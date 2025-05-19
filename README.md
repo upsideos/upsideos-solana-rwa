@@ -1,4 +1,4 @@
-# UpsideOS Solana RWA
+# Upside OS Solana RWA
 
 # Environment Setup
 
