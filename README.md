@@ -1,4 +1,4 @@
-# Solana Security Token
+# UpsideOS Solana RWA
 
 # Environment Setup
 
@@ -84,26 +84,26 @@ ts-node deploy/new-dividends-distribution.ts --cluster localnet
 ```
 
 # Overview
-This is a Security Token smart contract implementation from Upside. 
+
+RWA smart contract implementation from Upside.
 The core purpose of the token is to enforce transfer restrictions for certain groups.
 
+This implementation attempts to balance simplicity and sufficiency for smart contract RWAs that need to comply with regulatory authorities - without adding unnecessary complexity for simple use cases.
 
-This implementation attempts to balance simplicity and sufficiency for smart contract security tokens that need to comply with regulatory authorities - without adding unnecessary complexity for simple use cases.
-
-Solana Security Token consists of several modules:
+Solana RWA consists of several modules:
 * **Access Management**
 * **Transfer Groups and Rules Management**
-* **Token2022 Security Token Tansfer**
+* **Token2022 RWA Tansfer**
 
 ### Disclaimer
 
-This open or closed source software is provided with no warranty. This is not legal advice. CoMakery (dba Upside) is not a legal firm and is not your lawyer. Securities are highly regulated across multiple jurisdictions. Issuing a security token incorrectly can result in financial penalties or jail time if done incorrectly. Consult a lawyer and tax advisor. Conduct an independent security audit of the code.
+This open or closed source software is provided with no warranty. This is not legal advice. CoMakery (dba Upside) is not a legal firm and is not your lawyer. Securities are highly regulated across multiple jurisdictions. Issuing a RWA incorrectly can result in financial penalties or jail time if done incorrectly. Consult a lawyer and tax advisor. Conduct an independent security audit of the code.
 
 ## On-Chain Holder/Wallet Management
 
 Active Holder/Wallet management is conducted on-chain and autonomously, with multiple admin configurations that allow flexibility of transfer rule configuration. This greatly simplifies the off-chain accounting and effort required from Transfer (and other) Admins, removing the need to track Wallet holdings across different Holders.
 
-Wallets are not programatically prohibited from assuming multiple Admin roles. We advise against this in practice; however, this must be enforced off-chain. 
+Wallets are not programatically prohibited from assuming multiple Admin roles. We advise against this in practice; however, this must be enforced off-chain.
 
 Holders are allowed to keep multiple Wallet addresses, which can be spread across multiple Transfer Groups (in which case, they would be added to each group's holder count) as well as _within_ Transfer Groups. These Wallets are consolidated under a common `holderId`.
 
@@ -117,7 +117,7 @@ To manage these Holders and their Wallets:
 
 ## Transfer Restrictions
 
-The Security Token can be configured after deployment to enforce transfer restrictions such as the ones shown in the diagram below. Each Holder's blockchain Wallet address corresponds to a different group.
+The RWA can be configured after deployment to enforce transfer restrictions such as the ones shown in the diagram below. Each Holder's blockchain Wallet address corresponds to a different group.
 
 This is enforced by TransferRestrictions Program and Transfer Hook.
 
@@ -171,7 +171,7 @@ sequenceDiagram
 
 The Transfer Admin for the TransferRestrictionsProgram can provision wallet addresses to transfer and receive tokens under certain defined conditions. This is the process for configuring transfer restrictions and executing token transfers:
 
-1. An Investor sends their Anti Money Laundering and Know Your Customer (AML/KYC) information to the Transfer Admin or to a proxy vetting service off-chain to verify this information. 
+1. An Investor sends their Anti Money Laundering and Know Your Customer (AML/KYC) information to the Transfer Admin or to a proxy vetting service off-chain to verify this information.
     - The benefit of using a qualified third party provider is to avoid needing to store privately identifiable information.
     - We recommend implementations use off-chain mechanisms (such as a 3rd party AML/KYC provider) that ensure a given address is approved and is a non-malicious smart contract wallet. However, generally multi-signature type wallets must be allowed in order to provide adequate security for investors.
     - This smart contract implementation does not provide a solution for collecting AML/KYC information.
@@ -241,7 +241,7 @@ initializeTransferRule(lockedUntil)
 ```typescript
 /**
   * @dev A convenience method for initializing the new holder.
-  * @param recipientHolderId The created holderId 
+  * @param recipientHolderId The created holderId
   * @accounts
   * @param transferRestrictionHolder The transfer restriction holder PDA as ["trh", transferRestrictionData, holderId].
   * @param transferRestrictionData The Transfer Restricition data initialized for securityToken
@@ -328,7 +328,7 @@ The variable `maxTotalSupply` is set when the contract is created and limits the
 
 # Roles
 
-The smart contract enforces specific admin roles. The roles divide responsibilities to reduce abuse vectors and create checks and balances. Ideally each role should be managed by a separate admin with separate key control. 
+The smart contract enforces specific admin roles. The roles divide responsibilities to reduce abuse vectors and create checks and balances. Ideally each role should be managed by a separate admin with separate key control.
 
 In some cases, such as for the Contract Admin or Wallets Admin, it is recommended that the role's private key is managed through multi-signature (e.g. requiring 2 of 3 or N of M approvers) authentication.
 
@@ -382,7 +382,7 @@ Note! Anyone can burn owned tokens by Solana SPL design
 
 # Use Cases
 
-## Initial Security Token Deployment
+## Initial RWA Deployment
 ```mermaid
 sequenceDiagram
   autonumber
@@ -423,8 +423,8 @@ sequenceDiagram
   Token22 Program ->> TransferRestrictionsProgram: execute(from, to, value) // where transfer restrictions are enforced
 ```
 
-1. AccessControl and TransferRestrictions programs are deployed first  
-2. Deployer initializes access control data, mint, transfer restrictions data. At the time of deployment, the deployer configures a separate Reserve Admin address, a Transfer Admin address, and a Wallets Admin address. This allows the reserve security tokens to be stored in cold storage since the treasury Reserve Admin address private keys are not needed for everyday use by the Transfer Admin.
+1. AccessControl and TransferRestrictions programs are deployed first
+2. Deployer initializes access control data, mint, transfer restrictions data. At the time of deployment, the deployer configures a separate Reserve Admin address, a Transfer Admin address, and a Wallets Admin address. This allows the reserve RWAs to be stored in cold storage since the treasury Reserve Admin address private keys are not needed for everyday use by the Transfer Admin.
 2. The Transfer Admin initializes transfer groups with `initializeTransferRestrictionGroup(groupId)`
 3. The Transfer Admin authorizes the transfer of tokens between account groups with `initializeTransferRestrictionGroup(fromGroup, toGroup, afterTimestamp)` .
 4. The Reserve Admin then provisions a Wallets Admin address for distributing tokens to investors or other stakeholders. The Wallets Admin uses `initializeTransferRestrictionHolder(investorAddress, holderId)`, `initializeHolderGroup(investorAddress, group)``initializeSecurityAssociatedAccount(investorAddress, transferGroup)` to set address restrictions.
@@ -512,7 +512,7 @@ Note that there are no transfers initially authorized between groups. By default
 
 Lockup periods are enforced via:
 
-- `initializeTrnasferRule(fromGroup, toGroup, unixTimestamp)` or `setAllowTransferRule(fromGroup, toGroup, unixTimestamp)` allows transfers from one Transfer Group to another after the unixTimestamp. If the unixTimestamp is 0, then no transfer is allowed. 
+- `initializeTrnasferRule(fromGroup, toGroup, unixTimestamp)` or `setAllowTransferRule(fromGroup, toGroup, unixTimestamp)` allows transfers from one Transfer Group to another after the unixTimestamp. If the unixTimestamp is 0, then no transfer is allowed.
 
 ## Maximum Number of Holders Allowed
 
@@ -556,7 +556,7 @@ Timelocks can be configured to be cancelled by a specific canceler address. This
 
 ### Transfer Timelock
 
-For unlocked tokens within a timelock, the initial target recipient can choose to transfer unlocked tokens directly to another recipient. This is a convenience atop the typical transfer method. 
+For unlocked tokens within a timelock, the initial target recipient can choose to transfer unlocked tokens directly to another recipient. This is a convenience atop the typical transfer method.
 
 In the case of a timelock transfer, the initial target recipient must also be in a group able to transfer tokens to the new recipient.
 
@@ -605,13 +605,13 @@ The `pause()` mechanism has been implemented into the `TransferRestrictions` and
 
 In the case of stolen assets with sufficient legal reason to be returned to their owner, the issuer can call `freezeWallet()` (Wallets Admin, Transfer Admin), `burnSecurities()`, and `mintSecurities()` (Reserve Admin) to transfer the assets to the appropriate account.
 
-Although this is not in the spirit of a cryptocurrency, it is available as a response to requirements that some regulators impose on blockchain security token projects.
+Although this is not in the spirit of a cryptocurrency, it is available as a response to requirements that some regulators impose on blockchain RWA projects.
 
 ## Asset Recovery In The Case of Lost Keys
 
 In the case of lost keys with sufficient legal reason to be returned to their owner, the issuer can call `freezeWallet()`, `burnSecurities()`, and `mintSecurities()` to transfer the assets to the appropriate account. This opens the issuer up to potential cases of fraud. Handle with care.
 
-Once again, although this is not in the spirit of a cryptocurrency, it is available as a response to requirements that some regulators impose on blockchain security token projects.
+Once again, although this is not in the spirit of a cryptocurrency, it is available as a response to requirements that some regulators impose on blockchain RWA projects.
 
 # Lockup
 
@@ -625,7 +625,7 @@ Note that tokens in lockups cannot be burned by admins to avoid significant comp
 
 ## mintReleaseSchedule
 
-Release schedules can be only minted directly to timelock by the Reserve Admin. In this case, as it is akin to token minting, it does not have to adhere to transfer restrictions, and is purely under the discretion of the Reserve Admin. 
+Release schedules can be only minted directly to timelock by the Reserve Admin. In this case, as it is akin to token minting, it does not have to adhere to transfer restrictions, and is purely under the discretion of the Reserve Admin.
 
 This is described in `mint_release_schedule.rs`.
 
@@ -779,7 +779,7 @@ return sendAndConfirmTransaction(
 
 # Access Control
 
-Access Control Program implements roles `initializeWalletRole`, `updateWalletRole` and ownership under admin security token functions: `mintSecurities`, `burnSecurities`, `freezeWallet`, `thawWallet`, `forceTransferbetween`. This is similar to the linux file permission bitmask exposed in the `chmod` command line function.
+Access Control Program implements roles `initializeWalletRole`, `updateWalletRole` and ownership under admin RWA functions: `mintSecurities`, `burnSecurities`, `freezeWallet`, `thawWallet`, `forceTransferbetween`. This is similar to the linux file permission bitmask exposed in the `chmod` command line function.
 
 Our implementation uses binary bitmask determine the access control roles for an address. This optimizes the compute units usage and the size of the smart contract code itself.
 
@@ -834,7 +834,7 @@ const WALLET_AND_TRANSFER_ADMIN_ROLE: u8 = Roles::WalletsAdmin as u8 | Roles::Tr
 some_number & WALLETS_ADMIN_ROLE > 0 // checking if some_number contains 0100 bit, it can be used for checking the role
 ```
 
-The contract implements simple methods to manipulate Access Controls and check the roles. Note that granting new and revoking existing roles must be done in separate transactions. 
+The contract implements simple methods to manipulate Access Controls and check the roles. Note that granting new and revoking existing roles must be done in separate transactions.
 
 ```rust
  fn initialize_wallet_role(u8 role)
@@ -878,7 +878,7 @@ After smart contract deployment, there are certain configurations to complete be
 
 1. Grant Transfer Admin Role
 
-    This is important so that an admin exists which can configure group transfers. 
+    This is important so that an admin exists which can configure group transfers.
 
 1. Allow Group Transfers
 
@@ -888,10 +888,10 @@ After smart contract deployment, there are certain configurations to complete be
 
 1. Whitelist Program Derived Address (PDA)
 
-    The Transfer Admin can then set the group of the PDA address itself. 
+    The Transfer Admin can then set the group of the PDA address itself.
 
-    It is important that group transfers are allowed between PDA and recipients. This is necessary to take into account during integration Security Token with your Program. 
-    Tokenlockup program escrow account must be whitelisted with `setLockupEscrowAccount()` 
+    It is important that group transfers are allowed between PDA and recipients. This is necessary to take into account during integration RWA with your Program.
+    Tokenlockup program escrow account must be whitelisted with `setLockupEscrowAccount()`
 
 ```mermaid
 sequenceDiagram
@@ -918,19 +918,19 @@ To enable transfers between wallets, ensure that:
 
 Note that `balance` property of AssociatedTokenAccount typically used by wallet providers (ie Phantom) will display wallet balance that includes the amount of simple tokens. Any locked, staked tokens are held by related Tokenlockup program escrow account.
 
-# Program Deploy and Upgrade 
+# Program Deploy and Upgrade
 
 The programs deployed are not immutable until they are marked as "final" (i.e., not upgradeable) on the Solana blockchain by the admin team. The upgrade authority has super power to change program.
 In order to deploy not upgradable program use an option `--final` to use [BPFLoader2](https://explorer.solana.com/address/BPFLoader2111111111111111111111111111111111) at the deployment time (when --final is provided and the program will not be upgradeable).
 If any changes are required to the finalized program (features, patches, etc…) the new program must be deployed to a new program ID.
 To verify that program is not upgradable can be done on https://explorer.solana.com/ by checking Upgradeable property or not belong to *Owner: BPFLoaderUpgradeab1e11111111111111111111111U*
 
-Otherwise program ownership, upgrades and changes must be shared with users. 
+Otherwise program ownership, upgrades and changes must be shared with users.
 
 # Dividends
 
 Dividends program is based on [merkle-distributor program](https://github.com/saber-hq/merkle-distributor) but with access control and support of Token22. Note that the transfer fee extension must remain disabled in this implementation for Token22 as a payment token.
-Dividends functionality provides the administrators of the Primary security token the ability to make dividend distributions at certain points in time. Each moment of time is recorded as a Merkle tree root proof, total claim amount and number of nodes of a snapshot that captures the relative ownership of each token holder (invoking `newDistributor()` method manually by Contract Admin on the `Dividends` program). Snapshot and Merkle tree are built off-chain in advance and can be stored on IPFS or any other distributed storage. Dividends can be payed in any SPL or SPL 2022 standard tokens. The distributor creator can upload the IPFS hash containing the Merkle tree and all proofs for eligible claimants. It will allow anyone to obtain an on-chain link to the distribution information and claim it themselves.
+Dividends functionality provides the administrators of the Primary RWA the ability to make dividend distributions at certain points in time. Each moment of time is recorded as a Merkle tree root proof, total claim amount and number of nodes of a snapshot that captures the relative ownership of each token holder (invoking `newDistributor()` method manually by Contract Admin on the `Dividends` program). Snapshot and Merkle tree are built off-chain in advance and can be stored on IPFS or any other distributed storage. Dividends can be payed in any SPL or SPL 2022 standard tokens. The distributor creator can upload the IPFS hash containing the Merkle tree and all proofs for eligible claimants. It will allow anyone to obtain an on-chain link to the distribution information and claim it themselves.
 
 Investor can claim only all dividends amount for one distribution in 1 instruction.
 
@@ -938,7 +938,7 @@ Anyone can `fundDividends` who owns dividends distribution tokens.
 
 Investor can start claiming dividends as soon as treasury has enough balance to distribute with `readyToClaim` distributor parameters `true`.
 
-See below for the Dividends payment distribution and claim flow utilizing USDC. 
+See below for the Dividends payment distribution and claim flow utilizing USDC.
 
 ```mermaid
 sequenceDiagram
@@ -955,20 +955,20 @@ sequenceDiagram
     D ->> R: Transfer dividend payment token
 ```
 
-1. Contract Admin chooses to create new distribution to fund a dividend. Note that this is Contract Admin on the `AccessControl` data and Security mint. Each security mint has its own set of admins. A `distributor` account will be generated. 
+1. Contract Admin chooses to create new distribution to fund a dividend. Note that this is Contract Admin on the `AccessControl` data and Security mint. Each security mint has its own set of admins. A `distributor` account will be generated.
 
 1. Anyone can fund the dividend using a payment token of specified distribution. This example uses USDC. The dividend must be funded for a specific `distributor`. Sender wallet must hold the payment token in order to fund the dividend. The payment token is extracted and sent to the `Distribution` PDA upon successful funding.
 
-1. Recipient is free to claim the dividend by invoking `claimDividend` from the `Dividends` program. Note that claiming is available only when dividends treasury balance has anough tokens to distribute dividends to all investors. 
+1. Recipient is free to claim the dividend by invoking `claimDividend` from the `Dividends` program. Note that claiming is available only when dividends treasury balance has anough tokens to distribute dividends to all investors.
 
 1. Amount of entitled dividend token is transferred from the `Dividends` PDA to the rightful recipient.
 
 ## Security implication
-**Please note:** *Anyone can create a Security Token* with related Access Control data and a Distributor. 
+**Please note:** *Anyone can create a RWA* with related Access Control data and a Distributor.
 
-However, **someone might attempt to deceive the issuer** into funding dividends into fake accounts, which could result in **a loss of funds**. 
+However, **someone might attempt to deceive the issuer** into funding dividends into fake accounts, which could result in **a loss of funds**.
 
-Therefore, the issuer must use **a trusted service** to fund dividends or validate Security Token address inside instruction to mitigate this risk.
+Therefore, the issuer must use **a trusted service** to fund dividends or validate RWA address inside instruction to mitigate this risk.
 
 ## Relevant Methods
 
@@ -1044,3 +1044,4 @@ await program.methods
     .signers([claimant, payer])
     .rpc({ commitment });
 ```
+
