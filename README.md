@@ -1,5 +1,7 @@
 # Solana Security Token
 
+BUILD TEST
+
 # Environment Setup
 
 The environment is necessary to build and run tests of the project.
