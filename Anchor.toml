@@ -26,4 +26,3 @@ types = "app/src/types/"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/*.ts tests/tokenlock/*.ts tests/access_control/*.ts tests/transfer_restrictions/*.ts tests/dividends/*.ts"
-# test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/transfer_restrictions/approve-and-transfer.ts"
