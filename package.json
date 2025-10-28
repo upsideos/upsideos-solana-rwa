@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "build": "anchor build && node scripts/format-types.js",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "deploy:localnet": "ts-node deploy/run.ts --cluster localnet",
