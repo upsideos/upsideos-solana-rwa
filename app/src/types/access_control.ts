@@ -10,16 +10,25 @@ export type AccessControl = {
     name: "accessControl";
     version: "0.1.0";
     spec: "0.1.0";
-    description: "Access Control for Solana Programs";
+    description: "Access Control for Solana Programs"
   };
   instructions: [
     {
       name: "burnSecurities";
-      discriminator: [79, 165, 145, 57, 203, 228, 175, 0];
+      discriminator: [
+        79,
+        165,
+        145,
+        57,
+        203,
+        228,
+        175,
+        0
+      ];
       accounts: [
         {
           name: "authority";
-          signer: true;
+          signer: true
         },
         {
           name: "authorityWalletRole";
@@ -27,18 +36,30 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [119, 97, 108, 108, 101, 116, 95, 114, 111, 108, 101];
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               },
               {
                 kind: "account";
-                path: "authority";
+                path: "authority"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "accessControl";
@@ -46,18 +67,21 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [97, 99];
+                value: [
+                  97,
+                  99
+                ]
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "securityMint";
-          writable: true;
+          writable: true
         },
         {
           name: "targetAccount";
@@ -66,15 +90,15 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "account";
-                path: "targetAuthority";
+                path: "targetAuthority"
               },
               {
                 kind: "account";
-                path: "tokenProgram";
+                path: "tokenProgram"
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
             ];
             program: {
@@ -112,28 +136,37 @@ export type AccessControl = {
                 233,
                 248,
                 89
-              ];
-            };
-          };
+              ]
+            }
+          }
         },
         {
-          name: "targetAuthority";
+          name: "targetAuthority"
         },
         {
           name: "tokenProgram";
-          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         }
       ];
       args: [
         {
           name: "amount";
-          type: "u64";
+          type: "u64"
         }
-      ];
+      ]
     },
     {
       name: "forceTransferBetween";
-      discriminator: [186, 115, 85, 7, 217, 111, 254, 108];
+      discriminator: [
+        186,
+        115,
+        85,
+        7,
+        217,
+        111,
+        254,
+        108
+      ];
       accounts: [
         {
           name: "sourceAccount";
@@ -142,15 +175,15 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "account";
-                path: "sourceAuthority";
+                path: "sourceAuthority"
               },
               {
                 kind: "account";
-                path: "tokenProgram";
+                path: "tokenProgram"
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
             ];
             program: {
@@ -188,13 +221,13 @@ export type AccessControl = {
                 233,
                 248,
                 89
-              ];
-            };
-          };
+              ]
+            }
+          }
         },
         {
           name: "securityMint";
-          writable: true;
+          writable: true
         },
         {
           name: "destinationAccount";
@@ -203,15 +236,15 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "account";
-                path: "destinationAuthority";
+                path: "destinationAuthority"
               },
               {
                 kind: "account";
-                path: "tokenProgram";
+                path: "tokenProgram"
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
             ];
             program: {
@@ -249,13 +282,13 @@ export type AccessControl = {
                 233,
                 248,
                 89
-              ];
-            };
-          };
+              ]
+            }
+          }
         },
         {
           name: "authority";
-          signer: true;
+          signer: true
         },
         {
           name: "authorityWalletRole";
@@ -263,18 +296,30 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [119, 97, 108, 108, 101, 116, 95, 114, 111, 108, 101];
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               },
               {
                 kind: "account";
-                path: "authority";
+                path: "authority"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "accessControlAccount";
@@ -282,40 +327,52 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [97, 99];
+                value: [
+                  97,
+                  99
+                ]
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "sourceAuthority";
+          name: "sourceAuthority"
         },
         {
-          name: "destinationAuthority";
+          name: "destinationAuthority"
         },
         {
           name: "tokenProgram";
-          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         }
       ];
       args: [
         {
           name: "amount";
-          type: "u64";
+          type: "u64"
         }
-      ];
+      ]
     },
     {
       name: "freezeWallet";
-      discriminator: [93, 202, 159, 167, 22, 246, 255, 211];
+      discriminator: [
+        93,
+        202,
+        159,
+        167,
+        22,
+        246,
+        255,
+        211
+      ];
       accounts: [
         {
           name: "authority";
-          signer: true;
+          signer: true
         },
         {
           name: "authorityWalletRole";
@@ -323,18 +380,30 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [119, 97, 108, 108, 101, 116, 95, 114, 111, 108, 101];
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               },
               {
                 kind: "account";
-                path: "authority";
+                path: "authority"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "accessControl";
@@ -342,18 +411,21 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [97, 99];
+                value: [
+                  97,
+                  99
+                ]
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "securityMint";
-          writable: true;
+          writable: true
         },
         {
           name: "targetAccount";
@@ -362,15 +434,15 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "account";
-                path: "targetAuthority";
+                path: "targetAuthority"
               },
               {
                 kind: "account";
-                path: "tokenProgram";
+                path: "tokenProgram"
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
             ];
             program: {
@@ -408,36 +480,45 @@ export type AccessControl = {
                 233,
                 248,
                 89
-              ];
-            };
-          };
+              ]
+            }
+          }
         },
         {
-          name: "targetAuthority";
+          name: "targetAuthority"
         },
         {
           name: "tokenProgram";
-          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         }
       ];
-      args: [];
+      args: []
     },
     {
       name: "initializeAccessControl";
-      discriminator: [244, 90, 245, 242, 199, 224, 247, 140];
+      discriminator: [
+        244,
+        90,
+        245,
+        242,
+        199,
+        224,
+        247,
+        140
+      ];
       accounts: [
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
-          name: "authority";
+          name: "authority"
         },
         {
           name: "mint";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
           name: "accessControl";
@@ -446,14 +527,17 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [97, 99];
+                value: [
+                  97,
+                  99
+                ]
               },
               {
                 kind: "account";
-                path: "mint";
+                path: "mint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "walletRole";
@@ -462,26 +546,38 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [119, 97, 108, 108, 101, 116, 95, 114, 111, 108, 101];
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
               },
               {
                 kind: "account";
-                path: "mint";
+                path: "mint"
               },
               {
                 kind: "account";
-                path: "payer";
+                path: "payer"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          address: "11111111111111111111111111111111"
         },
         {
           name: "tokenProgram";
-          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         }
       ];
       args: [
@@ -489,15 +585,24 @@ export type AccessControl = {
           name: "args";
           type: {
             defined: {
-              name: "initializeAccessControlArgs";
-            };
-          };
+              name: "initializeAccessControlArgs"
+            }
+          }
         }
-      ];
+      ]
     },
     {
       name: "initializeWalletRole";
-      discriminator: [218, 166, 58, 194, 218, 211, 151, 175];
+      discriminator: [
+        218,
+        166,
+        58,
+        194,
+        218,
+        211,
+        151,
+        175
+      ];
       accounts: [
         {
           name: "walletRole";
@@ -506,18 +611,30 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [119, 97, 108, 108, 101, 116, 95, 114, 111, 108, 101];
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
               },
               {
                 kind: "account";
-                path: "securityToken";
+                path: "securityToken"
               },
               {
                 kind: "account";
-                path: "userWallet";
+                path: "userWallet"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "authorityWalletRole";
@@ -525,18 +642,30 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [119, 97, 108, 108, 101, 116, 95, 114, 111, 108, 101];
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
               },
               {
                 kind: "account";
-                path: "securityToken";
+                path: "securityToken"
               },
               {
                 kind: "account";
-                path: "payer";
+                path: "payer"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "accessControl";
@@ -544,45 +673,57 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [97, 99];
+                value: [
+                  97,
+                  99
+                ]
               },
               {
                 kind: "account";
-                path: "securityToken";
+                path: "securityToken"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "securityToken";
+          name: "securityToken"
         },
         {
-          name: "userWallet";
+          name: "userWallet"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
           name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          address: "11111111111111111111111111111111"
         }
       ];
       args: [
         {
           name: "role";
-          type: "u8";
+          type: "u8"
         }
-      ];
+      ]
     },
     {
       name: "mintSecurities";
-      discriminator: [90, 195, 58, 36, 142, 195, 14, 225];
+      discriminator: [
+        90,
+        195,
+        58,
+        36,
+        142,
+        195,
+        14,
+        225
+      ];
       accounts: [
         {
           name: "authority";
-          signer: true;
+          signer: true
         },
         {
           name: "authorityWalletRole";
@@ -590,18 +731,30 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [119, 97, 108, 108, 101, 116, 95, 114, 111, 108, 101];
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               },
               {
                 kind: "account";
-                path: "authority";
+                path: "authority"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "accessControl";
@@ -609,18 +762,21 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [97, 99];
+                value: [
+                  97,
+                  99
+                ]
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "securityMint";
-          writable: true;
+          writable: true
         },
         {
           name: "destinationAccount";
@@ -629,15 +785,15 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "account";
-                path: "destinationAuthority";
+                path: "destinationAuthority"
               },
               {
                 kind: "account";
-                path: "tokenProgram";
+                path: "tokenProgram"
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
             ];
             program: {
@@ -675,28 +831,37 @@ export type AccessControl = {
                 233,
                 248,
                 89
-              ];
-            };
-          };
+              ]
+            }
+          }
         },
         {
-          name: "destinationAuthority";
+          name: "destinationAuthority"
         },
         {
           name: "tokenProgram";
-          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         }
       ];
       args: [
         {
           name: "amount";
-          type: "u64";
+          type: "u64"
         }
-      ];
+      ]
     },
     {
       name: "setLockupEscrowAccount";
-      discriminator: [134, 172, 249, 223, 25, 118, 55, 93];
+      discriminator: [
+        134,
+        172,
+        249,
+        223,
+        25,
+        118,
+        55,
+        93
+      ];
       accounts: [
         {
           name: "accessControlAccount";
@@ -705,38 +870,50 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [97, 99];
+                value: [
+                  97,
+                  99
+                ]
               },
               {
                 kind: "account";
-                path: "mint";
+                path: "mint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "mint";
+          name: "mint"
         },
         {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
-          name: "escrowAccount";
+          name: "escrowAccount"
         },
         {
-          name: "tokenlockAccount";
+          name: "tokenlockAccount"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         }
       ];
-      args: [];
+      args: []
     },
     {
       name: "setMaxTotalSupply";
-      discriminator: [249, 164, 34, 254, 160, 89, 214, 12];
+      discriminator: [
+        249,
+        164,
+        34,
+        254,
+        160,
+        89,
+        214,
+        12
+      ];
       accounts: [
         {
           name: "accessControlAccount";
@@ -745,41 +922,53 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [97, 99];
+                value: [
+                  97,
+                  99
+                ]
               },
               {
                 kind: "account";
-                path: "mint";
+                path: "mint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "mint";
+          name: "mint"
         },
         {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         }
       ];
       args: [
         {
           name: "maxTotalSupply";
-          type: "u64";
+          type: "u64"
         }
-      ];
+      ]
     },
     {
       name: "thawWallet";
-      discriminator: [79, 251, 128, 221, 55, 172, 181, 221];
+      discriminator: [
+        79,
+        251,
+        128,
+        221,
+        55,
+        172,
+        181,
+        221
+      ];
       accounts: [
         {
           name: "authority";
-          signer: true;
+          signer: true
         },
         {
           name: "authorityWalletRole";
@@ -787,18 +976,30 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [119, 97, 108, 108, 101, 116, 95, 114, 111, 108, 101];
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               },
               {
                 kind: "account";
-                path: "authority";
+                path: "authority"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "accessControl";
@@ -806,18 +1007,21 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [97, 99];
+                value: [
+                  97,
+                  99
+                ]
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "securityMint";
-          writable: true;
+          writable: true
         },
         {
           name: "targetAccount";
@@ -826,15 +1030,15 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "account";
-                path: "targetAuthority";
+                path: "targetAuthority"
               },
               {
                 kind: "account";
-                path: "tokenProgram";
+                path: "tokenProgram"
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
             ];
             program: {
@@ -872,23 +1076,32 @@ export type AccessControl = {
                 233,
                 248,
                 89
-              ];
-            };
-          };
+              ]
+            }
+          }
         },
         {
-          name: "targetAuthority";
+          name: "targetAuthority"
         },
         {
           name: "tokenProgram";
-          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         }
       ];
-      args: [];
+      args: []
     },
     {
       name: "updateWalletRole";
-      discriminator: [1, 63, 55, 231, 251, 199, 154, 9];
+      discriminator: [
+        1,
+        63,
+        55,
+        231,
+        251,
+        199,
+        154,
+        9
+      ];
       accounts: [
         {
           name: "walletRole";
@@ -897,18 +1110,30 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [119, 97, 108, 108, 101, 116, 95, 114, 111, 108, 101];
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
               },
               {
                 kind: "account";
-                path: "securityToken";
+                path: "securityToken"
               },
               {
                 kind: "account";
-                path: "userWallet";
+                path: "userWallet"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "authorityWalletRole";
@@ -916,18 +1141,30 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [119, 97, 108, 108, 101, 116, 95, 114, 111, 108, 101];
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
               },
               {
                 kind: "account";
-                path: "securityToken";
+                path: "securityToken"
               },
               {
                 kind: "account";
-                path: "payer";
+                path: "payer"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "accessControl";
@@ -935,99 +1172,120 @@ export type AccessControl = {
             seeds: [
               {
                 kind: "const";
-                value: [97, 99];
+                value: [
+                  97,
+                  99
+                ]
               },
               {
                 kind: "account";
-                path: "securityToken";
+                path: "securityToken"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "securityToken";
+          name: "securityToken"
         },
         {
-          name: "userWallet";
+          name: "userWallet"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
           name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          address: "11111111111111111111111111111111"
         }
       ];
       args: [
         {
           name: "role";
-          type: "u8";
+          type: "u8"
         }
-      ];
+      ]
     }
   ];
   accounts: [
     {
       name: "accessControl";
-      discriminator: [147, 81, 178, 92, 223, 66, 181, 132];
+      discriminator: [
+        147,
+        81,
+        178,
+        92,
+        223,
+        66,
+        181,
+        132
+      ]
     },
     {
       name: "walletRole";
-      discriminator: [219, 71, 35, 217, 102, 248, 173, 9];
+      discriminator: [
+        219,
+        71,
+        35,
+        217,
+        102,
+        248,
+        173,
+        9
+      ]
     }
   ];
   errors: [
     {
       code: 6000;
       name: "unauthorized";
-      msg: "unauthorized";
+      msg: "unauthorized"
     },
     {
       code: 6001;
       name: "invalidRole";
-      msg: "Invalid role";
+      msg: "Invalid role"
     },
     {
       code: 6002;
       name: "mintExceedsMaxTotalSupply";
-      msg: "Cannot mint more than max total supply";
+      msg: "Cannot mint more than max total supply"
     },
     {
       code: 6003;
       name: "incorrectTokenlockAccount";
-      msg: "Wrong tokenlock account";
+      msg: "Wrong tokenlock account"
     },
     {
       code: 6004;
       name: "mismatchedEscrowAccount";
-      msg: "Mismatched escrow account";
+      msg: "Mismatched escrow account"
     },
     {
       code: 6005;
       name: "cantBurnSecuritiesWithinLockup";
-      msg: "Cannot burn securities within lockup; cancel the lockup first";
+      msg: "Cannot burn securities within lockup; cancel the lockup first"
     },
     {
       code: 6006;
       name: "cantForceTransferBetweenLockup";
-      msg: "Cannot force transfer between lockup accounts";
+      msg: "Cannot force transfer between lockup accounts"
     },
     {
       code: 6007;
       name: "newMaxTotalSupplyMustExceedCurrentTotalSupply";
-      msg: "New max total supply must exceed current total supply";
+      msg: "New max total supply must exceed current total supply"
     },
     {
       code: 6008;
       name: "cannotFreezeLockupEscrowAccount";
-      msg: "Cannot freeze lockup escrow account";
+      msg: "Cannot freeze lockup escrow account"
     },
     {
       code: 6009;
       name: "valueUnchanged";
-      msg: "The provided value is already set. No changes were made";
+      msg: "The provided value is already set. No changes were made"
     }
   ];
   types: [
@@ -1038,24 +1296,24 @@ export type AccessControl = {
         fields: [
           {
             name: "mint";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "authority";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "maxTotalSupply";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "lockupEscrowAccount";
             type: {
-              option: "pubkey";
-            };
+              option: "pubkey"
+            }
           }
-        ];
-      };
+        ]
+      }
     },
     {
       name: "initializeAccessControlArgs";
@@ -1064,30 +1322,30 @@ export type AccessControl = {
         fields: [
           {
             name: "decimals";
-            type: "u8";
+            type: "u8"
           },
           {
             name: "name";
-            type: "string";
+            type: "string"
           },
           {
             name: "symbol";
-            type: "string";
+            type: "string"
           },
           {
             name: "uri";
-            type: "string";
+            type: "string"
           },
           {
             name: "hookProgramId";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "maxTotalSupply";
-            type: "u64";
+            type: "u64"
           }
-        ];
-      };
+        ]
+      }
     },
     {
       name: "walletRole";
@@ -1096,18 +1354,18 @@ export type AccessControl = {
         fields: [
           {
             name: "owner";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "accessControl";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "role";
-            type: "u8";
+            type: "u8"
           }
-        ];
-      };
+        ]
+      }
     }
-  ];
+  ]
 };

@@ -94,13 +94,13 @@ pub fn claim<'info>(
     );
 
     // Verify the merkle proof.
-    let node = anchor_lang::solana_program::keccak::hashv(&[
+    let node = solana_keccak_hasher::hashv(&[
         &index.to_le_bytes(),
         &claimant_account.key().to_bytes(),
         &amount.to_le_bytes(),
     ]);
     require!(
-        merkle_proof::verify(proof, distributor.root, node.0),
+        merkle_proof::verify(proof, distributor.root, node.to_bytes()),
         DividendsErrorCode::InvalidProof
     );
 

@@ -1275,7 +1275,7 @@
       "code": 6008,
       "name": "CannotFreezeLockupEscrowAccount",
       "msg": "Cannot freeze lockup escrow account"
-      },
+    },
     {
       "code": 6009,
       "name": "ValueUnchanged",
