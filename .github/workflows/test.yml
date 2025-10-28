@@ -22,7 +22,7 @@ jobs:
           components: rustfmt, clippy
 
       - name: Install Solana
-        uses: metadaoproject/setup-solana@v1.0
+        uses: metadaoproject/setup-solana@v1.2
         with: 
           solana-cli-version: ${{ env.SOLANA_VERSION }}
       
