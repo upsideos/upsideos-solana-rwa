@@ -8,7 +8,7 @@ jobs:
     env:
       RUST_VERSION: 1.78.0
       SOLANA_VERSION: 1.18.17
-      ANCHOR_VERSION: 0.30.1
+      ANCHOR_VERSION: 0.31.1
 
     steps:
       - name: Checkout

@@ -1,6 +1,6 @@
 [toolchain]
-anchor_version = "0.30.1"
-rust_version = "1.78.0"
+anchor_version = "0.31.1"
+rust_version = "1.90.0"
 
 [features]
 seeds = false

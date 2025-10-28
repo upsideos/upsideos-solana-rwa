@@ -6,10 +6,8 @@ import {
   SystemProgram,
   sendAndConfirmTransaction,
   Transaction,
-  Signer,
-  Commitment,
-  Finality,
 } from "@solana/web3.js";
+import type { Commitment, Finality, Signer } from "@solana/web3.js";
 
 export async function topUpWallet(
   connection: Connection,

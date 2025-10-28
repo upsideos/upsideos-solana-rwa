@@ -46,7 +46,7 @@ pub struct InitializeTimeLock<'info> {
 pub fn initialize_timelock(ctx: Context<InitializeTimeLock>) -> Result<()> {
     let tokenlock_account = &ctx.accounts.tokenlock_account;
     let tokenlock_account_data = tokenlock_account.try_borrow_mut_data()?;
-    let discriminator = TokenLockData::discriminator();
+    let discriminator = TokenLockData::DISCRIMINATOR;
     if sol_memcmp(&discriminator, &tokenlock_account_data, discriminator.len()) != 0 {
         return Err(TokenlockErrors::IncorrectTokenlockAccount.into());
     }

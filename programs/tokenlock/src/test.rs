@@ -498,7 +498,7 @@ impl TestFixture {
         access_control_address: &Pubkey,
         transfer_restrictions_address: &Pubkey,
     ) -> (Pubkey, SolanaAccount) {
-        let discriminator = TokenLockData::discriminator();
+        let discriminator = TokenLockData::DISCRIMINATOR;
         let mut account = Self::create_account(
             tokenlock_address,
             program_id,
@@ -532,7 +532,7 @@ impl TestFixture {
         transfer_restrictions_address: &Pubkey,
         program_id: &Pubkey,
     ) -> (Pubkey, SolanaAccount) {
-        let discriminator = TransferRestrictionData::discriminator();
+        let discriminator = TransferRestrictionData::DISCRIMINATOR;
         Self::create_account(
             transfer_restrictions_address,
             program_id,
@@ -545,7 +545,7 @@ impl TestFixture {
         security_associated_address: &Pubkey,
         program_id: &Pubkey,
     ) -> (Pubkey, SolanaAccount) {
-        let discriminator = SecurityAssociatedAccount::discriminator();
+        let discriminator = SecurityAssociatedAccount::DISCRIMINATOR;
         Self::create_account(
             security_associated_address,
             program_id,
@@ -558,7 +558,7 @@ impl TestFixture {
         transfer_rule_address: &Pubkey,
         program_id: &Pubkey,
     ) -> (Pubkey, SolanaAccount) {
-        let discriminator = TransferRule::discriminator();
+        let discriminator = TransferRule::DISCRIMINATOR;
         Self::create_account(
             transfer_rule_address,
             program_id,
@@ -571,7 +571,7 @@ impl TestFixture {
         access_control_address: &Pubkey,
         program_id: &Pubkey,
     ) -> (Pubkey, SolanaAccount) {
-        let discriminator = AccessControl::discriminator();
+        let discriminator = AccessControl::DISCRIMINATOR;
         Self::create_account(
             access_control_address,
             program_id,
@@ -584,7 +584,7 @@ impl TestFixture {
         wallet_role_address: &Pubkey,
         program_id: &Pubkey,
     ) -> (Pubkey, SolanaAccount) {
-        let discriminator = WalletRole::discriminator();
+        let discriminator = WalletRole::DISCRIMINATOR;
         Self::create_account(
             wallet_role_address,
             program_id,

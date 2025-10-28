@@ -7,7 +7,7 @@
     "deploy:mainnet": "ts-node deploy/run.ts --cluster mainnet-beta"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.30.1",
+    "@coral-xyz/anchor": "^0.31.1",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5"
   },

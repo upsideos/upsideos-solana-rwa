@@ -4,7 +4,7 @@
 
 The environment is necessary to build and run tests of the project.
 
-1. Install Anchor 0.30.1 from https://www.anchor-lang.com/docs/installation
+1. Install Anchor 0.31.1 from https://www.anchor-lang.com/docs/installation
 
 ## Build and test source code
 
