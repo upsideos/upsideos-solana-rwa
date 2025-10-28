@@ -32,26 +32,9 @@ jobs:
 
       - name: Install Anchor
         run: cargo install --git https://github.com/coral-xyz/anchor --tag v${{ env.ANCHOR_VERSION }} anchor-cli
-
-      # - name: Setup Rust & Solana & Anchor
-      #   run: |
-      #     # Install Solana, Rust, Anchor
-      #     # sh -c "$(curl -sSfL https://solana-install.solana.workers.dev)" -- v${SOLANA_VERSION} | bash
-      #     curl --proto '=https' --tlsv1.2 -sSfL https://solana-install.solana.workers.dev | bash
-      #     # Source the environment to get correct paths
-      #     echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-      #     echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
-      #     echo "$HOME/.avm/bin" >> $GITHUB_PATH
       
       - name: Generate Key
         run: solana-keygen new --no-passphrase
-
-      - name: Verify Installed Versions
-        run: |
-          rustc --version
-          cargo --version
-          solana --version
-          anchor --version
 
       - name: Build
         run: anchor build
