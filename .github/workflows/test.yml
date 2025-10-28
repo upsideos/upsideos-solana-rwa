@@ -6,8 +6,8 @@ jobs:
   Test:
     runs-on: [ubuntu-22.04]
     env:
-      RUST_VERSION: 1.78.0
-      SOLANA_VERSION: 1.18.17
+      RUST_VERSION: 1.90.0
+      SOLANA_VERSION: 2.2.14
       ANCHOR_VERSION: 0.31.1
 
     steps:
