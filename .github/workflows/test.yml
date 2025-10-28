@@ -7,12 +7,19 @@ jobs:
     runs-on: [ubuntu-24.04]
     env:
       RUST_VERSION: 1.90.0
-      SOLANA_VERSION: 2.2.14
-      ANCHOR_VERSION: 0.31.1
+      SOLANA_VERSION: 2.2.20
+      ANCHOR_VERSION: 0.32.1
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y \
+          build-essential \
+          pkg-config \
+          libudev-dev llvm libclang-dev \
+          protobuf-compiler libssl-dev
 
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
@@ -21,15 +28,24 @@ jobs:
           override: true
           components: rustfmt, clippy
 
-      - name: Setup Rust & Solana & Anchor
+      - name: Install Solana
         run: |
-          # Install Solana, Rust, Anchor
-          # sh -c "$(curl -sSfL https://solana-install.solana.workers.dev)" -- v${SOLANA_VERSION} | bash
-          curl --proto '=https' --tlsv1.2 -sSfL https://solana-install.solana.workers.dev | bash
-          # Source the environment to get correct paths
+          sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
-          echo "$HOME/.avm/bin" >> $GITHUB_PATH
+
+      - name: Install Anchor
+        run: cargo install --git https://github.com/coral-xyz/anchor --tag v${{ env.ANCHOR_VERSION }} anchor-cli
+
+      # - name: Setup Rust & Solana & Anchor
+      #   run: |
+      #     # Install Solana, Rust, Anchor
+      #     # sh -c "$(curl -sSfL https://solana-install.solana.workers.dev)" -- v${SOLANA_VERSION} | bash
+      #     curl --proto '=https' --tlsv1.2 -sSfL https://solana-install.solana.workers.dev | bash
+      #     # Source the environment to get correct paths
+      #     echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      #     echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+      #     echo "$HOME/.avm/bin" >> $GITHUB_PATH
       
       - name: Generate Key
         run: solana-keygen new --no-passphrase
