@@ -21,16 +21,17 @@ jobs:
           override: true
           components: rustfmt, clippy
 
-      - name: Install Solana
-        uses: metadaoproject/setup-solana@v1.2
-        with: 
-          solana-cli-version: stable
+      - name: Setup Rust & Solana & Anchor
+        run: |
+          # Install Solana, Rust, Anchor
+          curl --proto '=https' --tlsv1.2 -sSfL https://solana-install.solana.workers.dev | bash
+          # Source the environment to get correct paths
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+          echo "$HOME/.avm/bin" >> $GITHUB_PATH
       
       - name: Generate Key
         run: solana-keygen new --no-passphrase
-
-      - name: Install Anchor
-        run: cargo install --git https://github.com/coral-xyz/anchor --tag v${{ env.ANCHOR_VERSION }} anchor-cli --locked
 
       - name: Build
         run: anchor build
