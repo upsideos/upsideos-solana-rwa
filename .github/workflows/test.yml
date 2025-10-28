@@ -34,15 +34,17 @@ jobs:
       - name: Generate Key
         run: solana-keygen new --no-passphrase
 
-      # - name: Install Anchor
-      #   run: cargo install --git https://github.com/coral-xyz/anchor --tag v${{ env.ANCHOR_VERSION }} anchor-cli --locked
-
-      - name: List anchor version in AVM
-        run: avm list
-
-      - name: Install Anchor
-        run: avm install --force v${{ env.ANCHOR_VERSION }}
-
+      - name: Install Anchor via avm
+        run: |
+          # Clean up any existing anchor binary to prevent conflict
+          rm -f ~/.cargo/bin/anchor || true
+          # Install specific Anchor version
+          cargo install avm --locked
+          avm install v${ANCHOR_VERSION} --force
+          avm use v${ANCHOR_VERSION}
+          echo "$HOME/.avm/bin" >> $GITHUB_PATH
+          anchor --version
+      
       - name: Verify Installed Versions
         run: |
           rustc --version
