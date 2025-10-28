@@ -41,7 +41,7 @@ jobs:
         run: avm list
 
       - name: Install Anchor
-        run: avm install v${{ env.ANCHOR_VERSION }}
+        run: avm install --force v${{ env.ANCHOR_VERSION }}
 
       - name: Verify Installed Versions
         run: |
