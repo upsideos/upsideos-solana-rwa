@@ -2,10 +2,12 @@ use anchor_lang::prelude::*;
 
 pub mod contexts;
 pub mod errors;
+pub mod helpers;
 pub mod instructions;
 pub mod utils;
 
 pub use contexts::*;
+pub use helpers::*;
 pub use utils::*;
 
 declare_id!("6yEnqdEjX3zBBDkzhwTRGJwv1jRaN4QE4gywmgdcfPBZ");
@@ -110,5 +112,11 @@ pub mod transfer_restrictions {
 
     pub fn enforce_transfer_restrictions(ctx: Context<EnforceTransferRestrictions>) -> Result<()> {
         instructions::transfer_restrictions::enforce_transfer_restrictions(ctx)
+    }
+
+    pub fn initialize_default_security_accounts(
+        ctx: Context<InitializeDefaultSecurityAccounts>,
+    ) -> Result<()> {
+        instructions::transfer_restrictions::initialize_default_security_accounts(ctx)
     }
 }
