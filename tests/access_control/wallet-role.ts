@@ -35,9 +35,9 @@ describe("Access Control wallet role", () => {
   });
 
   const investor = new Keypair();
-  it("fails to initialize wallet role by reserve admin", async () => {
+  it("fails to grant wallet role by reserve admin", async () => {
     try {
-      await testEnvironment.accessControlHelper.initializeWalletRole(
+      await testEnvironment.accessControlHelper.grantRole(
         investor.publicKey,
         Roles.WalletsAdmin,
         testEnvironment.reserveAdmin
@@ -49,9 +49,9 @@ describe("Access Control wallet role", () => {
     }
   });
 
-  it("fails to initialize wallet role by wallets admin", async () => {
+  it("fails to grant wallet role by wallets admin", async () => {
     try {
-      await testEnvironment.accessControlHelper.initializeWalletRole(
+      await testEnvironment.accessControlHelper.grantRole(
         investor.publicKey,
         Roles.WalletsAdmin,
         testEnvironment.walletsAdmin
@@ -63,9 +63,9 @@ describe("Access Control wallet role", () => {
     }
   });
 
-  it("fails to initialize wallet role by transfer admin", async () => {
+  it("fails to grant wallet role by transfer admin", async () => {
     try {
-      await testEnvironment.accessControlHelper.initializeWalletRole(
+      await testEnvironment.accessControlHelper.grantRole(
         investor.publicKey,
         Roles.WalletsAdmin,
         testEnvironment.transferAdmin
@@ -77,9 +77,9 @@ describe("Access Control wallet role", () => {
     }
   });
 
-  it("fails to initialize invalid wallet role", async () => {
+  it("fails to grant invalid wallet role", async () => {
     try {
-      await testEnvironment.accessControlHelper.initializeWalletRole(
+      await testEnvironment.accessControlHelper.grantRole(
         investor.publicKey,
         Roles.All + 1,
         testEnvironment.contractAdmin
@@ -91,8 +91,8 @@ describe("Access Control wallet role", () => {
     }
   });
 
-  it("initializes wallet role by contract admin", async () => {
-    await testEnvironment.accessControlHelper.initializeWalletRole(
+  it("grants wallet role by contract admin", async () => {
+    await testEnvironment.accessControlHelper.grantRole(
       investor.publicKey,
       Roles.WalletsAdmin,
       testEnvironment.contractAdmin
@@ -115,11 +115,25 @@ describe("Access Control wallet role", () => {
     );
   });
 
-  it("fails to update wallet role by reserve admin", async () => {
+  it("fails to grant already granted role", async () => {
     try {
-      await testEnvironment.accessControlHelper.updateWalletRole(
+      await testEnvironment.accessControlHelper.grantRole(
         investor.publicKey,
-        Roles.TransferAdmin,
+        Roles.WalletsAdmin,
+        testEnvironment.contractAdmin
+      );
+      assert.fail("Expected an error");
+    } catch ({ error }) {
+      assert.equal(error.errorCode.code, "AlreadyHasRole");
+      assert.equal(error.errorMessage, "Wallet already has this role");
+    }
+  });
+
+  it("fails to revoke wallet role by reserve admin", async () => {
+    try {
+      await testEnvironment.accessControlHelper.revokeRole(
+        investor.publicKey,
+        Roles.WalletsAdmin,
         testEnvironment.reserveAdmin
       );
       assert.fail("Expected an error");
@@ -129,11 +143,11 @@ describe("Access Control wallet role", () => {
     }
   });
 
-  it("fails to update wallet role by wallets admin", async () => {
+  it("fails to revoke wallet role by wallets admin", async () => {
     try {
-      await testEnvironment.accessControlHelper.updateWalletRole(
+      await testEnvironment.accessControlHelper.revokeRole(
         investor.publicKey,
-        Roles.TransferAdmin,
+        Roles.WalletsAdmin,
         testEnvironment.walletsAdmin
       );
       assert.fail("Expected an error");
@@ -143,11 +157,11 @@ describe("Access Control wallet role", () => {
     }
   });
 
-  it("fails to update wallet role by transfer admin", async () => {
+  it("fails to revoke wallet role by transfer admin", async () => {
     try {
-      await testEnvironment.accessControlHelper.updateWalletRole(
+      await testEnvironment.accessControlHelper.revokeRole(
         investor.publicKey,
-        Roles.TransferAdmin,
+        Roles.WalletsAdmin,
         testEnvironment.transferAdmin
       );
       assert.fail("Expected an error");
@@ -157,8 +171,40 @@ describe("Access Control wallet role", () => {
     }
   });
 
-  it("updates wallet role by contract admin", async () => {
-    await testEnvironment.accessControlHelper.updateWalletRole(
+  it("revokes wallet role by contract admin", async () => {
+    await testEnvironment.accessControlHelper.revokeRole(
+      investor.publicKey,
+      Roles.WalletsAdmin,
+      testEnvironment.contractAdmin
+    );
+
+    const [walletRolePubkey] =
+      testEnvironment.accessControlHelper.walletRolePDA(investor.publicKey);
+    const walletRoleData =
+      await testEnvironment.accessControlHelper.walletRoleData(
+        walletRolePubkey
+      );
+    assert.equal(walletRoleData.role, Roles.None);
+    assert.strictEqual(
+      walletRoleData.owner.toString(),
+      investor.publicKey.toString()
+    );
+    assert.strictEqual(
+      walletRoleData.accessControl.toString(),
+      testEnvironment.accessControlHelper.accessControlPubkey.toString()
+    );
+  });
+
+  it("grants multiple roles by contract admin", async () => {
+    // Grant WalletsAdmin
+    await testEnvironment.accessControlHelper.grantRole(
+      investor.publicKey,
+      Roles.WalletsAdmin,
+      testEnvironment.contractAdmin
+    );
+    
+    // Grant TransferAdmin (should combine with existing roles)
+    await testEnvironment.accessControlHelper.grantRole(
       investor.publicKey,
       Roles.TransferAdmin,
       testEnvironment.contractAdmin
@@ -170,20 +216,42 @@ describe("Access Control wallet role", () => {
       await testEnvironment.accessControlHelper.walletRoleData(
         walletRolePubkey
       );
-    assert.equal(walletRoleData.role, Roles.TransferAdmin);
-    assert.strictEqual(
-      walletRoleData.owner.toString(),
-      investor.publicKey.toString()
-    );
-    assert.strictEqual(
-      walletRoleData.accessControl.toString(),
-      testEnvironment.accessControlHelper.accessControlPubkey.toString()
-    );
+    assert.equal(walletRoleData.role, Roles.WalletsAdmin | Roles.TransferAdmin);
   });
 
-  it("fails to update wallet role to invalid one", async () => {
+  it("fails to revoke role that wallet does not have", async () => {
+    // Revoke all roles first
+    await testEnvironment.accessControlHelper.revokeRole(
+      investor.publicKey,
+      Roles.WalletsAdmin,
+      testEnvironment.contractAdmin
+    );
+    await testEnvironment.accessControlHelper.revokeRole(
+      investor.publicKey,
+      Roles.TransferAdmin,
+      testEnvironment.contractAdmin
+    );
+
+    // Try to revoke a role that doesn't exist
     try {
-      await testEnvironment.accessControlHelper.updateWalletRole(
+      await testEnvironment.accessControlHelper.revokeRole(
+        investor.publicKey,
+        Roles.ReserveAdmin,
+        testEnvironment.contractAdmin
+      );
+      assert.fail("Expected an error");
+    } catch ({ error }) {
+      assert.equal(error.errorCode.code, "CannotRevokeRole");
+      assert.equal(
+        error.errorMessage,
+        "Cannot revoke role that wallet does not have"
+      );
+    }
+  });
+
+  it("fails to grant invalid wallet role", async () => {
+    try {
+      await testEnvironment.accessControlHelper.grantRole(
         investor.publicKey,
         Roles.All + 1,
         testEnvironment.contractAdmin
@@ -192,23 +260,6 @@ describe("Access Control wallet role", () => {
     } catch ({ error }) {
       assert.equal(error.errorCode.code, "InvalidRole");
       assert.equal(error.errorMessage, "Invalid role");
-    }
-  });
-
-  it("fails to update wallet role to the same role", async () => {
-    try {
-      await testEnvironment.accessControlHelper.updateWalletRole(
-        investor.publicKey,
-        Roles.TransferAdmin,
-        testEnvironment.contractAdmin
-      );
-      assert.fail("Expected an error");
-    } catch ({ error }) {
-      assert.equal(error.errorCode.code, "ValueUnchanged");
-      assert.equal(
-        error.errorMessage,
-        "The provided value is already set. No changes were made"
-      );
     }
   });
 });

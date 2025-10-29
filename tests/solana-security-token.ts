@@ -254,10 +254,10 @@ describe("solana-security-token", () => {
   });
 
   it("assigns ReserveAdmin role to super admin", async () => {
-    const newRoles = Roles.ReserveAdmin | Roles.ContractAdmin;
-    const assignRoleTx = await accessControlHelper.updateWalletRole(
+    // Grant ReserveAdmin role (ContractAdmin is already granted during initialization)
+    const assignRoleTx = await accessControlHelper.grantRole(
       superAdmin.publicKey,
-      newRoles,
+      Roles.ReserveAdmin,
       superAdmin
     );
     console.log("Assign Role Transaction Signature", assignRoleTx);
@@ -265,7 +265,8 @@ describe("solana-security-token", () => {
     const walletRoleData = await accessControlHelper.walletRoleData(
       authorityWalletRolePubkey
     );
-    assert.deepEqual(walletRoleData.role, newRoles);
+    const expectedRoles = Roles.ReserveAdmin | Roles.ContractAdmin;
+    assert.deepEqual(walletRoleData.role, expectedRoles);
   });
 
   it("fails to mint more than max total supply", async () => {
@@ -369,7 +370,7 @@ describe("solana-security-token", () => {
 
   it("assigns Transfer Admin role to user wallet", async () => {
     const newRoles = Roles.TransferAdmin;
-    const txSignature = await accessControlHelper.initializeWalletRole(
+    const txSignature = await accessControlHelper.grantRole(
       transferAdmin.publicKey,
       newRoles,
       superAdmin
@@ -727,7 +728,7 @@ describe("solana-security-token", () => {
   it("assigns Reserve Admin role to new wallet", async () => {
     const newRoles = Roles.ReserveAdmin;
 
-    const txSignature = await accessControlHelper.initializeWalletRole(
+    const txSignature = await accessControlHelper.grantRole(
       reserveAdmin.publicKey,
       newRoles,
       superAdmin
@@ -820,11 +821,10 @@ describe("solana-security-token", () => {
   });
 
   it("assigns Transfer role to super admin", async () => {
-    const newRoles =
-      Roles.ReserveAdmin | Roles.ContractAdmin | Roles.TransferAdmin;
-    const assignRoleTx = await accessControlHelper.updateWalletRole(
+    // Grant TransferAdmin role (ContractAdmin and ReserveAdmin are already granted)
+    const assignRoleTx = await accessControlHelper.grantRole(
       superAdmin.publicKey,
-      newRoles,
+      Roles.TransferAdmin,
       superAdmin
     );
     console.log("Assign Role Transaction Signature", assignRoleTx);
@@ -832,7 +832,9 @@ describe("solana-security-token", () => {
     const walletRoleData = await accessControlHelper.walletRoleData(
       authorityWalletRolePubkey
     );
-    assert.deepEqual(walletRoleData.role, newRoles);
+    const expectedRoles =
+      Roles.ReserveAdmin | Roles.ContractAdmin | Roles.TransferAdmin;
+    assert.deepEqual(walletRoleData.role, expectedRoles);
   });
 
   it("freezes user wallet", async () => {

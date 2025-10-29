@@ -84,19 +84,19 @@ export class TestEnvironment {
   }
 
   async setupAdminRoles() {
-    await this.accessControlHelper.initializeWalletRole(
+    await this.accessControlHelper.grantRole(
       this.reserveAdmin.publicKey,
       Roles.ReserveAdmin,
       this.contractAdmin
     );
 
-    await this.accessControlHelper.initializeWalletRole(
+    await this.accessControlHelper.grantRole(
       this.walletsAdmin.publicKey,
       Roles.WalletsAdmin,
       this.contractAdmin
     );
 
-    await this.accessControlHelper.initializeWalletRole(
+    await this.accessControlHelper.grantRole(
       this.transferAdmin.publicKey,
       Roles.TransferAdmin,
       this.contractAdmin

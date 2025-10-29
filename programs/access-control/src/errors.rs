@@ -22,4 +22,8 @@ pub enum AccessControlError {
     CannotFreezeLockupEscrowAccount,
     #[msg("The provided value is already set. No changes were made")]
     ValueUnchanged,
+    #[msg("Wallet already has this role")]
+    AlreadyHasRole,
+    #[msg("Cannot revoke role that wallet does not have")]
+    CannotRevokeRole,
 }
