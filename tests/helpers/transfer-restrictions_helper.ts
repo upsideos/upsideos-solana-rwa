@@ -1,5 +1,5 @@
 import { BN, Program } from "@coral-xyz/anchor";
-import { Keypair, PublicKey, SystemProgram, Commitment } from "@solana/web3.js";
+import { Keypair, PublicKey, SystemProgram, Commitment, Connection } from "@solana/web3.js";
 import { TransferRestrictions } from "../../target/types/transfer_restrictions";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 
@@ -505,5 +505,62 @@ export class TransferRestrictionsHelper {
       })
       .signers([payer])
       .rpc({ commitment: this.commitment });
+  }
+
+  async initializeSecurityAssociatedAccountIfNotExists(
+    userWalletPubkey: PublicKey,
+    userWalletAssociatedAccountPubkey: PublicKey,
+    authorityWalletRolePubkey: PublicKey,
+    authority: Keypair,
+    groupIdx: BN = new BN(0)
+  ) {
+    const [securityAssociatedAccountPubkey] = this.securityAssociatedAccountPDA(
+      userWalletAssociatedAccountPubkey
+    );
+
+    // Check if security_associated_account exists
+    const saaAccountInfo = await this.program.provider.connection.getAccountInfo(securityAssociatedAccountPubkey);
+    const saaExists = saaAccountInfo !== null && saaAccountInfo.data.length > 0;
+
+    if (!saaExists) {
+      // Initialize holder, holder_group, and SAA with group 0
+      const transferRestrictionData = await this.transferRestrictionData();
+      const holderId = transferRestrictionData.holderIds;
+
+      // Initialize holder
+      await this.initializeTransferRestrictionHolder(
+        holderId,
+        authorityWalletRolePubkey,
+        authority
+      );
+
+      // Get PDAs
+      const [holderPubkey] = this.holderPDA(holderId);
+      const [groupPubkey] = this.groupPDA(groupIdx);
+      const [holderGroupPubkey] = this.holderGroupPDA(
+        holderPubkey,
+        groupIdx
+      );
+
+      // Initialize holder group
+      await this.initializeHolderGroup(
+        holderGroupPubkey,
+        holderPubkey,
+        groupPubkey,
+        authorityWalletRolePubkey,
+        authority
+      );
+
+      // Initialize security associated account
+      await this.initializeSecurityAssociatedAccount(
+        groupPubkey,
+        holderPubkey,
+        holderGroupPubkey,
+        userWalletPubkey,
+        userWalletAssociatedAccountPubkey,
+        authorityWalletRolePubkey,
+        authority
+      );
+    }
   }
 }

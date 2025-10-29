@@ -841,6 +841,14 @@ export type AccessControl = {
         {
           name: "tokenProgram";
           address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          name: "securityAssociatedAccount";
+          docs: [
+            "This account must be initialized before minting (holder, holder_group, and SAA must exist)",
+            "Optional: Not required when minting to lockup_escrow_account, mandatory otherwise"
+          ];
+          optional: true
         }
       ];
       args: [
@@ -1286,6 +1294,26 @@ export type AccessControl = {
       code: 6009;
       name: "valueUnchanged";
       msg: "The provided value is already set. No changes were made"
+    },
+    {
+      code: 6010;
+      name: "invalidSecurityAssociatedAccount";
+      msg: "Invalid security associated account - PDA does not match expected address derived from transfer hook"
+    },
+    {
+      code: 6011;
+      name: "securityAssociatedAccountNotInitialized";
+      msg: "Security associated account not initialized"
+    },
+    {
+      code: 6012;
+      name: "transferHookNotConfigured";
+      msg: "Transfer hook not configured on mint - cannot validate security associated account"
+    },
+    {
+      code: 6013;
+      name: "securityAssociatedAccountRequired";
+      msg: "Security associated account is required when minting to non-lockup-escrow destinations"
     }
   ];
   types: [

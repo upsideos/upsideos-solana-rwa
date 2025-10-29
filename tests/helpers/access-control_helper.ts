@@ -127,7 +127,8 @@ export class AccessControlHelper {
     amount: BN,
     userWalletPubkey: PublicKey,
     userWalletAssociatedAccountPubkey: PublicKey,
-    signer: Keypair
+    signer: Keypair,
+    securityAssociatedAccountPubkey: PublicKey  // Required - SAA must exist
   ): Promise<string> {
     const authorityWalletRolePubkey = this.walletRolePDA(signer.publicKey)[0];
 
@@ -141,6 +142,7 @@ export class AccessControlHelper {
         destinationAccount: userWalletAssociatedAccountPubkey,
         destinationAuthority: userWalletPubkey,
         tokenProgram: TOKEN_2022_PROGRAM_ID,
+        securityAssociatedAccount: securityAssociatedAccountPubkey,
       })
       .signers([signer])
       .rpc({ commitment: this.commitment });

@@ -131,6 +131,11 @@ describe("TokenLockup create release schedule", () => {
       contractAdminWalletRole,
       testEnvironment.contractAdmin
     );
+    await testEnvironment.accessControlHelper.setLockupEscrowAccount(
+      escrowAccount,
+      tokenlockDataPubkey,
+      testEnvironment.contractAdmin
+    );
   });
 
   it("increments the schedulerCount", async () => {
@@ -263,7 +268,7 @@ describe("TokenLockup create release schedule", () => {
     const groupId = new anchor.BN(0);
     const [groupPubkey] =
       testEnvironment.transferRestrictionsHelper.groupPDA(groupId);
-    const holderId = new anchor.BN(0);
+    const holderId = new anchor.BN(1);
     const [holderPubkey] =
       testEnvironment.transferRestrictionsHelper.holderPDA(holderId);
     const [holderGroupPubkey] =
@@ -290,15 +295,6 @@ describe("TokenLockup create release schedule", () => {
       testEnvironment.transferAdmin
     );
 
-    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
-      holderGroupPubkey,
-      reserveAdmin.publicKey,
-      reserveAdminTokenAccountPubkey,
-      transferAdminWalletRole,
-      testEnvironment.transferAdmin
-    );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
       groupPubkey,
       holderPubkey,
