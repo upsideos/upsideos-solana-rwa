@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/tokenlock.json`.
  */
 export type Tokenlock = {
-  address: "7CN3iHcRimZRa97M38cyMQAF68ecQYDqHfCUgBeSARG2";
+  address: "tokenlockaccountsidconst";
   metadata: {
     name: "tokenlock";
     version: "0.1.1";
@@ -185,6 +185,10 @@ export type Tokenlock = {
         },
         {
           name: "authority";
+          signer: true
+        },
+        {
+          name: "payer";
           writable: true;
           signer: true
         },

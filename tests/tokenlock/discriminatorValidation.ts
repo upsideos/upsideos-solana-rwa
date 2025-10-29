@@ -160,6 +160,7 @@ describe("TokenLockup tokenlock discriminator tests", () => {
           accessControl:
             testEnvironment.accessControlHelper.accessControlPubkey,
           authority: reserveAdmin.publicKey,
+          payer: reserveAdmin.publicKey,
           targetAccount: recipient2.publicKey,
           systemProgram: anchor.web3.SystemProgram.programId,
           rent: anchor.web3.SYSVAR_RENT_PUBKEY,

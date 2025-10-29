@@ -325,6 +325,7 @@ describe("token lockup", () => {
           accessControl:
             testEnvironment.accessControlHelper.accessControlPubkey,
           authority: testEnvironment.reserveAdmin.publicKey,
+          payer: testEnvironment.reserveAdmin.publicKey,
           targetAccount: investor.publicKey,
           systemProgram: SystemProgram.programId,
           rent: SYSVAR_RENT_PUBKEY,
