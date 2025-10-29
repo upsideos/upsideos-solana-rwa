@@ -111,4 +111,12 @@ pub mod transfer_restrictions {
     pub fn enforce_transfer_restrictions(ctx: Context<EnforceTransferRestrictions>) -> Result<()> {
         instructions::transfer_restrictions::enforce_transfer_restrictions(ctx)
     }
+
+    pub fn set_address_permission(
+        ctx: Context<SetAddressPermission>,
+        group_id: u64,
+        frozen: bool,
+    ) -> Result<()> {
+        instructions::transfer_restrictions::set_address_permission(ctx, group_id, frozen)
+    }
 }
