@@ -1,9 +1,11 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
+use access_control::{program::AccessControl as AccessControlProgram, AccessControl, WalletRole};
 
+use crate::states::Reclaimer;
 use crate::{
     errors::DividendsErrorCode,
-    events::ClaimedEvent,
+    events::ReclaimedEvent,
     ClaimStatus,
     MerkleDistributor,
 };
@@ -18,7 +20,7 @@ use crate::instructions::helpers::{
 /// [merkle_distributor::claim] accounts.
 #[derive(Accounts)]
 #[instruction(_bump: u8, index: u64)]
-pub struct Claim<'info> {
+pub struct ReclaimDividends<'info> {
     /// The [MerkleDistributor].
     #[account(
         mut,
@@ -26,6 +28,16 @@ pub struct Claim<'info> {
         constraint = distributor.paused == false @ DividendsErrorCode::DistributionPaused,
     )]
     pub distributor: Account<'info, MerkleDistributor>,
+
+    /// Reclaimer account storing the wallet address.
+    #[account(
+        seeds = [
+            b"reclaimer".as_ref(),
+            access_control.key().as_ref()
+        ],
+        bump,
+    )]
+    pub reclaimer: Account<'info, Reclaimer>,
 
     /// Status of the claim.
     #[account(
@@ -52,12 +64,13 @@ pub struct Claim<'info> {
     #[account(mut,
         token::mint = mint,
         token::token_program = token_program,
+        constraint = to.owner == reclaimer.wallet_address @ DividendsErrorCode::OwnerMismatch,
     )]
     pub to: Box<InterfaceAccount<'info, TokenAccount>>,
 
-    /// Who is claiming the tokens.
-    #[account(address = to.owner @ DividendsErrorCode::OwnerMismatch)]
-    pub claimant: Signer<'info>,
+    /// CHECK: On behalf of the which the reclaimer is claiming.
+    #[account()]
+    pub claimant: AccountInfo<'info>,
 
     /// Payer of the claim.
     #[account(mut)]
@@ -67,6 +80,25 @@ pub struct Claim<'info> {
     #[account(address = distributor.mint)]
     pub mint: Box<InterfaceAccount<'info, Mint>>,
 
+    /// Authority wallet role to pause the distributor.
+    #[account(
+        constraint = authority_wallet_role.owner == authority.key(),
+        constraint = authority_wallet_role.has_any_role(access_control::Roles::ContractAdmin as u8 | access_control::Roles::TransferAdmin as u8) @ DividendsErrorCode::Unauthorized,
+        constraint = authority_wallet_role.access_control == access_control.key(),
+    )]
+    pub authority_wallet_role: Account<'info, WalletRole>,
+
+    /// Access Control for Security Token.
+    #[account(
+        owner = AccessControlProgram::id(),
+        constraint = distributor.access_control == access_control.key(),
+    )]
+    pub access_control: Account<'info, AccessControl>,
+
+    /// Payer of the reclaim.
+    #[account()]
+    pub authority: Signer<'info>,
+
     /// The [System] program.
     pub system_program: Program<'info, System>,
 
@@ -75,8 +107,8 @@ pub struct Claim<'info> {
 }
 
 /// Claims tokens from the [MerkleDistributor].
-pub fn claim<'info>(
-    ctx: Context<'_, '_, '_, 'info, Claim<'info>>,
+pub fn reclaim_dividends<'info>(
+    ctx: Context<'_, '_, '_, 'info, ReclaimDividends<'info>>,
     _bump: u8,
     index: u64,
     amount: u64,
@@ -96,7 +128,6 @@ pub fn claim<'info>(
 
     let claimant_account = &ctx.accounts.claimant;
     let distributor = &ctx.accounts.distributor;
-    require!(claimant_account.is_signer, DividendsErrorCode::Unauthorized);
     require!(
         distributor.ready_to_claim,
         DividendsErrorCode::DistributorNotReadyToClaim
@@ -111,8 +142,8 @@ pub fn claim<'info>(
         distributor.root,
     )?;
 
-    // Mark it claimed.
-    mark_claim_status(claim_status, amount, claimant_account.key())?;
+    // Mark it claimed (with authority as claimant since TransferAdmin is doing the reclaim).
+    mark_claim_status(claim_status, amount, ctx.accounts.authority.key())?;
 
     // Transfer tokens.
     transfer_dividends_tokens(
@@ -129,9 +160,10 @@ pub fn claim<'info>(
     let distributor = &mut ctx.accounts.distributor;
     update_distributor_after_claim(distributor, amount)?;
 
-    emit!(ClaimedEvent {
+    emit!(ReclaimedEvent {
         index,
-        claimant: claimant_account.key(),
+        claimant: ctx.accounts.authority.key(),
+        target: ctx.accounts.claimant.key(),
         amount
     });
     Ok(())

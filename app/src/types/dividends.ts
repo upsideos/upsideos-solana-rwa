@@ -441,6 +441,322 @@ export type Dividends = {
           type: "bool"
         }
       ]
+    },
+    {
+      name: "reclaimDividends";
+      docs: [
+        "Reclaims all remaining unclaimed dividends and sends them to the reclaimer address."
+      ];
+      discriminator: [
+        32,
+        208,
+        208,
+        161,
+        89,
+        49,
+        92,
+        72
+      ];
+      accounts: [
+        {
+          name: "distributor";
+          docs: [
+            "The [MerkleDistributor]."
+          ];
+          writable: true
+        },
+        {
+          name: "reclaimer";
+          docs: [
+            "Reclaimer account storing the wallet address."
+          ];
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  114,
+                  101,
+                  99,
+                  108,
+                  97,
+                  105,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                kind: "account";
+                path: "accessControl"
+              }
+            ]
+          }
+        },
+        {
+          name: "claimStatus";
+          docs: [
+            "Status of the claim."
+          ];
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  67,
+                  108,
+                  97,
+                  105,
+                  109,
+                  83,
+                  116,
+                  97,
+                  116,
+                  117,
+                  115
+                ]
+              },
+              {
+                kind: "arg";
+                path: "index"
+              },
+              {
+                kind: "account";
+                path: "distributor"
+              }
+            ]
+          }
+        },
+        {
+          name: "from";
+          docs: [
+            "Distributor ATA containing the tokens to distribute."
+          ];
+          writable: true
+        },
+        {
+          name: "to";
+          docs: [
+            "Account to send the claimed tokens to."
+          ];
+          writable: true
+        },
+        {
+          name: "claimant"
+        },
+        {
+          name: "payer";
+          docs: [
+            "Payer of the claim."
+          ];
+          writable: true;
+          signer: true
+        },
+        {
+          name: "mint"
+        },
+        {
+          name: "authorityWalletRole";
+          docs: [
+            "Authority wallet role to pause the distributor."
+          ]
+        },
+        {
+          name: "accessControl";
+          docs: [
+            "Access Control for Security Token."
+          ]
+        },
+        {
+          name: "authority";
+          docs: [
+            "Payer of the reclaim."
+          ];
+          signer: true
+        },
+        {
+          name: "systemProgram";
+          docs: [
+            "The [System] program."
+          ];
+          address: "11111111111111111111111111111111"
+        },
+        {
+          name: "tokenProgram";
+          docs: [
+            "SPL [Token] program."
+          ]
+        }
+      ];
+      args: [
+        {
+          name: "bump";
+          type: "u8"
+        },
+        {
+          name: "index";
+          type: "u64"
+        },
+        {
+          name: "amount";
+          type: "u64"
+        },
+        {
+          name: "proof";
+          type: {
+            vec: {
+              array: [
+                "u8",
+                32
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      name: "setReclaimer";
+      docs: [
+        "Sets the reclaimer wallet address for dividends."
+      ];
+      discriminator: [
+        194,
+        151,
+        2,
+        213,
+        255,
+        205,
+        137,
+        136
+      ];
+      accounts: [
+        {
+          name: "reclaimer";
+          docs: [
+            "Reclaimer account storing the wallet address."
+          ];
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  114,
+                  101,
+                  99,
+                  108,
+                  97,
+                  105,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                kind: "account";
+                path: "accessControl"
+              }
+            ]
+          }
+        },
+        {
+          name: "accessControl";
+          docs: [
+            "Access Control for Security Token."
+          ];
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  97,
+                  99
+                ]
+              },
+              {
+                kind: "account";
+                path: "securityMint"
+              }
+            ];
+            program: {
+              kind: "const";
+              value: [
+                52,
+                73,
+                111,
+                144,
+                68,
+                201,
+                194,
+                136,
+                142,
+                176,
+                110,
+                98,
+                34,
+                243,
+                63,
+                165,
+                30,
+                161,
+                45,
+                199,
+                24,
+                46,
+                67,
+                87,
+                76,
+                194,
+                73,
+                243,
+                192,
+                121,
+                138,
+                252
+              ]
+            }
+          }
+        },
+        {
+          name: "authorityWalletRole";
+          docs: [
+            "Authority wallet role to set the reclaimer."
+          ]
+        },
+        {
+          name: "securityMint"
+        },
+        {
+          name: "authority";
+          docs: [
+            "Authority signing the transaction."
+          ];
+          writable: true;
+          signer: true
+        },
+        {
+          name: "payer";
+          docs: [
+            "Payer for the reclaimer account initialization."
+          ];
+          writable: true;
+          signer: true
+        },
+        {
+          name: "systemProgram";
+          docs: [
+            "The [System] program."
+          ];
+          address: "11111111111111111111111111111111"
+        }
+      ];
+      args: [
+        {
+          name: "reclaimerWallet";
+          type: "pubkey"
+        }
+      ]
     }
   ];
   accounts: [
@@ -484,6 +800,19 @@ export type Dividends = {
       ]
     },
     {
+      name: "reclaimer";
+      discriminator: [
+        191,
+        103,
+        233,
+        218,
+        91,
+        3,
+        158,
+        191
+      ]
+    },
+    {
       name: "walletRole";
       discriminator: [
         219,
@@ -522,6 +851,19 @@ export type Dividends = {
         159,
         102,
         174
+      ]
+    },
+    {
+      name: "reclaimedEvent";
+      discriminator: [
+        247,
+        85,
+        15,
+        7,
+        133,
+        73,
+        216,
+        53
       ]
     }
   ];
@@ -590,6 +932,11 @@ export type Dividends = {
       code: 6012;
       name: "transferFeeIsNotAllowedForPaymentMint";
       msg: "Transfer fee is not allowed for payment mint"
+    },
+    {
+      code: 6013;
+      name: "reclaimerNotSet";
+      msg: "Reclaimer address is not set"
     }
   ];
   types: [
@@ -817,6 +1164,63 @@ export type Dividends = {
               "IPFS hash of the serialized merkle tree."
             ];
             type: "string"
+          }
+        ]
+      }
+    },
+    {
+      name: "reclaimedEvent";
+      docs: [
+        "Emitted when dividends are reclaimed."
+      ];
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "index";
+            docs: [
+              "Index of the claim."
+            ];
+            type: "u64"
+          },
+          {
+            name: "claimant";
+            docs: [
+              "User that claimed."
+            ];
+            type: "pubkey"
+          },
+          {
+            name: "target";
+            docs: [
+              "Dividends owner"
+            ];
+            type: "pubkey"
+          },
+          {
+            name: "amount";
+            docs: [
+              "Amount of tokens to distribute."
+            ];
+            type: "u64"
+          }
+        ]
+      }
+    },
+    {
+      name: "reclaimer";
+      docs: [
+        "Holds the reclaimer wallet address for a given access control account."
+      ];
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "walletAddress";
+            docs: [
+              "Wallet address that will receive reclaimed dividends."
+            ];
+            type: "pubkey"
           }
         ]
       }
