@@ -368,6 +368,10 @@ export type TransferRestrictions = {
           name: "authorityWalletRole"
         },
         {
+          name: "authority";
+          signer: true
+        },
+        {
           name: "payer";
           writable: true;
           signer: true
@@ -542,6 +546,10 @@ export type TransferRestrictions = {
           name: "authorityWalletRole"
         },
         {
+          name: "authority";
+          signer: true
+        },
+        {
           name: "payer";
           writable: true;
           signer: true
@@ -616,6 +624,10 @@ export type TransferRestrictions = {
         },
         {
           name: "authorityWalletRole"
+        },
+        {
+          name: "authority";
+          signer: true
         },
         {
           name: "payer";
@@ -697,6 +709,10 @@ export type TransferRestrictions = {
         },
         {
           name: "authorityWalletRole"
+        },
+        {
+          name: "authority";
+          signer: true
         },
         {
           name: "payer";
@@ -886,6 +902,10 @@ export type TransferRestrictions = {
           name: "authorityWalletRole"
         },
         {
+          name: "authority";
+          signer: true
+        },
+        {
           name: "payer";
           writable: true;
           signer: true
@@ -1021,6 +1041,10 @@ export type TransferRestrictions = {
           writable: true
         },
         {
+          name: "authority";
+          signer: true
+        },
+        {
           name: "payer";
           writable: true;
           signer: true
@@ -1144,6 +1168,10 @@ export type TransferRestrictions = {
         {
           name: "authorityWalletRole";
           writable: true
+        },
+        {
+          name: "authority";
+          signer: true
         },
         {
           name: "payer";
@@ -1318,6 +1346,10 @@ export type TransferRestrictions = {
         },
         {
           name: "authorityWalletRole"
+        },
+        {
+          name: "authority";
+          signer: true
         },
         {
           name: "payer";

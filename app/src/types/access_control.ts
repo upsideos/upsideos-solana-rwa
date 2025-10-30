@@ -662,7 +662,7 @@ export type AccessControl = {
               },
               {
                 kind: "account";
-                path: "payer"
+                path: "authority"
               }
             ]
           }
@@ -690,6 +690,10 @@ export type AccessControl = {
         },
         {
           name: "userWallet"
+        },
+        {
+          name: "authority";
+          signer: true
         },
         {
           name: "payer";

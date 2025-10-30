@@ -256,6 +256,7 @@ impl<'a> TestFixture {
             tokenlock_account: tokenlock_account_info,
             timelock_account: Account::try_from_unchecked(timelock_account_info)?,
             authority: Signer::try_from(authority_info).unwrap(),
+            payer: Signer::try_from(authority_info).unwrap(),
             access_control: Account::try_from_unchecked(access_control_info).unwrap(),
             authority_wallet_role,
             target_account: target_account_info,

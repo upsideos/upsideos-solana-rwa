@@ -503,7 +503,8 @@ export async function initializeTimelock(
   targetAccount: PublicKey,
   accessControl: PublicKey,
   authorityWalletRole: PublicKey,
-  signer: Keypair,
+  authority: Keypair,
+  payer?: Keypair,
   commitment: Commitment = "confirmed"
 ): Promise<PublicKey> {
   const timelockAccount = getTimelockAccount(
@@ -511,6 +512,8 @@ export async function initializeTimelock(
     tokenlockAccount,
     targetAccount
   );
+  const payerKeypair = payer || authority;
+
   await program.methods
     .initializeTimelock()
     .accountsStrict({
@@ -518,12 +521,13 @@ export async function initializeTimelock(
       timelockAccount: timelockAccount,
       authorityWalletRole,
       accessControl,
-      authority: signer.publicKey,
+      authority: authority.publicKey,
+      payer: payerKeypair.publicKey,
       targetAccount,
       systemProgram: SystemProgram.programId,
       rent: SYSVAR_RENT_PUBKEY,
     })
-    .signers([signer])
+    .signers(payer ? [authority, payerKeypair] : [authority])
     .rpc({ commitment });
 
   return timelockAccount;
@@ -562,7 +566,8 @@ export async function mintReleaseSchedule(
       to,
       accessControlPubkey,
       authorityWalletRolePubkey,
-      signer
+      signer,
+      undefined
     );
   }
   const uuid = uuidBytes();
@@ -748,6 +753,7 @@ export async function getOrCreateTimelockAccount(
       accessControl,
       authorityWalletRole,
       signer,
+      undefined,
       commitment
     );
   }
