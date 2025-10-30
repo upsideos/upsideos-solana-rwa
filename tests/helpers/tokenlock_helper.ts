@@ -597,6 +597,7 @@ export async function mintReleaseSchedule(
             authority: signer.publicKey,
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             accessControlProgram: accessControlProgramId,
+            systemProgram: SystemProgram.programId,
           },
           signers: [signer],
         }
@@ -849,6 +850,7 @@ export async function batchMintReleaseSchedule(
           authority: signer.publicKey,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           accessControlProgram: accessControlProgram.programId,
+          systemProgram: SystemProgram.programId,
         },
         signers: [signer],
       }

@@ -297,6 +297,7 @@ describe("TokenLockup tokenlock discriminator tests", () => {
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             accessControlProgram:
               testEnvironment.accessControlHelper.program.programId,
+            systemProgram: anchor.web3.SystemProgram.programId,
           },
           signers: [reserveAdmin],
         }

@@ -15,7 +15,7 @@ pub struct InitializeTimeLock<'info> {
     /// CHECK: implemented own serialization in order to save compute units
     pub tokenlock_account: AccountInfo<'info>,
 
-    #[account(init, payer = authority, space = 10240,
+    #[account(init, payer = authority, space = 8 + 32 + 32 + 4 + 4,
         seeds = [tokenlock_account.key.as_ref(), target_account.key.as_ref()],
         bump,
     )]
