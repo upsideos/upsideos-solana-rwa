@@ -67,16 +67,18 @@ fn validate_security_associated_account(ctx: &Context<MintSecurities>) -> Result
     let mint_account_info = &ctx.accounts.security_mint.to_account_info();
     let transfer_hook_extension = get_mint_extension_data::<TransferHook>(mint_account_info)?;
     let transfer_hook_program_id: Option<Pubkey> = transfer_hook_extension.program_id.into();
-    if transfer_hook_program_id.is_none() {
-        return Err(AccessControlError::TransferHookNotConfigured.into());
-    }
+    let program_id = match transfer_hook_program_id {
+        Some(pid) => pid,
+        None => return Err(AccessControlError::TransferHookNotConfigured.into()),
+    };
+
     // Derive the expected SAA PDA using the transfer hook program ID
     let (expected_saa_pubkey, _bump) = Pubkey::find_program_address(
         &[
             SECURITY_ASSOCIATED_ACCOUNT_PREFIX.as_bytes(),
             ctx.accounts.destination_account.key().as_ref(),
         ],
-        &transfer_hook_program_id.unwrap(),
+        &program_id,
     );
 
     // Validate the provided SAA matches the expected PDA
