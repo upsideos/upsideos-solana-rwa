@@ -52,4 +52,6 @@ pub enum TransferRestrictionsError {
     ValueUnchanged,
     #[msg("Current group and holder group must be provided for existing wallet")]
     CurrentGroupRequiredForExistingWallet,
+    #[msg("Holder group already initialized")]
+    HolderGroupAlreadyInitialized,
 }

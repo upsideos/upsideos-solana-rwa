@@ -22,6 +22,6 @@ anchor-spl = { version = "0.32.1" }
 spl-transfer-hook-interface = "0.10.0"
 spl-tlv-account-resolution = "0.10.0"
 spl-token-2022 = { version = "8.0.1", features = ["no-entrypoint"] }
-num_enum = "0.7.2"
+num_enum = "0.7.5"
 access-control = { path = "../access-control", features = ["cpi"] }
 tokenlock-accounts = { path = "../../libraries/tokenlock-accounts" }

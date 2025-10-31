@@ -126,6 +126,11 @@ describe("TokenLockup mint release schedules", () => {
       contractAdminWalletRole,
       testEnvironment.contractAdmin
     );
+    await testEnvironment.accessControlHelper.setLockupEscrowAccount(
+      escrowAccount,
+      tokenlockDataPubkey,
+      testEnvironment.contractAdmin
+    );
   });
 
   let currentScheduleId = 0;

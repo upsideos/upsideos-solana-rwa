@@ -104,9 +104,15 @@ describe("TokenLockup batch mint testing", () => {
       testEnvironment.accessControlHelper.accessControlPubkey,
       testEnvironment.contractAdmin
     );
+
+    await testEnvironment.accessControlHelper.setLockupEscrowAccount(
+      escrowAccount,
+      tokenlockDataPubkey,
+      testEnvironment.contractAdmin
+    );
   });
 
-  it("batchMintReleaseSchedule emits a ScheduleFunded event", async () => {
+  it("batchMintReleaseSchedule success", async () => {
     const totalBatches = 3;
     const firstDelay = 0;
     const firstBatchBips = 800; // 8%
