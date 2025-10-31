@@ -127,301 +127,301 @@ describe("TokenLockup stress test", () => {
     }
   });
 
-  // it("200 create Schedule", async () => {
-  //   const totalBatches = 3;
-  //   const firstDelay = 0;
-  //   const firstBatchBips = 800; // 8%
-  //   const batchDelay = fromDaysToSeconds(4); // 4 days
+  it("200 create Schedule", async () => {
+    const totalBatches = 3;
+    const firstDelay = 0;
+    const firstBatchBips = 800; // 8%
+    const batchDelay = fromDaysToSeconds(4); // 4 days
 
-  //   for (let i = 0; i < 200; i++) {
-  //     const scheduleId = await createReleaseSchedule(
-  //       tokenlockProgram,
-  //       tokenlockDataPubkey,
-  //       totalBatches,
-  //       new anchor.BN(firstDelay),
-  //       firstBatchBips,
-  //       new anchor.BN(batchDelay),
-  //       testEnvironment.accessControlHelper.accessControlPubkey,
-  //       reserveAdminWalletRolePubkey,
-  //       reserveAdmin
-  //     );
+    for (let i = 0; i < 200; i++) {
+      const scheduleId = await createReleaseSchedule(
+        tokenlockProgram,
+        tokenlockDataPubkey,
+        totalBatches,
+        new anchor.BN(firstDelay),
+        firstBatchBips,
+        new anchor.BN(batchDelay),
+        testEnvironment.accessControlHelper.accessControlPubkey,
+        reserveAdminWalletRolePubkey,
+        reserveAdmin
+      );
 
-  //     console.log("create schedule=", i);
-  //     assert(scheduleId === i);
-  //   }
-  // });
+      console.log("create schedule=", i);
+      assert(scheduleId === i);
+    }
+  });
 
-  // it("200 mint release Schedule", async () => {
-  //   const totalBatches = 3;
-  //   const firstDelay = 0;
-  //   const firstBatchBips = 800; // 8%
-  //   const batchDelay = fromDaysToSeconds(4); // 4 days
-  //   const commence = -3600 * 24;
+  it("200 mint release Schedule", async () => {
+    const totalBatches = 3;
+    const firstDelay = 0;
+    const firstBatchBips = 800; // 8%
+    const batchDelay = fromDaysToSeconds(4); // 4 days
+    const commence = -3600 * 24;
 
-  //   const scheduleId = await createReleaseSchedule(
-  //     tokenlockProgram,
-  //     tokenlockDataPubkey,
-  //     totalBatches,
-  //     new anchor.BN(firstDelay),
-  //     firstBatchBips,
-  //     new anchor.BN(batchDelay),
-  //     testEnvironment.accessControlHelper.accessControlPubkey,
-  //     reserveAdminWalletRolePubkey,
-  //     reserveAdmin
-  //   );
-  //   console.log("scheduleId=", scheduleId);
-  //   assert(scheduleId === 0);
+    const scheduleId = await createReleaseSchedule(
+      tokenlockProgram,
+      tokenlockDataPubkey,
+      totalBatches,
+      new anchor.BN(firstDelay),
+      firstBatchBips,
+      new anchor.BN(batchDelay),
+      testEnvironment.accessControlHelper.accessControlPubkey,
+      reserveAdminWalletRolePubkey,
+      reserveAdmin
+    );
+    console.log("scheduleId=", scheduleId);
+    assert(scheduleId === 0);
 
-  //   await topUpWallet(
-  //     testEnvironment.connection,
-  //     reserveAdmin.publicKey,
-  //     2_000_000_000
-  //   );
-  //   let nowTs = await getNowTs(testEnvironment.connection);
-  //   const iterations = 2;
-  //   for (let i = 0; i < iterations; i++) {
-  //     const timelockId = await mintReleaseSchedule(
-  //       testEnvironment.connection,
-  //       tokenlockProgram,
-  //       new anchor.BN(490),
-  //       new anchor.BN(nowTs + commence),
-  //       scheduleId,
-  //       [walletC.publicKey, reserveAdmin.publicKey, walletB.publicKey],
-  //       tokenlockDataPubkey,
-  //       escrowAccount,
-  //       escrowOwnerPubkey,
-  //       walletB.publicKey,
-  //       reserveAdmin,
-  //       reserveAdminWalletRolePubkey,
-  //       testEnvironment.accessControlHelper.accessControlPubkey,
-  //       mintPubkey,
-  //       testEnvironment.accessControlHelper.program.programId
-  //     );
-  //     console.log("created timelock=", i);
-  //     assert(timelockId === i);
-  //   }
+    await topUpWallet(
+      testEnvironment.connection,
+      reserveAdmin.publicKey,
+      2_000_000_000
+    );
+    let nowTs = await getNowTs(testEnvironment.connection);
+    const iterations = 2;
+    for (let i = 0; i < iterations; i++) {
+      const timelockId = await mintReleaseSchedule(
+        testEnvironment.connection,
+        tokenlockProgram,
+        new anchor.BN(490),
+        new anchor.BN(nowTs + commence),
+        scheduleId,
+        [walletC.publicKey, reserveAdmin.publicKey, walletB.publicKey],
+        tokenlockDataPubkey,
+        escrowAccount,
+        escrowOwnerPubkey,
+        walletB.publicKey,
+        reserveAdmin,
+        reserveAdminWalletRolePubkey,
+        testEnvironment.accessControlHelper.accessControlPubkey,
+        mintPubkey,
+        testEnvironment.accessControlHelper.program.programId
+      );
+      console.log("created timelock=", i);
+      assert(timelockId === i);
+    }
 
-  //   await topUpWallet(
-  //     testEnvironment.connection,
-  //     reserveAdmin.publicKey,
-  //     2_000_000_000
-  //   );
-  //   nowTs = await getNowTs(testEnvironment.connection);
-  //   for (let i = 0; i < iterations; i++) {
-  //     const timelockId = await mintReleaseSchedule(
-  //       testEnvironment.connection,
-  //       tokenlockProgram,
-  //       new anchor.BN(490),
-  //       new anchor.BN(nowTs + commence),
-  //       scheduleId,
-  //       [walletC.publicKey, reserveAdmin.publicKey, walletB.publicKey],
-  //       tokenlockDataPubkey,
-  //       escrowAccount,
-  //       escrowOwnerPubkey,
-  //       walletC.publicKey,
-  //       reserveAdmin,
-  //       reserveAdminWalletRolePubkey,
-  //       testEnvironment.accessControlHelper.accessControlPubkey,
-  //       mintPubkey,
-  //       testEnvironment.accessControlHelper.program.programId
-  //     );
-  //     console.log("2nd created timelock=", i);
-  //     assert(timelockId === i);
-  //   }
+    await topUpWallet(
+      testEnvironment.connection,
+      reserveAdmin.publicKey,
+      2_000_000_000
+    );
+    nowTs = await getNowTs(testEnvironment.connection);
+    for (let i = 0; i < iterations; i++) {
+      const timelockId = await mintReleaseSchedule(
+        testEnvironment.connection,
+        tokenlockProgram,
+        new anchor.BN(490),
+        new anchor.BN(nowTs + commence),
+        scheduleId,
+        [walletC.publicKey, reserveAdmin.publicKey, walletB.publicKey],
+        tokenlockDataPubkey,
+        escrowAccount,
+        escrowOwnerPubkey,
+        walletC.publicKey,
+        reserveAdmin,
+        reserveAdminWalletRolePubkey,
+        testEnvironment.accessControlHelper.accessControlPubkey,
+        mintPubkey,
+        testEnvironment.accessControlHelper.program.programId
+      );
+      console.log("2nd created timelock=", i);
+      assert(timelockId === i);
+    }
 
-  //   await topUpWallet(
-  //     testEnvironment.connection,
-  //     walletC.publicKey,
-  //     solToLamports(1)
-  //   );
+    await topUpWallet(
+      testEnvironment.connection,
+      walletC.publicKey,
+      solToLamports(1)
+    );
 
-  //   const tsNow = await getNowTs(testEnvironment.connection);
-  //   let tokenlockData = await tokenlockProgram.account.tokenLockData.fetch(
-  //     tokenlockDataPubkey
-  //   );
-  //   const timelockAccount = getTimelockAccount(
-  //     tokenlockProgram.programId,
-  //     tokenlockDataPubkey,
-  //     walletC.publicKey
-  //   );
-  //   let timelockData = await tokenlockProgram.account.timelockData.fetch(
-  //     timelockAccount
-  //   );
-  //   const unlockedBalance = unlockedBalanceOf(
-  //     tokenlockData,
-  //     timelockData,
-  //     tsNow
-  //   );
-  //   const walletCTokenAccount =
-  //     await testEnvironment.mintHelper.createAssociatedTokenAccount(
-  //       walletC.publicKey,
-  //       reserveAdmin
-  //     );
+    const tsNow = await getNowTs(testEnvironment.connection);
+    let tokenlockData = await tokenlockProgram.account.tokenLockData.fetch(
+      tokenlockDataPubkey
+    );
+    const timelockAccount = getTimelockAccount(
+      tokenlockProgram.programId,
+      tokenlockDataPubkey,
+      walletC.publicKey
+    );
+    let timelockData = await tokenlockProgram.account.timelockData.fetch(
+      timelockAccount
+    );
+    const unlockedBalance = unlockedBalanceOf(
+      tokenlockData,
+      timelockData,
+      tsNow
+    );
+    const walletCTokenAccount =
+      await testEnvironment.mintHelper.createAssociatedTokenAccount(
+        walletC.publicKey,
+        reserveAdmin
+      );
 
-  //   const group0 = new anchor.BN(0);
-  //   const transferRestrictionData =
-  //     await testEnvironment.transferRestrictionsHelper.transferRestrictionData();
-  //   const holderId = transferRestrictionData.holderIds;
-  //   const [authorityWalletRole] =
-  //     testEnvironment.accessControlHelper.walletRolePDA(
-  //       testEnvironment.walletsAdmin.publicKey
-  //     );
-  //   await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
-  //     holderId,
-  //     testEnvironment.accessControlHelper.walletRolePDA(
-  //       testEnvironment.walletsAdmin.publicKey
-  //     )[0],
-  //     testEnvironment.walletsAdmin
-  //   );
-  //   const [groupPubkey] =
-  //     testEnvironment.transferRestrictionsHelper.groupPDA(group0);
-  //   const [holderPubkey] =
-  //     testEnvironment.transferRestrictionsHelper.holderPDA(holderId);
-  //   const [holderGroupPubkey] =
-  //     testEnvironment.transferRestrictionsHelper.holderGroupPDA(
-  //       holderPubkey,
-  //       group0
-  //     );
-  //   await testEnvironment.transferRestrictionsHelper.initializeHolderGroup(
-  //     holderGroupPubkey,
-  //     holderPubkey,
-  //     groupPubkey,
-  //     authorityWalletRole,
-  //     testEnvironment.walletsAdmin
-  //   );
-  //   await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-  //     groupPubkey,
-  //     holderPubkey,
-  //     holderGroupPubkey,
-  //     walletC.publicKey,
-  //     walletCTokenAccount,
-  //     authorityWalletRole,
-  //     testEnvironment.walletsAdmin
-  //   );
-  //   await testEnvironment.transferRestrictionsHelper.initializeTransferRule(
-  //     new anchor.BN(1),
-  //     group0,
-  //     group0,
-  //     testEnvironment.accessControlHelper.walletRolePDA(
-  //       testEnvironment.transferAdmin.publicKey
-  //     )[0],
-  //     testEnvironment.transferAdmin
-  //   );
+    const group0 = new anchor.BN(0);
+    const transferRestrictionData =
+      await testEnvironment.transferRestrictionsHelper.transferRestrictionData();
+    const holderId = transferRestrictionData.holderIds;
+    const [authorityWalletRole] =
+      testEnvironment.accessControlHelper.walletRolePDA(
+        testEnvironment.walletsAdmin.publicKey
+      );
+    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
+      holderId,
+      testEnvironment.accessControlHelper.walletRolePDA(
+        testEnvironment.walletsAdmin.publicKey
+      )[0],
+      testEnvironment.walletsAdmin
+    );
+    const [groupPubkey] =
+      testEnvironment.transferRestrictionsHelper.groupPDA(group0);
+    const [holderPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderPDA(holderId);
+    const [holderGroupPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
+        holderPubkey,
+        group0
+      );
+    await testEnvironment.transferRestrictionsHelper.initializeHolderGroup(
+      holderGroupPubkey,
+      holderPubkey,
+      groupPubkey,
+      authorityWalletRole,
+      testEnvironment.walletsAdmin
+    );
+    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
+      groupPubkey,
+      holderPubkey,
+      holderGroupPubkey,
+      walletC.publicKey,
+      walletCTokenAccount,
+      authorityWalletRole,
+      testEnvironment.walletsAdmin
+    );
+    await testEnvironment.transferRestrictionsHelper.initializeTransferRule(
+      new anchor.BN(1),
+      group0,
+      group0,
+      testEnvironment.accessControlHelper.walletRolePDA(
+        testEnvironment.transferAdmin.publicKey
+      )[0],
+      testEnvironment.transferAdmin
+    );
 
-  //   const transferAmount = new anchor.BN(unlockedBalance);
-  //   const withdrawTxSignature = await withdraw(
-  //     testEnvironment.connection,
-  //     transferAmount,
-  //     tokenlockProgram,
-  //     testEnvironment.transferRestrictionsHelper.program.programId,
-  //     testEnvironment.mintKeypair.publicKey,
-  //     tokenlockDataPubkey,
-  //     timelockAccount,
-  //     escrowOwnerPubkey,
-  //     walletCTokenAccount,
-  //     testEnvironment.transferRestrictionsHelper,
-  //     walletC
-  //   );
-  //   console.log("Transfer Transaction Signature", withdrawTxSignature);
-  //   tokenlockData = await tokenlockProgram.account.tokenLockData.fetch(
-  //     tokenlockDataPubkey
-  //   );
-  //   timelockData = await tokenlockProgram.account.timelockData.fetch(
-  //     timelockAccount
-  //   );
-  //   assert.equal(
-  //     0,
-  //     unlockedBalanceOf(tokenlockData, timelockData, tsNow).toNumber()
-  //   );
+    const transferAmount = new anchor.BN(unlockedBalance);
+    const withdrawTxSignature = await withdraw(
+      testEnvironment.connection,
+      transferAmount,
+      tokenlockProgram,
+      testEnvironment.transferRestrictionsHelper.program.programId,
+      testEnvironment.mintKeypair.publicKey,
+      tokenlockDataPubkey,
+      timelockAccount,
+      escrowOwnerPubkey,
+      walletCTokenAccount,
+      testEnvironment.transferRestrictionsHelper,
+      walletC
+    );
+    console.log("Transfer Transaction Signature", withdrawTxSignature);
+    tokenlockData = await tokenlockProgram.account.tokenLockData.fetch(
+      tokenlockDataPubkey
+    );
+    timelockData = await tokenlockProgram.account.timelockData.fetch(
+      timelockAccount
+    );
+    assert.equal(
+      0,
+      unlockedBalanceOf(tokenlockData, timelockData, tsNow).toNumber()
+    );
 
-  //   const walletCTokenAccountData = await testEnvironment.mintHelper.getAccount(
-  //     walletCTokenAccount
-  //   );
-  //   assert.equal(
-  //     transferAmount.toString(),
-  //     walletCTokenAccountData.amount.toString()
-  //   );
-  // });
+    const walletCTokenAccountData = await testEnvironment.mintHelper.getAccount(
+      walletCTokenAccount
+    );
+    assert.equal(
+      transferAmount.toString(),
+      walletCTokenAccountData.amount.toString()
+    );
+  });
 
-  // it("100 mints release Schedule for different recipients", async () => {
-  //   const totalBatches = 3;
-  //   const firstDelay = 0;
-  //   const firstBatchBips = 800; // 8%
-  //   const batchDelay = fromDaysToSeconds(4); // 4 days
-  //   const commence = -3600 * 24;
+  it("100 mints release Schedule for different recipients", async () => {
+    const totalBatches = 3;
+    const firstDelay = 0;
+    const firstBatchBips = 800; // 8%
+    const batchDelay = fromDaysToSeconds(4); // 4 days
+    const commence = -3600 * 24;
 
-  //   const scheduleId = await createReleaseSchedule(
-  //     tokenlockProgram,
-  //     tokenlockDataPubkey,
-  //     totalBatches,
-  //     new anchor.BN(firstDelay),
-  //     firstBatchBips,
-  //     new anchor.BN(batchDelay),
-  //     testEnvironment.accessControlHelper.accessControlPubkey,
-  //     reserveAdminWalletRolePubkey,
-  //     reserveAdmin
-  //   );
-  //   console.log("scheduleId=", scheduleId);
-  //   assert(scheduleId === 0);
+    const scheduleId = await createReleaseSchedule(
+      tokenlockProgram,
+      tokenlockDataPubkey,
+      totalBatches,
+      new anchor.BN(firstDelay),
+      firstBatchBips,
+      new anchor.BN(batchDelay),
+      testEnvironment.accessControlHelper.accessControlPubkey,
+      reserveAdminWalletRolePubkey,
+      reserveAdmin
+    );
+    console.log("scheduleId=", scheduleId);
+    assert(scheduleId === 0);
 
-  //   await topUpWallet(
-  //     testEnvironment.connection,
-  //     reserveAdmin.publicKey,
-  //     2_000_000_000
-  //   );
-  //   let nowTs = await getNowTs(testEnvironment.connection);
-  //   for (let i = 0; i < 100; i++) {
-  //     const timelockId = await mintReleaseSchedule(
-  //       testEnvironment.connection,
-  //       tokenlockProgram,
-  //       new anchor.BN(490),
-  //       new anchor.BN(nowTs + commence),
-  //       scheduleId,
-  //       [walletC.publicKey, reserveAdmin.publicKey, walletB.publicKey],
-  //       tokenlockDataPubkey,
-  //       escrowAccount,
-  //       escrowOwnerPubkey,
-  //       walletB.publicKey,
-  //       reserveAdmin,
-  //       reserveAdminWalletRolePubkey,
-  //       testEnvironment.accessControlHelper.accessControlPubkey,
-  //       mintPubkey,
-  //       testEnvironment.accessControlHelper.program.programId
-  //     );
-  //     console.log("created timelock=", i);
-  //     assert(timelockId === i);
-  //   }
+    await topUpWallet(
+      testEnvironment.connection,
+      reserveAdmin.publicKey,
+      2_000_000_000
+    );
+    let nowTs = await getNowTs(testEnvironment.connection);
+    for (let i = 0; i < 100; i++) {
+      const timelockId = await mintReleaseSchedule(
+        testEnvironment.connection,
+        tokenlockProgram,
+        new anchor.BN(490),
+        new anchor.BN(nowTs + commence),
+        scheduleId,
+        [walletC.publicKey, reserveAdmin.publicKey, walletB.publicKey],
+        tokenlockDataPubkey,
+        escrowAccount,
+        escrowOwnerPubkey,
+        walletB.publicKey,
+        reserveAdmin,
+        reserveAdminWalletRolePubkey,
+        testEnvironment.accessControlHelper.accessControlPubkey,
+        mintPubkey,
+        testEnvironment.accessControlHelper.program.programId
+      );
+      console.log("created timelock=", i);
+      assert(timelockId === i);
+    }
 
-  //   await topUpWallet(
-  //     testEnvironment.connection,
-  //     reserveAdmin.publicKey,
-  //     2_000_000_000
-  //   );
-  //   nowTs = await getNowTs(testEnvironment.connection);
-  //   for (let i = 0; i < 100; i++) {
-  //     const timelockId = await mintReleaseSchedule(
-  //       testEnvironment.connection,
-  //       tokenlockProgram,
-  //       new anchor.BN(490),
-  //       new anchor.BN(nowTs + commence),
-  //       scheduleId,
-  //       [walletC.publicKey, reserveAdmin.publicKey, walletB.publicKey],
-  //       tokenlockDataPubkey,
-  //       escrowAccount,
-  //       escrowOwnerPubkey,
-  //       walletC.publicKey,
-  //       reserveAdmin,
-  //       reserveAdminWalletRolePubkey,
-  //       testEnvironment.accessControlHelper.accessControlPubkey,
-  //       mintPubkey,
-  //       testEnvironment.accessControlHelper.program.programId
-  //     );
-  //     console.log("2nd created timelock=", i);
-  //     assert(timelockId === i);
-  //   }
-  // });
+    await topUpWallet(
+      testEnvironment.connection,
+      reserveAdmin.publicKey,
+      2_000_000_000
+    );
+    nowTs = await getNowTs(testEnvironment.connection);
+    for (let i = 0; i < 100; i++) {
+      const timelockId = await mintReleaseSchedule(
+        testEnvironment.connection,
+        tokenlockProgram,
+        new anchor.BN(490),
+        new anchor.BN(nowTs + commence),
+        scheduleId,
+        [walletC.publicKey, reserveAdmin.publicKey, walletB.publicKey],
+        tokenlockDataPubkey,
+        escrowAccount,
+        escrowOwnerPubkey,
+        walletC.publicKey,
+        reserveAdmin,
+        reserveAdminWalletRolePubkey,
+        testEnvironment.accessControlHelper.accessControlPubkey,
+        mintPubkey,
+        testEnvironment.accessControlHelper.program.programId
+      );
+      console.log("2nd created timelock=", i);
+      assert(timelockId === i);
+    }
+  });
 
-  it("100 mint release Schedule with cancelables validation", async () => {
+  it("Mint release Schedule with cancelables validation", async () => {
     const totalBatches = 3;
     const firstDelay = 0;
     const firstBatchBips = 800; // 8%
