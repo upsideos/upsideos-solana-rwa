@@ -182,7 +182,7 @@ testCases.forEach(({ tokenProgramId, programName }) => {
           distributor,
           dividendsProgram.programId
         );
-        const [reclaimerPubkey, reclaimerBump] = findReclaimerKey(
+        const [reclaimerPubkey] = findReclaimerKey(
           testEnvironment.accessControlHelper.accessControlPubkey,
           dividendsProgram.programId
         );
@@ -959,7 +959,159 @@ testCases.forEach(({ tokenProgramId, programName }) => {
         assert.deepEqual(claimStatusData.claimant, transferAdmin.publicKey);
         assert.equal(claimStatusData.amount.toString(), claimAmount.toString());
       });
+
+      it("successfully reclaims when dividends are paused", async () => {
+        const userKP = Keypair.generate();
+        await topUpWallet(connection, userKP.publicKey, solToLamports(1));
+
+        const claimAmount = new BN(1_000_000);
+        const tree = new BalanceTree([
+          { account: userKP.publicKey, amount: claimAmount },
+        ]);
+
+        await dividendsProgram.methods
+          .newDistributor(
+            bump,
+            toBytes32Array(tree.getRoot()),
+            totalClaimAmount,
+            numNodes,
+            ipfsHash
+          )
+          .accountsStrict({
+            base: baseKey.publicKey,
+            distributor,
+            mint: mintKeypair.publicKey,
+            authorityWalletRole:
+              testEnvironment.accessControlHelper.walletRolePDA(
+                signer.publicKey
+              )[0],
+            accessControl:
+              testEnvironment.accessControlHelper.accessControlPubkey,
+            securityMint: testEnvironment.mintKeypair.publicKey,
+            payer: signer.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([signer, baseKey])
+          .rpc({ commitment });
+
+        // Set reclaimer
+        const [reclaimerPubkey] = findReclaimerKey(
+          testEnvironment.accessControlHelper.accessControlPubkey,
+          dividendsProgram.programId
+        );
+
+        await dividendsProgram.methods
+          .setReclaimer(reclaimerWallet.publicKey)
+          .accountsStrict({
+            reclaimer: reclaimerPubkey,
+            accessControl:
+              testEnvironment.accessControlHelper.accessControlPubkey,
+            authorityWalletRole:
+              testEnvironment.accessControlHelper.walletRolePDA(
+                signer.publicKey
+              )[0],
+            securityMint: testEnvironment.mintKeypair.publicKey,
+            authority: signer.publicKey,
+            payer: signer.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([signer])
+          .rpc({ commitment });
+
+        await dividendsProgram.methods
+          .fundDividends(totalClaimAmount)
+          .accounts({
+            distributor,
+            mint: mintKeypair.publicKey,
+            from: signerATA,
+            to: distributorATA,
+            funder: signer.publicKey,
+            payer: signer.publicKey,
+            tokenProgram: tokenProgramId,
+          })
+          .signers([signer])
+          .rpc({ commitment });
+
+        // Pause the distribution
+        await dividendsProgram.methods
+          .pause(true)
+          .accountsStrict({
+            distributor,
+            accessControl:
+              testEnvironment.accessControlHelper.accessControlPubkey,
+            authorityWalletRole:
+              testEnvironment.accessControlHelper.walletRolePDA(
+                signer.publicKey
+              )[0],
+            authority: signer.publicKey,
+          })
+          .signers([signer])
+          .rpc({ commitment });
+
+        // Verify that distribution is paused
+        const distributorDataPaused =
+          await dividendsProgram.account.merkleDistributor.fetch(distributor);
+        assert.equal(distributorDataPaused.paused, true);
+
+        const index = new BN(0);
+        const proof = tree.getProof(
+          index.toNumber(),
+          userKP.publicKey,
+          claimAmount
+        );
+        const [claimPubkey, claimBump] = findClaimStatusKey(
+          index,
+          distributor,
+          dividendsProgram.programId
+        );
+
+        const reclaimerATA = getAssociatedTokenAddressSync(
+          mintKeypair.publicKey,
+          reclaimerWallet.publicKey,
+          false,
+          tokenProgramId
+        );
+        await mintHelper.createAssociatedTokenAccount(
+          reclaimerWallet.publicKey,
+          transferAdmin
+        );
+
+        // Reclaim should succeed even though distribution is paused
+        await dividendsProgram.methods
+          .reclaimDividends(claimBump, index, claimAmount, proof.map((p) => toBytes32Array(p)))
+          .accountsStrict({
+            distributor,
+            reclaimer: reclaimerPubkey,
+            claimStatus: claimPubkey,
+            from: distributorATA,
+            to: reclaimerATA,
+            target: userKP.publicKey,
+            payer: transferAdmin.publicKey,
+            mint: mintKeypair.publicKey,
+            authorityWalletRole:
+              testEnvironment.accessControlHelper.walletRolePDA(
+                transferAdmin.publicKey
+              )[0],
+            accessControl:
+              testEnvironment.accessControlHelper.accessControlPubkey,
+            authority: transferAdmin.publicKey,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: tokenProgramId,
+          })
+          .signers([transferAdmin])
+          .rpc({ commitment });
+
+        // Verify tokens were sent to reclaimer
+        const reclaimerATAInfo = await mintHelper.getAccount(reclaimerATA);
+        assert.equal(reclaimerATAInfo.amount.toString(), claimAmount.toString());
+
+        // Verify claim status
+        const claimStatusData =
+          await dividendsProgram.account.claimStatus.fetch(claimPubkey);
+        assert.equal(claimStatusData.isClaimed, true);
+        assert.deepEqual(claimStatusData.claimant, transferAdmin.publicKey);
+        assert.equal(claimStatusData.amount.toString(), claimAmount.toString());
+      });
     });
   });
 });
-

@@ -935,8 +935,13 @@ export type Dividends = {
     },
     {
       code: 6013;
-      name: "reclaimerNotSet";
-      msg: "Reclaimer address is not set"
+      name: "totalAmountClaimedOverflow";
+      msg: "Total amount claimed overflow"
+    },
+    {
+      code: 6014;
+      name: "numNodesClaimedOverflow";
+      msg: "Number of nodes claimed overflow"
     }
   ];
   types: [

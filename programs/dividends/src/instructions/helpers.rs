@@ -89,7 +89,7 @@ pub fn update_distributor_after_claim(
     distributor.total_amount_claimed = distributor
         .total_amount_claimed
         .checked_add(amount)
-        .unwrap();
+        .ok_or(DividendsErrorCode::TotalAmountClaimedOverflow)?;
     require!(
         distributor.total_amount_claimed <= distributor.total_claim_amount,
         DividendsErrorCode::ExceededMaxClaim
@@ -97,7 +97,7 @@ pub fn update_distributor_after_claim(
 
     distributor.num_nodes_claimed = distributor.num_nodes_claimed
         .checked_add(1)
-        .unwrap();
+        .ok_or(DividendsErrorCode::NumNodesClaimedOverflow)?;
     require!(
         distributor.num_nodes_claimed <= distributor.num_nodes,
         DividendsErrorCode::ExceededNumNodes
@@ -105,4 +105,3 @@ pub fn update_distributor_after_claim(
 
     Ok(())
 }
-

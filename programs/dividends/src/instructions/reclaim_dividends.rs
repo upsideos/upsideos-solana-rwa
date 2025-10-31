@@ -17,7 +17,7 @@ use crate::instructions::helpers::{
     verify_merkle_proof,
 };
 
-/// [merkle_distributor::claim] accounts.
+/// [merkle_distributor::reclaim_dividends] accounts.
 #[derive(Accounts)]
 #[instruction(_bump: u8, index: u64)]
 pub struct ReclaimDividends<'info> {
@@ -25,7 +25,6 @@ pub struct ReclaimDividends<'info> {
     #[account(
         mut,
         address = from.owner,
-        constraint = distributor.paused == false @ DividendsErrorCode::DistributionPaused,
     )]
     pub distributor: Account<'info, MerkleDistributor>,
 
@@ -106,7 +105,7 @@ pub struct ReclaimDividends<'info> {
     pub token_program: Interface<'info, TokenInterface>,
 }
 
-/// Claims tokens from the [MerkleDistributor].
+/// Reclaims all remaining unclaimed dividends and sends them to the reclaimer address.
 pub fn reclaim_dividends<'info>(
     ctx: Context<'_, '_, '_, 'info, ReclaimDividends<'info>>,
     _bump: u8,
