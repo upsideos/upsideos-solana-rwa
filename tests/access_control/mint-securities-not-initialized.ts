@@ -204,7 +204,6 @@ describe("Access Control mint securities", () => {
           .rpc({ commitment: testEnvironment.commitment });
         assert.fail("Expected an error");
       } catch ({ error }) {
-        console.error(error);
         assert.equal(error.errorCode?.code, "SecurityAssociatedAccountRequired");
         assert.equal(
           error.errorMessage,

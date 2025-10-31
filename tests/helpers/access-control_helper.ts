@@ -128,7 +128,7 @@ export class AccessControlHelper {
     userWalletPubkey: PublicKey,
     userWalletAssociatedAccountPubkey: PublicKey,
     signer: Keypair,
-    securityAssociatedAccountPubkey: PublicKey  // Required - SAA must exist
+    securityAssociatedAccountPubkey: PublicKey  // Required except when minting to lockup_escrow_account - SAA must exist for non-escrow destinations
   ): Promise<string> {
     const authorityWalletRolePubkey = this.walletRolePDA(signer.publicKey)[0];
 
