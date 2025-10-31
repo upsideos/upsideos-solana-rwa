@@ -23,11 +23,10 @@ pub struct MintReleaseSchedule<'info> {
     pub tokenlock_account: AccountInfo<'info>,
 
     #[account(mut,
-        realloc = timelock_account.to_account_info().data_len()
-            .checked_add(cancelable_by.len().checked_mul(PUBKEY_BYTES).unwrap())
-            .unwrap()
-            .checked_add(Timelock::DEFAULT_SIZE)
-            .unwrap(),
+        realloc = timelock_account.expected_new_size(
+            timelock_account.to_account_info().data_len(),
+            cancelable_by.len()
+        ),
         realloc::payer = authority,
         realloc::zero = false,
         constraint = timelock_account.tokenlock_account == *tokenlock_account.key,

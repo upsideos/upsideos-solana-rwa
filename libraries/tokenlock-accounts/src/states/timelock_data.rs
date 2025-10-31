@@ -20,7 +20,7 @@ pub struct Timelock {
 impl Timelock {
     pub const MAX_CANCELABLES_COUNT: usize = 256;
     pub const CANCELABLE_BY_COUNT_MAX: u8 = 10;
-    pub const DEFAULT_SIZE: usize = 2 + 8 + 8 + 8 + 32 + 1 + 10 + 20;
+    pub const DEFAULT_SIZE: usize = 2 + 8 + 8 + 8 + 1 + 10 + 20;
 
     pub fn has_cancelable_by(&self, cancelable_by_index: u8) -> bool {
         for i in 0..self.cancelable_by_count {
@@ -61,6 +61,24 @@ impl TimelockData {
             .checked_add(Self::HEADERS_LEN)?
             .checked_add(VEC_LEN_SIZE * 2)?;
         return total_size.checked_sub(total_used);
+    }
+
+    /// Calculate the expected new size for the timelock account after adding a new timelock and cancelables
+    pub fn expected_new_size(&self, current_data_len: usize, cancelable_by_len: usize) -> usize {
+        let cancelables_space = if self.cancelables.len()
+            .checked_add(cancelable_by_len)
+            .unwrap() < Timelock::MAX_CANCELABLES_COUNT
+        {
+            cancelable_by_len.checked_mul(PUBKEY_BYTES).unwrap()
+        } else {
+            Timelock::MAX_CANCELABLES_COUNT.checked_mul(PUBKEY_BYTES).unwrap()
+        };
+        
+        current_data_len
+            .checked_add(cancelables_space)
+            .unwrap()
+            .checked_add(Timelock::DEFAULT_SIZE)
+            .unwrap()
     }
 
     pub fn get_cancelable_index(&self, canceler: &Pubkey) -> Option<u8> {
