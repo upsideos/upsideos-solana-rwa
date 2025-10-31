@@ -107,19 +107,18 @@ describe("TokenLockup stress test", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         testEnvironment.contractAdmin
       );
-
-      const txSignature =
-        await testEnvironment.transferRestrictionsHelper.setLockupEscrowAccount(
-          escrowAccount,
-          tokenlockDataPubkey,
-          testEnvironment.accessControlHelper.walletRolePDA(
-            testEnvironment.contractAdmin.publicKey
-          )[0],
-          testEnvironment.contractAdmin
-        );
-      console.log(
-        "Set escrow account into transfer restriction data tx:",
-        txSignature
+      await testEnvironment.transferRestrictionsHelper.setLockupEscrowAccount(
+        escrowAccount,
+        tokenlockDataPubkey,
+        testEnvironment.accessControlHelper.walletRolePDA(
+          testEnvironment.contractAdmin.publicKey
+        )[0],
+        testEnvironment.contractAdmin
+      );
+      await testEnvironment.accessControlHelper.setLockupEscrowAccount(
+        escrowAccount,
+        tokenlockDataPubkey,
+        testEnvironment.contractAdmin
       );
     } catch (error) {
       console.log("error=", error);
@@ -151,7 +150,7 @@ describe("TokenLockup stress test", () => {
     }
   });
 
-  it("200 mint release Schedule", async () => {
+  it("100 mint release Schedule", async () => {
     const totalBatches = 3;
     const firstDelay = 0;
     const firstBatchBips = 800; // 8%
@@ -177,8 +176,9 @@ describe("TokenLockup stress test", () => {
       reserveAdmin.publicKey,
       2_000_000_000
     );
+
     let nowTs = await getNowTs(testEnvironment.connection);
-    const iterations = 2;
+    const iterations = 100;
     for (let i = 0; i < iterations; i++) {
       const timelockId = await mintReleaseSchedule(
         testEnvironment.connection,

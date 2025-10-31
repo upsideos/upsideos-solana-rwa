@@ -264,6 +264,7 @@ fn mint_securities_cpi<'info>(
             destination_account: escrow_account.to_account_info(),
             destination_authority: escrow_account_owner.to_account_info(),
             token_program: token_program.to_account_info(),
+            security_associated_account: None,
         };
 
         access_control::cpi::mint_securities(

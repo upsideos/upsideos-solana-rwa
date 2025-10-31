@@ -50,4 +50,6 @@ pub enum TransferRestrictionsError {
     CurrentHolderGroupCountMustBeZero,
     #[msg("The provided value is already set. No changes were made")]
     ValueUnchanged,
+    #[msg("Holder group already initialized")]
+    HolderGroupAlreadyInitialized,
 }
