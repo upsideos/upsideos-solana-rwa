@@ -28,6 +28,8 @@ pub enum DividendsErrorCode {
     ValueUnchanged,
     #[msg("Transfer fee is not allowed for payment mint")]
     TransferFeeIsNotAllowedForPaymentMint,
-    #[msg("Reclaimer address is not set")]
-    ReclaimerNotSet,
+    #[msg("Total amount claimed overflow")]
+    TotalAmountClaimedOverflow,
+    #[msg("Number of nodes claimed overflow")]
+    NumNodesClaimedOverflow,
 }
