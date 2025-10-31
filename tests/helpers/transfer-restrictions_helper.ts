@@ -1,5 +1,5 @@
 import { BN, Program } from "@coral-xyz/anchor";
-import { Keypair, PublicKey, SystemProgram, Commitment, Connection } from "@solana/web3.js";
+import { Keypair, PublicKey, SystemProgram, Commitment } from "@solana/web3.js";
 import { TransferRestrictions } from "../../target/types/transfer_restrictions";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 

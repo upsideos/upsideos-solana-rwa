@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { assert } from "chai";
-import { Keypair, PublicKey, sendAndConfirmTransaction, Transaction } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 
 import {
@@ -155,9 +155,6 @@ describe("Access Control mint securities", () => {
   describe("when wrong security associated account is provided", () => {
     it("fails to mint securities", async () => {
       const amount = new anchor.BN(1_000_000);
-      const [mintRecipientSaaPubkey] = testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
-        mintRecipientTokenAccount
-      );
       try {
         await testEnvironment.accessControlHelper.mintSecurities(
           amount,

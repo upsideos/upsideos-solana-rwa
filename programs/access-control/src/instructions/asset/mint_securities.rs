@@ -64,8 +64,8 @@ fn validate_security_associated_account(ctx: &Context<MintSecurities>) -> Result
     let saa_account = ctx.accounts.security_associated_account.as_ref()
         .ok_or(AccessControlError::SecurityAssociatedAccountRequired)?;
 
-    let mint_data: &AccountInfo = &ctx.accounts.security_mint.to_account_info();
-    let transfer_hook_extension = get_mint_extension_data::<TransferHook>(mint_data)?;
+    let mint_account_info = &ctx.accounts.security_mint.to_account_info();
+    let transfer_hook_extension = get_mint_extension_data::<TransferHook>(mint_account_info)?;
     let transfer_hook_program_id: Option<Pubkey> = transfer_hook_extension.program_id.into();
     if transfer_hook_program_id.is_none() {
         return Err(AccessControlError::TransferHookNotConfigured.into());

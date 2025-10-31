@@ -267,7 +267,7 @@ describe("Pause transfers", () => {
       testEnvironment.reserveAdmin,
       testEnvironment.connection
     );
-    
+
     const { amount: amountAfterForceTransfer } =
       await testEnvironment.mintHelper.getAccount(investorTokenAccountPubkey);
     assert.equal(

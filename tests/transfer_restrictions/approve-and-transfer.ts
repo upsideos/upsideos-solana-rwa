@@ -66,7 +66,6 @@ describe("Approve and transfer by third party service", () => {
 
   it("sets up accounts and mints tokens to investor", async () => {
     const amount = 1_000_000 * 10 ** testEnvironmentParams.mint.decimals;
-    console.log("=".repeat(30));
     // Create token accounts
     reserveAdminTokenAccountPubkey =
       testEnvironment.mintHelper.getAssocciatedTokenAddress(
@@ -82,7 +81,6 @@ describe("Approve and transfer by third party service", () => {
         recipient.publicKey,
         testEnvironment.reserveAdmin
       );
-    console.log('associated account created!');
     // Setup wallet roles
     [walletsAdminWalletRole] =
       testEnvironment.accessControlHelper.walletRolePDA(
@@ -113,7 +111,6 @@ describe("Approve and transfer by third party service", () => {
       testEnvironment.transferRestrictionsHelper.holderPDA(
         new anchor.BN(holderRecipientId)
       );
-    console.log('holders initialized')
     // Initialize group
     await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionGroup(
       new anchor.BN(groupId),
@@ -150,7 +147,6 @@ describe("Approve and transfer by third party service", () => {
       walletsAdminWalletRole,
       testEnvironment.walletsAdmin
     );
-    console.log('holder groups initialized')
     // Initialize security associated accounts
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
       groupPubkey,
@@ -171,7 +167,6 @@ describe("Approve and transfer by third party service", () => {
       walletsAdminWalletRole,
       testEnvironment.walletsAdmin
     );
-    console.log('security associated accounts initialized')
     // Initialize reserve admin holder, holder group and security associated account
     await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
       new anchor.BN(holderReserveAdminId),
@@ -205,7 +200,6 @@ describe("Approve and transfer by third party service", () => {
       walletsAdminWalletRole,
       testEnvironment.walletsAdmin
     );
-    console.log('reserve admin holder and security associated account initialized');
     const [reserveAdminSaaPubkey] = testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
       reserveAdminTokenAccountPubkey
     );
@@ -217,7 +211,6 @@ describe("Approve and transfer by third party service", () => {
       testEnvironment.reserveAdmin,
       reserveAdminSaaPubkey
     );
-    console.log('securities minted');
     // Setup transfer rule
     const tsNow = await getNowTs(testEnvironment.connection);
     const lockedUntil = new anchor.BN(tsNow);
@@ -228,7 +221,6 @@ describe("Approve and transfer by third party service", () => {
       transferAdminWalletRole,
       testEnvironment.transferAdmin
     );
-    console.log('transfer rule initialized')
     // Transfer tokens to investor using transfer hook (instead of forceTransfer)
     const transferAmount = 500_000 * 10 ** testEnvironmentParams.mint.decimals;
     const transferWithHookInstruction = await createTransferCheckedWithTransferHookInstruction(
@@ -243,7 +235,6 @@ describe("Approve and transfer by third party service", () => {
       testEnvironment.commitment,
       TOKEN_2022_PROGRAM_ID
     );
-    console.log('transfer instruction created');
 
     await sendAndConfirmTransaction(
       testEnvironment.connection,
@@ -251,11 +242,9 @@ describe("Approve and transfer by third party service", () => {
       [testEnvironment.reserveAdmin],
       { commitment: testEnvironment.commitment }
     );
-    console.log('tokens transferred to investor');
     const { amount: investorBalance } =
       await testEnvironment.mintHelper.getAccount(investorTokenAccountPubkey);
-    console.log('investor balance', investorBalance.toString());
-    
+
     assert.equal(investorBalance.toString(), transferAmount.toString());
   });
 
@@ -268,12 +257,6 @@ describe("Approve and transfer by third party service", () => {
       investor.publicKey,
       solToLamports(1)
     );
-
-    const accountInfoBeforeApproval = await testEnvironment.mintHelper.getAccount(
-      investorTokenAccountPubkey
-    );
-    console.log('account delegate before approval', accountInfoBeforeApproval.delegate?.toBase58());
-    console.log('account delegatedAmount before approval', accountInfoBeforeApproval.delegatedAmount.toString());
 
     // Create approve instruction
     const approveInstruction = createApproveInstruction(
@@ -296,8 +279,6 @@ describe("Approve and transfer by third party service", () => {
     const accountInfo = await testEnvironment.mintHelper.getAccount(
       investorTokenAccountPubkey
     );
-    console.log('account delegate', accountInfo.delegate?.toBase58());
-    console.log('account delegatedAmount', accountInfo.delegatedAmount.toString());
     assert.equal(accountInfo.delegate?.toBase58(), thirdPartyService.publicKey.toBase58());
     assert.equal(accountInfo.delegatedAmount.toString(), approveAmount.toString());
   });
@@ -341,17 +322,10 @@ describe("Approve and transfer by third party service", () => {
     );
 
     // Verify balances after transfer
-    const { amount: investorBalanceAfter, delegatedAmount: investorDelegatedAmountAfter } =
+    const { amount: investorBalanceAfter } =
       await testEnvironment.mintHelper.getAccount(investorTokenAccountPubkey);
     const { amount: recipientBalanceAfter } =
       await testEnvironment.mintHelper.getAccount(recipientTokenAccountPubkey);
-
-    console.log('='.repeat(30));
-    console.log('transfer amount:                ', transferAmount.toString());
-    console.log('investor balance after:         ', investorBalanceAfter.toString());
-    console.log('investor delegatedAmount after: ', investorDelegatedAmountAfter.toString());
-    console.log('recipient balance after:        ', recipientBalanceAfter.toString());
-    console.log('='.repeat(30));
 
     assert.equal(
       investorBalanceAfter.toString(),
@@ -405,17 +379,10 @@ describe("Approve and transfer by third party service", () => {
     );
 
     // Verify balances after transfer
-    const { amount: investorBalanceAfter, delegatedAmount: investorDelegatedAmountAfter } =
+    const { amount: investorBalanceAfter } =
       await testEnvironment.mintHelper.getAccount(investorTokenAccountPubkey);
     const { amount: recipientBalanceAfter } =
       await testEnvironment.mintHelper.getAccount(recipientTokenAccountPubkey);
-
-    console.log('='.repeat(30));
-    console.log('transfer amount:                ', transferAmount.toString());
-    console.log('investor balance after:         ', investorBalanceAfter.toString());
-    console.log('investor delegatedAmount after: ', investorDelegatedAmountAfter.toString());
-    console.log('recipient balance after:        ', recipientBalanceAfter.toString());
-    console.log('='.repeat(30));
 
     assert.equal(
       investorBalanceAfter.toString(),

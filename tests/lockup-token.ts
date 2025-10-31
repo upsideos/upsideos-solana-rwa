@@ -462,7 +462,7 @@ describe("token lockup", () => {
       transferAdminWalletRole,
       testEnvironment.transferAdmin
     );
-    
+
     const reserveAdminHolderPubkey =
       testEnvironment.transferRestrictionsHelper.holderPDA(
         reserveAdminHolderId
