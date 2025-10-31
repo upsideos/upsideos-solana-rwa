@@ -43,9 +43,19 @@ describe("Access Control set max total supply", () => {
       wallet.publicKey,
       solToLamports(1)
     );
-    await testEnvironment.accessControlHelper.initializeWalletRole(
+    await testEnvironment.accessControlHelper.grantRole(
       wallet.publicKey,
-      Roles.WalletsAdmin | Roles.ContractAdmin | Roles.TransferAdmin,
+      Roles.WalletsAdmin,
+      testEnvironment.contractAdmin
+    );
+    await testEnvironment.accessControlHelper.grantRole(
+      wallet.publicKey,
+      Roles.ContractAdmin,
+      testEnvironment.contractAdmin
+    );
+    await testEnvironment.accessControlHelper.grantRole(
+      wallet.publicKey,
+      Roles.TransferAdmin,
       testEnvironment.contractAdmin
     );
     const newMaxTotalSupply = new anchor.BN(

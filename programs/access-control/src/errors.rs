@@ -30,4 +30,12 @@ pub enum AccessControlError {
     TransferHookNotConfigured,
     #[msg("Security associated account is required")]
     SecurityAssociatedAccountRequired,
+    #[msg("Wallet already has this role")]
+    AlreadyHasRole,
+    #[msg("Cannot revoke role that wallet does not have")]
+    CannotRevokeRole,
+    #[msg("Invalid access control")]
+    InvalidAccessControl,
+    #[msg("Invalid wallet role account owner")]
+    InvalidWalletRoleAccountOwner,
 }

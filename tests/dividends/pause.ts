@@ -123,9 +123,14 @@ describe(`pause distribution`, () => {
     const wallet = Keypair.generate();
     await topUpWallet(connection, wallet.publicKey, solToLamports(1));
 
-    await testEnvironment.accessControlHelper.initializeWalletRole(
+    await testEnvironment.accessControlHelper.grantRole(
       wallet.publicKey,
-      Roles.ReserveAdmin | Roles.WalletsAdmin,
+      Roles.ReserveAdmin,
+      testEnvironment.contractAdmin
+    );
+    await testEnvironment.accessControlHelper.grantRole(
+      wallet.publicKey,
+      Roles.WalletsAdmin,
       testEnvironment.contractAdmin
     );
     const [walletRole] = testEnvironment.accessControlHelper.walletRolePDA(
@@ -180,7 +185,7 @@ describe(`pause distribution`, () => {
   it("pause and unpause distribution by transfer admin", async () => {
     const wallet = Keypair.generate();
     await topUpWallet(connection, wallet.publicKey, solToLamports(1));
-    await testEnvironment.accessControlHelper.initializeWalletRole(
+    await testEnvironment.accessControlHelper.grantRole(
       wallet.publicKey,
       Roles.TransferAdmin,
       testEnvironment.contractAdmin

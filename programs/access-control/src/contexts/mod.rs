@@ -1,13 +1,14 @@
 pub mod common;
+pub use common::*;
 
 pub mod initialize_access_control;
 pub use initialize_access_control::*;
 
-pub mod update_wallet_role;
-pub use update_wallet_role::*;
+pub mod grant_role;
+pub use grant_role::*;
 
-pub mod initialize_wallet_role;
-pub use initialize_wallet_role::*;
+pub mod revoke_role;
+pub use revoke_role::*;
 
 pub mod mint_securities;
 pub use mint_securities::*;

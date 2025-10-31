@@ -2,26 +2,12 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{
     token_metadata_initialize, Mint, Token2022, TokenMetadataInitialize
 };
-use num_enum::IntoPrimitive;
 
-use crate::{contexts::common::DISCRIMINATOR_LEN, WalletRole, WALLET_ROLE_PREFIX};
+use crate::contexts::common::{DISCRIMINATOR_LEN, WalletRole, WALLET_ROLE_PREFIX};
 
 pub const ACCESS_CONTROL_SEED: &[u8] = b"ac"; // access_control
 
-#[repr(u8)]
-#[derive(IntoPrimitive, AnchorDeserialize, AnchorSerialize, Clone, InitSpace, Copy, Debug)]
-pub enum Roles {
-    ContractAdmin = 1,  // 0001
-    ReserveAdmin = 2,   // 0010
-    WalletsAdmin = 4,    // 0100
-    TransferAdmin = 8,  // 1000
-    All = 15,           // 1000
-}
 
-pub const ADMIN_ROLES: u8 = Roles::ContractAdmin as u8
-    | Roles::ReserveAdmin as u8
-    | Roles::WalletsAdmin as u8
-    | Roles::TransferAdmin as u8;
 
 #[account()]
 #[derive(InitSpace)]

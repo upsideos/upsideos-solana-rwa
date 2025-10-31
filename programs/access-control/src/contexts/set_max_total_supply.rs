@@ -1,7 +1,10 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{token_2022::ID as TOKEN_2022_PROGRAM_ID, token_interface::Mint};
 
-use crate::{AccessControl, WalletRole, ACCESS_CONTROL_SEED};
+use crate::{
+    contexts::common::WalletRole,
+    AccessControl, ACCESS_CONTROL_SEED,
+};
 
 #[derive(Accounts)]
 pub struct SetMaxTotalSupply<'info> {
