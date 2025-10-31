@@ -34,4 +34,8 @@ pub enum AccessControlError {
     AlreadyHasRole,
     #[msg("Cannot revoke role that wallet does not have")]
     CannotRevokeRole,
+    #[msg("Invalid access control")]
+    InvalidAccessControl,
+    #[msg("Invalid wallet role account owner")]
+    InvalidWalletRoleAccountOwner,
 }

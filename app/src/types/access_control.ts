@@ -1328,6 +1328,16 @@ export type AccessControl = {
       code: 6015;
       name: "cannotRevokeRole";
       msg: "Cannot revoke role that wallet does not have"
+    },
+    {
+      code: 6016;
+      name: "invalidAccessControl";
+      msg: "Invalid access control"
+    },
+    {
+      code: 6017;
+      name: "invalidWalletRoleAccountOwner";
+      msg: "Invalid wallet role account owner"
     }
   ];
   types: [
