@@ -2460,6 +2460,11 @@ export type TransferRestrictions = {
       code: 6023;
       name: "valueUnchanged";
       msg: "The provided value is already set. No changes were made"
+    },
+    {
+      code: 6024;
+      name: "currentGroupRequiredForExistingWallet";
+      msg: "Current group and holder group must be provided for existing wallet"
     }
   ];
   types: [

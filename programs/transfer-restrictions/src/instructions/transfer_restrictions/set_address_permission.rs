@@ -54,6 +54,11 @@ pub fn set_address_permission(
         // Scenario 2: Existing wallet - update wallet group
         let existing_holder_key = security_associated_account.holder.unwrap();
         
+        // Validate that current group and holder group are provided for existing wallet
+        if ctx.accounts.holder_group_current.is_none() || ctx.accounts.transfer_restriction_group_current.is_none() {
+            return Err(TransferRestrictionsError::CurrentGroupRequiredForExistingWallet.into());
+        }
+        
         // Validate that transfer_restriction_holder matches existing holder
         if holder.key() != existing_holder_key {
             return Err(TransferRestrictionsError::InvalidPDA.into());
@@ -65,24 +70,28 @@ pub fn set_address_permission(
         }
         
         // Get current and new groups
+        // Both holder_group_current and transfer_restriction_group_current are guaranteed to be Some
+        // due to validation above
         let group_new = &mut ctx.accounts.transfer_restriction_group_new;
+        let group_current = &ctx.accounts.transfer_restriction_group_current.as_ref().unwrap();
+        let holder_group_current_ref = &ctx.accounts.holder_group_current.as_ref().unwrap();
         
-        // Check if we're actually changing groups
-        if let Some(ref group_current) = ctx.accounts.transfer_restriction_group_current {
-            if group_current.key() == group_new.key() {
-                return Err(TransferRestrictionsError::NewGroupIsTheSameAsTheCurrentGroup.into());
-            }
+        // Check current frozen state to determine if freeze status will change
+        let is_currently_frozen = ctx.accounts.user_associated_token_account.state == AccountState::Frozen;
+        let freeze_status_will_change = frozen != is_currently_frozen;
+        
+        // Check if group will change
+        let group_will_change = group_current.key() != group_new.key() 
+            || holder_group_current_ref.key() != holder_group_new.key()
+            || holder_group_current_ref.group != holder_group_new.group;
+        
+        // Only fail if both group and freeze status are unchanged (no changes at all)
+        if !group_will_change && !freeze_status_will_change {
+            return Err(TransferRestrictionsError::ValueUnchanged.into());
         }
         
-        if let Some(ref holder_group_current) = ctx.accounts.holder_group_current {
-            if holder_group_current.key() == holder_group_new.key() {
-                return Err(TransferRestrictionsError::NewGroupIsTheSameAsTheCurrentGroup.into());
-            }
-            
-            if holder_group_current.group == holder_group_new.group {
-                return Err(TransferRestrictionsError::NewGroupIsTheSameAsTheCurrentGroup.into());
-            }
-            
+        // If group is changing, proceed with group update logic
+        if group_will_change {
             // Holder joins new group if it is the first wallet
             if holder_group_new.current_wallets_count == 0 {
                 group_new.current_holders_count = group_new.current_holders_count.checked_add(1).unwrap();
@@ -106,17 +115,16 @@ pub fn set_address_permission(
             
             // Holder leaves current group if it is the last wallet
             if holder_group_current_mut.current_wallets_count == 0 {
-                if let Some(ref mut group_current_mut) = ctx.accounts.transfer_restriction_group_current.as_mut() {
-                    group_current_mut.current_holders_count = group_current_mut
-                        .current_holders_count
-                        .checked_sub(1)
-                        .unwrap();
-                }
+                let group_current_mut = &mut ctx.accounts.transfer_restriction_group_current.as_mut().unwrap();
+                group_current_mut.current_holders_count = group_current_mut
+                    .current_holders_count
+                    .checked_sub(1)
+                    .unwrap();
             }
+            
+            // Update security_associated_account group
+            security_associated_account.group = group_id;
         }
-        
-        // Update security_associated_account group
-        security_associated_account.group = group_id;
     }
     
     // Check current frozen state and only call CPI if state needs to change
