@@ -52,4 +52,6 @@ pub enum TransferRestrictionsError {
     ValueUnchanged,
     #[msg("Must be group zero")]
     MustBeGroupZero,
+    #[msg("Holder group already initialized")]
+    HolderGroupAlreadyInitialized,
 }

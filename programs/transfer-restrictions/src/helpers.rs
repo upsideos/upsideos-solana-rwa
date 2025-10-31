@@ -12,26 +12,39 @@ pub fn check_authorization(wallet_role: &WalletRole, allowed_roles: u8) -> Resul
     Ok(())
 }
 
+pub fn initialize_new_holder(
+    holder: &mut Account<TransferRestrictionHolder>,
+    transfer_restriction_data: &mut Account<TransferRestrictionData>,
+    holder_id: u64,
+) -> Result<()> {
+    initialize_holder_fields(holder, transfer_restriction_data, holder_id)?;
+    update_transfer_restriction_data_after_holder_creation(transfer_restriction_data, holder_id)?;
+    Ok(())
+}
+
 /// Initialize holder account fields
 pub fn initialize_holder_fields(
     holder: &mut Account<TransferRestrictionHolder>,
     transfer_restriction_data: &Account<TransferRestrictionData>,
     holder_id: u64,
-) {
+) -> Result<()> {
+    if transfer_restriction_data.holder_ids < holder_id {
+        return Err(TransferRestrictionsError::InvalidHolderIndex.into());
+    }
     holder.transfer_restriction_data = transfer_restriction_data.key();
     holder.id = holder_id;
     holder.current_wallets_count = 0;
     holder.current_holder_group_count = 0;
     holder.active = true;
+
+    Ok(())
 }
 
 /// Update transfer restriction data after creating a new holder
-/// If always_increment_holder_ids is true, holder_ids is always incremented.
-/// Otherwise, holder_ids is only incremented if it equals holder_id (for sequential IDs).
+/// holder_ids is only incremented if it equals holder_id (for sequential IDs).
 pub fn update_transfer_restriction_data_after_holder_creation(
     transfer_restriction_data: &mut Account<TransferRestrictionData>,
     holder_id: u64,
-    always_increment_holder_ids: bool,
 ) -> Result<()> {
     // Check max holders limit
     if transfer_restriction_data.current_holders_count >= transfer_restriction_data.max_holders {
@@ -44,11 +57,7 @@ pub fn update_transfer_restriction_data_after_holder_creation(
         .checked_add(1)
         .unwrap();
 
-    // Update holder_ids
-    if always_increment_holder_ids {
-        transfer_restriction_data.holder_ids =
-            transfer_restriction_data.holder_ids.checked_add(1).unwrap();
-    } else if transfer_restriction_data.holder_ids == holder_id {
+    if transfer_restriction_data.holder_ids == holder_id {
         transfer_restriction_data.holder_ids =
             transfer_restriction_data.holder_ids.checked_add(1).unwrap();
     }

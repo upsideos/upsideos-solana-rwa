@@ -237,9 +237,8 @@ export type TransferRestrictions = {
                 path: "transferRestrictionData"
               },
               {
-                kind: "account";
-                path: "transfer_restriction_data.holder_ids";
-                account: "transferRestrictionData"
+                kind: "arg";
+                path: "id"
               }
             ]
           }
@@ -459,7 +458,12 @@ export type TransferRestrictions = {
           address: "11111111111111111111111111111111"
         }
       ];
-      args: []
+      args: [
+        {
+          name: "holderId";
+          type: "u64"
+        }
+      ]
     },
     {
       name: "initializeExtraAccountMetaList";
@@ -2385,6 +2389,11 @@ export type TransferRestrictions = {
       code: 6024;
       name: "mustBeGroupZero";
       msg: "Must be group zero"
+    },
+    {
+      code: 6025;
+      name: "holderGroupAlreadyInitialized";
+      msg: "Holder group already initialized"
     }
   ];
   types: [

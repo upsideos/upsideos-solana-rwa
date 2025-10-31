@@ -12,13 +12,8 @@ pub fn initialize_holder(ctx: Context<InitializeTransferRestrictionHolder>, id: 
     )?;
 
     let transfer_restriction_data = &mut ctx.accounts.transfer_restriction_data;
-    if transfer_restriction_data.holder_ids < id {
-        return Err(TransferRestrictionsError::InvalidHolderIndex.into());
-    }
-
     let transfer_restriction_holder = &mut ctx.accounts.transfer_restriction_holder;
-    initialize_holder_fields(transfer_restriction_holder, transfer_restriction_data, id);
-    update_transfer_restriction_data_after_holder_creation(transfer_restriction_data, id, false)?;
+    initialize_new_holder(transfer_restriction_holder, transfer_restriction_data, id)?;
 
     Ok(())
 }

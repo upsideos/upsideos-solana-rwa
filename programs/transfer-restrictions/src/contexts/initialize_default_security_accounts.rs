@@ -12,20 +12,21 @@ use crate::{
 };
 
 #[derive(Accounts)]
+#[instruction(id: u64)]
 pub struct InitializeDefaultSecurityAccounts<'info> {
-    // Initialize holder with current_holders_count as id
-    #[account(init, payer = payer, space = DISCRIMINATOR_LEN + TransferRestrictionHolder::INIT_SPACE,
+    // Initialize holder
+    #[account(init_if_needed, payer = payer, space = DISCRIMINATOR_LEN + TransferRestrictionHolder::INIT_SPACE,
       seeds = [
         TRANSFER_RESTRICTION_HOLDER_PREFIX.as_bytes(),
         &transfer_restriction_data.key().to_bytes(),
-        &transfer_restriction_data.holder_ids.to_le_bytes(),
+        &id.to_le_bytes(),
       ],
       bump,
     )]
     pub transfer_restriction_holder: Account<'info, TransferRestrictionHolder>,
 
     // Initialize holder_group for group 0
-    #[account(init, payer = payer, space = DISCRIMINATOR_LEN + HolderGroup::INIT_SPACE,
+    #[account(init_if_needed, payer = payer, space = DISCRIMINATOR_LEN + HolderGroup::INIT_SPACE,
       seeds = [
         TRANSFER_RESTRICTION_HOLDER_GROUP_PREFIX.as_bytes(),
         &transfer_restriction_holder.key().to_bytes(),

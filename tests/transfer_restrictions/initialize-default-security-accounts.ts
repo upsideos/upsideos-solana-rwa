@@ -79,7 +79,7 @@ describe("Initialize Default Security Accounts", () => {
 
     // Initialize default security accounts
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .initializeDefaultSecurityAccounts()
+      .initializeDefaultSecurityAccounts(expectedHolderId)
       .accountsStrict({
         transferRestrictionHolder: holderPubkey,
         holderGroup: holderGroupPubkey,
@@ -173,7 +173,7 @@ describe("Initialize Default Security Accounts", () => {
       );
 
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .initializeDefaultSecurityAccounts()
+      .initializeDefaultSecurityAccounts(expectedHolderId)
       .accountsStrict({
         transferRestrictionHolder: holderPubkey,
         holderGroup: holderGroupPubkey,
@@ -231,7 +231,7 @@ describe("Initialize Default Security Accounts", () => {
       );
 
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .initializeDefaultSecurityAccounts()
+      .initializeDefaultSecurityAccounts(expectedHolderId)
       .accountsStrict({
         transferRestrictionHolder: holderPubkey,
         holderGroup: holderGroupPubkey,
@@ -295,7 +295,7 @@ describe("Initialize Default Security Accounts", () => {
 
     // Initialize default security accounts
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .initializeDefaultSecurityAccounts()
+      .initializeDefaultSecurityAccounts(expectedHolderId)
       .accountsStrict({
         transferRestrictionHolder: holderPubkey,
         holderGroup: holderGroupPubkey,
@@ -407,7 +407,7 @@ describe("Initialize Default Security Accounts", () => {
 
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .initializeDefaultSecurityAccounts()
+        .initializeDefaultSecurityAccounts(expectedHolderId)
         .accountsStrict({
           transferRestrictionHolder: holderPubkey,
           holderGroup: holderGroupPubkey,
@@ -431,74 +431,6 @@ describe("Initialize Default Security Accounts", () => {
       assert.equal(error.errorCode.code, "ConstraintSeeds");
       assert.equal(error.errorMessage, "A seeds constraint was violated");
       assert.equal(error.origin, "holder_group");
-    }
-  });
-
-  it("Cannot initialize default security accounts with previous holder_ids", async () => {
-    // Verify holder_ids has advanced
-    const transferRestrictionDataAfterManual =
-      await testEnvironment.transferRestrictionsHelper.transferRestrictionData();
-
-    // Test that initialize_default_security_accounts works correctly
-    // even when holder_ids > currentHoldersCount (due to manual holder creation)
-    // Note: initialize_default_security_accounts uses holder_ids for PDA derivation,
-    // but sets holder.id = currentHoldersCount
-    const userWallet = Keypair.generate();
-    const userTokenAccount =
-      await testEnvironment.mintHelper.createAssociatedTokenAccount(
-        userWallet.publicKey,
-        testEnvironment.reserveAdmin
-      );
-
-    const holderIdsForPDA = transferRestrictionDataAfterManual.holderIds.subn(1);
-
-    // The PDA is derived using holder_ids (not holderId), so we need to use holder_ids
-    const [holderPubkey] =
-      testEnvironment.transferRestrictionsHelper.holderPDA(holderIdsForPDA);
-
-    const [holderGroupPubkey] =
-      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
-        holderPubkey,
-        group0Idx
-      );
-
-    const [securityAssociatedAccountPubkey] =
-      testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
-        userTokenAccount
-      );
-
-    const [authorityWalletRolePubkey] =
-      testEnvironment.accessControlHelper.walletRolePDA(
-        testEnvironment.reserveAdmin.publicKey
-      );
-
-    try {
-      // This should work - it uses holder_ids for PDA but sets holder.id = currentHoldersCount
-      await testEnvironment.transferRestrictionsHelper.program.methods
-        .initializeDefaultSecurityAccounts()
-        .accountsStrict({
-          transferRestrictionHolder: holderPubkey,
-          holderGroup: holderGroupPubkey,
-          securityAssociatedAccount: securityAssociatedAccountPubkey,
-          group: group0Pubkey,
-          securityToken: testEnvironment.mintKeypair.publicKey,
-          transferRestrictionData:
-            testEnvironment.transferRestrictionsHelper
-              .transferRestrictionDataPubkey,
-          userWallet: userWallet.publicKey,
-          associatedTokenAccount: userTokenAccount,
-          authorityWalletRole: authorityWalletRolePubkey,
-          payer: testEnvironment.reserveAdmin.publicKey,
-          systemProgram: SystemProgram.programId,
-        })
-        .signers([testEnvironment.reserveAdmin])
-        .rpc({ commitment: testEnvironment.commitment });
-      assert.fail("Expect an error");
-    } catch ({error}) {
-      // Validate errorCode and origin from Anchor error object
-      assert.equal(error.errorCode.code, "ConstraintSeeds");
-      assert.equal(error.errorMessage, "A seeds constraint was violated");
-      assert.equal(error.origin, "transfer_restriction_holder");
     }
   });
 
@@ -545,7 +477,7 @@ describe("Initialize Default Security Accounts", () => {
         );
 
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .initializeDefaultSecurityAccounts()
+        .initializeDefaultSecurityAccounts(expectedHolderId)
         .accountsStrict({
           transferRestrictionHolder: holderPubkey,
           holderGroup: holderGroupPubkey,
@@ -569,6 +501,423 @@ describe("Initialize Default Security Accounts", () => {
       assert.equal(error.errorCode.code, "Unauthorized");
       assert.equal(error.errorMessage, "Unauthorized");
     }
+  });
+
+  it("Happy path: Holder already initialized but holder group not initialized", async () => {
+    const userWallet = Keypair.generate();
+    const signer = testEnvironment.reserveAdmin;
+
+    const userTokenAccount =
+      await testEnvironment.mintHelper.createAssociatedTokenAccount(
+        userWallet.publicKey,
+        testEnvironment.reserveAdmin
+      );
+
+    // Get transfer restriction data to know the holder ID
+    const transferRestrictionDataBefore =
+      await testEnvironment.transferRestrictionsHelper.transferRestrictionData();
+    const expectedHolderId = transferRestrictionDataBefore.currentHoldersCount;
+
+    // Derive PDAs
+    const [holderPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderPDA(expectedHolderId);
+
+    const [holderGroupPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
+        holderPubkey,
+        group0Idx
+      );
+
+    const [securityAssociatedAccountPubkey] =
+      testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+        userTokenAccount
+      );
+
+    const [authorityWalletRolePubkey] =
+      testEnvironment.accessControlHelper.walletRolePDA(
+        signer.publicKey
+      );
+
+    // Initialize holder first
+    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
+      expectedHolderId,
+      testEnvironment.accessControlHelper.walletRolePDA(
+        testEnvironment.transferAdmin.publicKey
+      )[0],
+      testEnvironment.transferAdmin
+    );
+
+    // Get holder state BEFORE initialization
+    const holderDataBefore =
+      await testEnvironment.transferRestrictionsHelper.holderData(holderPubkey);
+    assert.equal(holderDataBefore.id.toString(), expectedHolderId.toString());
+    assert.isTrue(holderDataBefore.active);
+    assert.equal(holderDataBefore.currentWalletsCount.toNumber(), 0);
+    assert.equal(holderDataBefore.currentHolderGroupCount.toNumber(), 0);
+
+    // Check holder group state BEFORE (should not exist)
+    let holderGroupDataBefore = null;
+    try {
+      holderGroupDataBefore =
+        await testEnvironment.transferRestrictionsHelper.holderGroupData(
+          holderGroupPubkey
+        );
+      assert.fail("Holder group should not exist");
+    } catch (error) {
+      // Holder group doesn't exist yet, which is expected
+      assert.isNull(holderGroupDataBefore);
+    }
+
+    // Check security associated account state BEFORE (should not exist)
+    let securityAssociatedAccountDataBefore = null;
+    try {
+      securityAssociatedAccountDataBefore =
+        await testEnvironment.transferRestrictionsHelper.securityAssociatedAccountData(
+          securityAssociatedAccountPubkey
+        );
+      assert.fail("Security associated account should not exist");
+    } catch (error) {
+      // Security associated account doesn't exist yet, which is expected
+      assert.isNull(securityAssociatedAccountDataBefore);
+    }
+
+    // Initialize default security accounts
+    await testEnvironment.transferRestrictionsHelper.program.methods
+      .initializeDefaultSecurityAccounts(expectedHolderId)
+      .accountsStrict({
+        transferRestrictionHolder: holderPubkey,
+        holderGroup: holderGroupPubkey,
+        securityAssociatedAccount: securityAssociatedAccountPubkey,
+        group: group0Pubkey,
+        securityToken: testEnvironment.mintKeypair.publicKey,
+        transferRestrictionData:
+          testEnvironment.transferRestrictionsHelper
+            .transferRestrictionDataPubkey,
+        userWallet: userWallet.publicKey,
+        associatedTokenAccount: userTokenAccount,
+        authorityWalletRole: authorityWalletRolePubkey,
+        payer: signer.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([signer])
+      .rpc({ commitment: testEnvironment.commitment });
+
+    // Get holder state AFTER initialization
+    const holderDataAfter =
+      await testEnvironment.transferRestrictionsHelper.holderData(holderPubkey);
+    assert.equal(holderDataAfter.id.toString(), expectedHolderId.toString());
+    assert.isTrue(holderDataAfter.active);
+    assert.equal(holderDataAfter.currentWalletsCount.toNumber(), 1);
+    assert.equal(holderDataAfter.currentHolderGroupCount.toNumber(), 1);
+
+    // Verify holder_group was created
+    const holderGroupDataAfter =
+      await testEnvironment.transferRestrictionsHelper.holderGroupData(
+        holderGroupPubkey
+      );
+    assert.equal(holderGroupDataAfter.group.toNumber(), 0);
+    assert.equal(holderGroupDataAfter.holder.toBase58(), holderPubkey.toBase58());
+    assert.equal(holderGroupDataAfter.currentWalletsCount.toNumber(), 1);
+
+    // Verify security associated account was created
+    const securityAssociatedAccountDataAfter =
+      await testEnvironment.transferRestrictionsHelper.securityAssociatedAccountData(
+        securityAssociatedAccountPubkey
+      );
+    assert.equal(securityAssociatedAccountDataAfter.group.toNumber(), 0);
+    assert.equal(
+      securityAssociatedAccountDataAfter.holder.toBase58(),
+      holderPubkey.toBase58()
+    );
+  });
+
+  it("Happy path: 2 holders created, 1st revoked, initialize with 1st holder id (all new accounts)", async () => {
+    const userWallet = Keypair.generate();
+    const signer = testEnvironment.reserveAdmin;
+
+    const userTokenAccount =
+      await testEnvironment.mintHelper.createAssociatedTokenAccount(
+        userWallet.publicKey,
+        testEnvironment.reserveAdmin
+      );
+
+    // Get transfer restriction data to know the holder ID
+    const transferRestrictionDataInitial =
+      await testEnvironment.transferRestrictionsHelper.transferRestrictionData();
+    const firstHolderId = transferRestrictionDataInitial.currentHoldersCount;
+    const secondHolderId = firstHolderId.addn(1);
+
+    // Derive PDAs for first holder
+    const [firstHolderPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderPDA(firstHolderId);
+
+    const [firstHolderGroupPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
+        firstHolderPubkey,
+        group0Idx
+      );
+
+    const [authorityWalletRolePubkey] =
+      testEnvironment.accessControlHelper.walletRolePDA(
+        signer.publicKey
+      );
+
+    const transferAdminRole = testEnvironment.accessControlHelper.walletRolePDA(
+      testEnvironment.transferAdmin.publicKey
+    )[0];
+    const transferAdmin = testEnvironment.transferAdmin;
+    // Initialize first holder
+    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
+      firstHolderId,
+      transferAdminRole,
+      transferAdmin
+    );
+
+    // Initialize second holder
+    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
+      secondHolderId,
+      transferAdminRole,
+      transferAdmin
+    );
+
+    // Revoke first holder
+    await testEnvironment.transferRestrictionsHelper.revokeHolder(
+      firstHolderPubkey,
+      transferAdminRole,
+      transferAdmin
+    );
+
+    // Check that first holder account is closed (doesn't exist)
+    let firstHolderDataBefore = null;
+    try {
+      firstHolderDataBefore =
+        await testEnvironment.transferRestrictionsHelper.holderData(
+          firstHolderPubkey
+        );
+      assert.fail("Holder should not exist after revocation");
+    } catch (error) {
+      // Holder doesn't exist, which is expected after revocation
+      assert.isNull(firstHolderDataBefore);
+    }
+
+    // Check holder group state BEFORE (should not exist)
+    let firstHolderGroupDataBefore = null;
+    try {
+      firstHolderGroupDataBefore =
+        await testEnvironment.transferRestrictionsHelper.holderGroupData(
+          firstHolderGroupPubkey
+        );
+      assert.fail("Holder group should not exist");
+    } catch (error) {
+      // Holder group doesn't exist yet, which is expected
+      assert.isNull(firstHolderGroupDataBefore);
+    }
+
+    // Check security associated account state BEFORE (should not exist)
+    const [securityAssociatedAccountPubkey] =
+      testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+        userTokenAccount
+      );
+    let securityAssociatedAccountDataBefore = null;
+    try {
+      securityAssociatedAccountDataBefore =
+        await testEnvironment.transferRestrictionsHelper.securityAssociatedAccountData(
+          securityAssociatedAccountPubkey
+        );
+    } catch (error) {
+      // Security associated account doesn't exist yet, which is expected
+      assert.isNull(securityAssociatedAccountDataBefore);
+    }
+
+    // Initialize default security accounts with first holder id
+    await testEnvironment.transferRestrictionsHelper.program.methods
+      .initializeDefaultSecurityAccounts(firstHolderId)
+      .accountsStrict({
+        transferRestrictionHolder: firstHolderPubkey,
+        holderGroup: firstHolderGroupPubkey,
+        securityAssociatedAccount: securityAssociatedAccountPubkey,
+        group: group0Pubkey,
+        securityToken: testEnvironment.mintKeypair.publicKey,
+        transferRestrictionData:
+          testEnvironment.transferRestrictionsHelper
+            .transferRestrictionDataPubkey,
+        userWallet: userWallet.publicKey,
+        associatedTokenAccount: userTokenAccount,
+        authorityWalletRole: authorityWalletRolePubkey,
+        payer: signer.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([signer])
+      .rpc({ commitment: testEnvironment.commitment });
+
+    // Get holder state AFTER initialization
+    const holderDataAfter =
+      await testEnvironment.transferRestrictionsHelper.holderData(
+        firstHolderPubkey
+      );
+    assert.equal(holderDataAfter.id.toString(), firstHolderId.toString());
+    assert.isTrue(holderDataAfter.active);
+    assert.equal(holderDataAfter.currentWalletsCount.toNumber(), 1);
+    assert.equal(holderDataAfter.currentHolderGroupCount.toNumber(), 1);
+
+    // Verify holder_group was created
+    const holderGroupDataAfter =
+      await testEnvironment.transferRestrictionsHelper.holderGroupData(
+        firstHolderGroupPubkey
+      );
+    assert.equal(holderGroupDataAfter.group.toNumber(), 0);
+    assert.equal(
+      holderGroupDataAfter.holder.toBase58(),
+      firstHolderPubkey.toBase58()
+    );
+    assert.equal(holderGroupDataAfter.currentWalletsCount.toNumber(), 1);
+
+    // Verify security associated account was created
+    const securityAssociatedAccountDataAfter =
+      await testEnvironment.transferRestrictionsHelper.securityAssociatedAccountData(
+        securityAssociatedAccountPubkey
+      );
+    assert.equal(securityAssociatedAccountDataAfter.group.toNumber(), 0);
+    assert.equal(
+      securityAssociatedAccountDataAfter.holder.toBase58(),
+      firstHolderPubkey.toBase58()
+    );
+  });
+
+  it("Happy path: Holder and holder group already initialized", async () => {
+    const userWallet = Keypair.generate();
+    const signer = testEnvironment.reserveAdmin;
+    const transferAdminRole = testEnvironment.accessControlHelper.walletRolePDA(
+      testEnvironment.transferAdmin.publicKey
+    )[0];
+    const transferAdmin = testEnvironment.transferAdmin;
+    const userTokenAccount =
+      await testEnvironment.mintHelper.createAssociatedTokenAccount(
+        userWallet.publicKey,
+        testEnvironment.reserveAdmin
+      );
+
+    // Get transfer restriction data to know the holder ID
+    const transferRestrictionDataBefore =
+      await testEnvironment.transferRestrictionsHelper.transferRestrictionData();
+    const expectedHolderId = transferRestrictionDataBefore.currentHoldersCount;
+
+    // Derive PDAs
+    const [holderPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderPDA(expectedHolderId);
+
+    const [holderGroupPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
+        holderPubkey,
+        group0Idx
+      );
+
+    const [securityAssociatedAccountPubkey] =
+      testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+        userTokenAccount
+      );
+
+    const [authorityWalletRolePubkey] =
+      testEnvironment.accessControlHelper.walletRolePDA(
+        signer.publicKey
+      );
+
+    // Initialize holder first
+    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
+      expectedHolderId,
+      transferAdminRole,
+      transferAdmin
+    );
+
+    // Initialize holder group
+    await testEnvironment.transferRestrictionsHelper.initializeHolderGroup(
+      holderGroupPubkey,
+      holderPubkey,
+      group0Pubkey,
+      transferAdminRole,
+      testEnvironment.transferAdmin
+    );
+
+    // Get holder state BEFORE initialization
+    const holderDataBefore =
+      await testEnvironment.transferRestrictionsHelper.holderData(holderPubkey);
+    assert.equal(holderDataBefore.id.toString(), expectedHolderId.toString());
+    assert.isTrue(holderDataBefore.active);
+    assert.equal(holderDataBefore.currentWalletsCount.toNumber(), 0);
+    assert.equal(holderDataBefore.currentHolderGroupCount.toNumber(), 1);
+
+    // Get holder group state BEFORE
+    const holderGroupDataBefore =
+      await testEnvironment.transferRestrictionsHelper.holderGroupData(
+        holderGroupPubkey
+      );
+    assert.equal(holderGroupDataBefore.group.toNumber(), 0);
+    assert.equal(
+      holderGroupDataBefore.holder.toBase58(),
+      holderPubkey.toBase58()
+    );
+    assert.equal(holderGroupDataBefore.currentWalletsCount.toNumber(), 0);
+
+    // Check security associated account state BEFORE (should not exist)
+    let securityAssociatedAccountDataBefore = null;
+    try {
+      securityAssociatedAccountDataBefore =
+        await testEnvironment.transferRestrictionsHelper.securityAssociatedAccountData(
+          securityAssociatedAccountPubkey
+        );
+    } catch (error) {
+      // Security associated account doesn't exist yet, which is expected
+      assert.isNull(securityAssociatedAccountDataBefore);
+    }
+
+    // Initialize default security accounts
+    await testEnvironment.transferRestrictionsHelper.program.methods
+      .initializeDefaultSecurityAccounts(expectedHolderId)
+      .accountsStrict({
+        transferRestrictionHolder: holderPubkey,
+        holderGroup: holderGroupPubkey,
+        securityAssociatedAccount: securityAssociatedAccountPubkey,
+        group: group0Pubkey,
+        securityToken: testEnvironment.mintKeypair.publicKey,
+        transferRestrictionData:
+          testEnvironment.transferRestrictionsHelper
+            .transferRestrictionDataPubkey,
+        userWallet: userWallet.publicKey,
+        associatedTokenAccount: userTokenAccount,
+        authorityWalletRole: authorityWalletRolePubkey,
+        payer: signer.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([signer])
+      .rpc({ commitment: testEnvironment.commitment });
+
+    // Get holder state AFTER initialization
+    const holderDataAfter =
+      await testEnvironment.transferRestrictionsHelper.holderData(holderPubkey);
+    assert.equal(holderDataAfter.id.toString(), expectedHolderId.toString());
+    assert.isTrue(holderDataAfter.active);
+    assert.equal(holderDataAfter.currentWalletsCount.toNumber(), 1);
+    assert.equal(holderDataAfter.currentHolderGroupCount.toNumber(), 1);
+
+    // Verify holder_group state AFTER
+    const holderGroupDataAfter =
+      await testEnvironment.transferRestrictionsHelper.holderGroupData(
+        holderGroupPubkey
+      );
+    assert.equal(holderGroupDataAfter.group.toNumber(), 0);
+    assert.equal(holderGroupDataAfter.holder.toBase58(), holderPubkey.toBase58());
+    assert.equal(holderGroupDataAfter.currentWalletsCount.toNumber(), 1);
+
+    // Verify security associated account was created
+    const securityAssociatedAccountDataAfter =
+      await testEnvironment.transferRestrictionsHelper.securityAssociatedAccountData(
+        securityAssociatedAccountPubkey
+      );
+    assert.equal(securityAssociatedAccountDataAfter.group.toNumber(), 0);
+    assert.equal(
+      securityAssociatedAccountDataAfter.holder.toBase58(),
+      holderPubkey.toBase58()
+    );
   });
 });
 

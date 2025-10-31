@@ -116,7 +116,8 @@ pub mod transfer_restrictions {
 
     pub fn initialize_default_security_accounts(
         ctx: Context<InitializeDefaultSecurityAccounts>,
+        holder_id: u64,
     ) -> Result<()> {
-        instructions::transfer_restrictions::initialize_default_security_accounts(ctx)
+        instructions::transfer_restrictions::initialize_default_security_accounts(ctx, holder_id)
     }
 }
