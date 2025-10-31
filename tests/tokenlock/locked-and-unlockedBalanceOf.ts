@@ -122,6 +122,11 @@ describe("TokenLockup timelock balances", () => {
       contractAdminWalletRole,
       testEnvironment.contractAdmin
     );
+    await testEnvironment.accessControlHelper.setLockupEscrowAccount(
+      escrowAccount,
+      tokenlockDataPubkey,
+      testEnvironment.contractAdmin
+    );
   });
 
   it("timelock creation with immediately unlocked tokens", async () => {

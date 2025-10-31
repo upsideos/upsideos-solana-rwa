@@ -845,6 +845,14 @@ export type AccessControl = {
         {
           name: "tokenProgram";
           address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          name: "securityAssociatedAccount";
+          docs: [
+            "This account must be initialized before minting (holder, holder_group, and SAA must exist)",
+            "Optional: Not required when minting to lockup_escrow_account, mandatory otherwise"
+          ];
+          optional: true
         }
       ];
       args: [
@@ -1293,11 +1301,31 @@ export type AccessControl = {
     },
     {
       code: 6010;
+      name: "invalidSecurityAssociatedAccount";
+      msg: "Invalid security associated account"
+    },
+    {
+      code: 6011;
+      name: "securityAssociatedAccountNotInitialized";
+      msg: "Security associated account not initialized"
+    },
+    {
+      code: 6012;
+      name: "transferHookNotConfigured";
+      msg: "Transfer hook not configured on mint"
+    },
+    {
+      code: 6013;
+      name: "securityAssociatedAccountRequired";
+      msg: "Security associated account is required"
+    },
+    {
+      code: 6014;
       name: "alreadyHasRole";
       msg: "Wallet already has this role"
     },
     {
-      code: 6011;
+      code: 6015;
       name: "cannotRevokeRole";
       msg: "Cannot revoke role that wallet does not have"
     }

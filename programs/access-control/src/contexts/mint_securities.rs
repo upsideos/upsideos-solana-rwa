@@ -45,4 +45,8 @@ pub struct MintSecurities<'info> {
     /// CHECK: The destination_authority account is the account that owner of the destination_account
     pub destination_authority: UncheckedAccount<'info>,
     pub token_program: Program<'info, Token2022>,
+    /// CHECK: Security Associated Account - validated in instruction using transfer hook program ID from mint
+    /// This account must be initialized before minting (holder, holder_group, and SAA must exist)
+    /// Optional: Not required when minting to lockup_escrow_account, mandatory otherwise
+    pub security_associated_account: Option<UncheckedAccount<'info>>,
 }
