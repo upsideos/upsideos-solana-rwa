@@ -1298,7 +1298,7 @@ export type AccessControl = {
     {
       code: 6010;
       name: "invalidSecurityAssociatedAccount";
-      msg: "Invalid security associated account - PDA does not match expected address derived from transfer hook"
+      msg: "Invalid security associated account"
     },
     {
       code: 6011;
@@ -1308,12 +1308,12 @@ export type AccessControl = {
     {
       code: 6012;
       name: "transferHookNotConfigured";
-      msg: "Transfer hook not configured on mint - cannot validate security associated account"
+      msg: "Transfer hook not configured on mint"
     },
     {
       code: 6013;
       name: "securityAssociatedAccountRequired";
-      msg: "Security associated account is required when minting to non-lockup-escrow destinations"
+      msg: "Security associated account is required"
     }
   ];
   types: [

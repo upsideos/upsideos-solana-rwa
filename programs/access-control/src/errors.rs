@@ -22,12 +22,12 @@ pub enum AccessControlError {
     CannotFreezeLockupEscrowAccount,
     #[msg("The provided value is already set. No changes were made")]
     ValueUnchanged,
-    #[msg("Invalid security associated account - PDA does not match expected address derived from transfer hook")]
+    #[msg("Invalid security associated account")]
     InvalidSecurityAssociatedAccount,
     #[msg("Security associated account not initialized")]
     SecurityAssociatedAccountNotInitialized,
-    #[msg("Transfer hook not configured on mint - cannot validate security associated account")]
+    #[msg("Transfer hook not configured on mint")]
     TransferHookNotConfigured,
-    #[msg("Security associated account is required when minting to non-lockup-escrow destinations")]
+    #[msg("Security associated account is required")]
     SecurityAssociatedAccountRequired,
 }

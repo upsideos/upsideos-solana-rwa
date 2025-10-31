@@ -1,6 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { assert } from "chai";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import { Keypair, PublicKey, sendAndConfirmTransaction, Transaction } from "@solana/web3.js";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 
 import {
   TestEnvironment,
@@ -23,6 +24,8 @@ describe("Access Control mint securities", () => {
   let testEnvironment: TestEnvironment;
   let reserveAdminWalletRole: PublicKey;
   let walletsAdminWalletRole: PublicKey;
+  let pretenderWallet: Keypair;
+  let pretenderTokenAccount: PublicKey;
 
   before(async () => {
     testEnvironment = new TestEnvironment(testEnvironmentParams);
@@ -37,11 +40,22 @@ describe("Access Control mint securities", () => {
       testEnvironment.accessControlHelper.walletRolePDA(
         testEnvironment.walletsAdmin.publicKey
       );
+    pretenderWallet = Keypair.generate();
+    pretenderTokenAccount =
+      await testEnvironment.mintHelper.createAssociatedTokenAccount(
+        pretenderWallet.publicKey,
+        testEnvironment.contractAdmin
+      );
+    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccountIfNotExists(
+      pretenderWallet.publicKey,
+      pretenderTokenAccount,
+      walletsAdminWalletRole,
+      testEnvironment.walletsAdmin
+    );
   });
 
   const mintRecipient = new Keypair();
   let mintRecipientTokenAccount: PublicKey;
-  const mintRecipientHolderId = new anchor.BN(0);
 
   it("fails to mint securities for non-initialized security associated account", async () => {
     mintRecipientTokenAccount =
@@ -72,6 +86,8 @@ describe("Access Control mint securities", () => {
   });
 
   it("initializes security associated account", async () => {
+  const transferRestrictionData = await testEnvironment.transferRestrictionsHelper.transferRestrictionData();
+  const mintRecipientHolderId = transferRestrictionData.holderIds;
     await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
       mintRecipientHolderId,
       walletsAdminWalletRole,
@@ -134,5 +150,70 @@ describe("Access Control mint securities", () => {
       (supplyAfterMint - supplyBeforeMint).toString(),
       amount.toString()
     );
+  });
+
+  describe("when wrong security associated account is provided", () => {
+    it("fails to mint securities", async () => {
+      const amount = new anchor.BN(1_000_000);
+      const [mintRecipientSaaPubkey] = testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+        mintRecipientTokenAccount
+      );
+      try {
+        await testEnvironment.accessControlHelper.mintSecurities(
+          amount,
+          mintRecipient.publicKey,
+          mintRecipientTokenAccount,
+          testEnvironment.reserveAdmin,
+          pretenderTokenAccount
+        );
+        assert.fail("Expected an error");
+      } catch ({ error }) {
+        assert.equal(error.errorCode.code, "InvalidSecurityAssociatedAccount");
+        assert.equal(
+          error.errorMessage,
+          "Invalid security associated account"
+        );
+      }
+    });
+  });
+
+  describe("when security associated account is not provided", () => {
+    it("fails with SecurityAssociatedAccountRequired error", async () => {
+      const testRecipient = new Keypair();
+      const testRecipientTokenAccount =
+        await testEnvironment.mintHelper.createAssociatedTokenAccount(
+          testRecipient.publicKey,
+          testEnvironment.contractAdmin
+        );
+      const amount = new anchor.BN(1_000_000);
+      
+      try {
+        // Call mintSecurities directly without providing securityAssociatedAccount
+        // The account is optional in Rust, so we can set it to null
+        await testEnvironment.accessControlHelper.program.methods
+          .mintSecurities(amount)
+          .accountsPartial({
+            authority: testEnvironment.reserveAdmin.publicKey,
+            authorityWalletRole: reserveAdminWalletRole,
+            accessControl: testEnvironment.accessControlHelper.accessControlPubkey,
+            securityMint: testEnvironment.mintKeypair.publicKey,
+            destinationAccount: testRecipientTokenAccount,
+            destinationAuthority: testRecipient.publicKey,
+            tokenProgram: TOKEN_2022_PROGRAM_ID,
+            securityAssociatedAccount: null,
+            // Omitting securityAssociatedAccount to test SecurityAssociatedAccountRequired error
+          })
+          .signers([testEnvironment.reserveAdmin])
+          .rpc({ commitment: testEnvironment.commitment });
+        assert.fail("Expected an error");
+      } catch ({ error }) {
+        console.error(error);
+        assert.equal(error.errorCode?.code, "SecurityAssociatedAccountRequired");
+        assert.equal(
+          error.errorMessage,
+          "Security associated account is required"
+        );
+      }
+    });
   });
 });
