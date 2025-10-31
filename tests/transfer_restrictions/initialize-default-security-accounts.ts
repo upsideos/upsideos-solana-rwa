@@ -724,6 +724,7 @@ describe("Initialize Default Security Accounts", () => {
         await testEnvironment.transferRestrictionsHelper.securityAssociatedAccountData(
           securityAssociatedAccountPubkey
         );
+      assert.fail("Security associated account should not exist", securityAssociatedAccountDataBefore.toString());
     } catch (error) {
       // Security associated account doesn't exist yet, which is expected
       assert.isNull(securityAssociatedAccountDataBefore);
@@ -858,13 +859,13 @@ describe("Initialize Default Security Accounts", () => {
     );
     assert.equal(holderGroupDataBefore.currentWalletsCount.toNumber(), 0);
 
-    // Check security associated account state BEFORE (should not exist)
     let securityAssociatedAccountDataBefore = null;
     try {
       securityAssociatedAccountDataBefore =
         await testEnvironment.transferRestrictionsHelper.securityAssociatedAccountData(
           securityAssociatedAccountPubkey
         );
+      assert.fail("Security associated account should not exist", securityAssociatedAccountDataBefore.toString());
     } catch (error) {
       // Security associated account doesn't exist yet, which is expected
       assert.isNull(securityAssociatedAccountDataBefore);
@@ -920,5 +921,3 @@ describe("Initialize Default Security Accounts", () => {
     );
   });
 });
-
-

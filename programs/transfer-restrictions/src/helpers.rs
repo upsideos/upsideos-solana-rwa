@@ -111,4 +111,3 @@ pub fn initialize_security_associated_account_fields(
 
     Ok(())
 }
-

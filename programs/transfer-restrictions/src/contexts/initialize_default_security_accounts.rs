@@ -43,7 +43,6 @@ pub struct InitializeDefaultSecurityAccounts<'info> {
         &associated_token_account.key().to_bytes(),
       ],
       bump,
-      constraint = group.id == 0 @ TransferRestrictionsError::MustBeGroupZero,
     )]
     pub security_associated_account: Account<'info, SecurityAssociatedAccount>,
 
@@ -56,7 +55,6 @@ pub struct InitializeDefaultSecurityAccounts<'info> {
       ],
       bump,
       constraint = group.transfer_restriction_data == transfer_restriction_data.key(),
-      constraint = group.id == 0 @ TransferRestrictionsError::MustBeGroupZero,
     )]
     pub group: Account<'info, TransferRestrictionGroup>,
 
@@ -95,5 +93,3 @@ pub struct InitializeDefaultSecurityAccounts<'info> {
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
-
-

@@ -2387,11 +2387,6 @@ export type TransferRestrictions = {
     },
     {
       code: 6024;
-      name: "mustBeGroupZero";
-      msg: "Must be group zero"
-    },
-    {
-      code: 6025;
       name: "holderGroupAlreadyInitialized";
       msg: "Holder group already initialized"
     }

@@ -18,7 +18,7 @@ pub fn initialize_default_security_accounts(
     let transfer_restriction_data = &mut ctx.accounts.transfer_restriction_data;
     // Initialize holder
     let transfer_restriction_holder = &mut ctx.accounts.transfer_restriction_holder;
-    if transfer_restriction_holder.active == false {
+    if !transfer_restriction_holder.active {
         initialize_new_holder(transfer_restriction_holder, transfer_restriction_data, holder_id)?;
     }
     // Initialize holder_group for group 0
@@ -47,5 +47,3 @@ pub fn initialize_default_security_accounts(
 
     Ok(())
 }
-
-
