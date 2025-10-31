@@ -9,7 +9,7 @@ import {
   TestEnvironment,
   TestEnvironmentParams,
 } from "./../helpers/test_environment";
-import { createAccount, solToLamports, topUpWallet } from "./../utils";
+import { createAccount, solToLamports, topUpWallet, getTransactionComputeUnits } from "./../utils";
 import {
   createReleaseSchedule,
   mintReleaseSchedule,
@@ -465,6 +465,9 @@ describe("TokenLockup stress test", () => {
     // Track cancelables used in each timelock for validation
     const timelockCancelables: PublicKey[][] = [];
 
+    // Track compute units for each mint
+    const computeUnitsUsed: number[] = [];
+
     // Mint first timelock with 4 initial cancelables
     const firstCancelables = [
       cancelableWallets[0].publicKey,
@@ -472,7 +475,7 @@ describe("TokenLockup stress test", () => {
       cancelableWallets[2].publicKey,
       cancelableWallets[3].publicKey,
     ];
-    let timelockId = await mintReleaseSchedule(
+    const firstResult = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(490),
@@ -487,10 +490,23 @@ describe("TokenLockup stress test", () => {
       reserveAdminWalletRolePubkey,
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
-      testEnvironment.accessControlHelper.program.programId
-    );
-    assert(timelockId === 0);
+      testEnvironment.accessControlHelper.program.programId,
+      true // return signature
+    ) as { timelockId: number | string; signature: string };
+    
+    assert.equal(firstResult.timelockId, 0);
     timelockCancelables.push([...firstCancelables]);
+
+    // Get compute units for first mint
+    try {
+      const computeUnits = await getTransactionComputeUnits(
+        testEnvironment.connection,
+        firstResult.signature
+      );
+      computeUnitsUsed.push(computeUnits);
+    } catch (error) {
+      console.warn(`Failed to get compute units for mint 1:`, error);
+    }
 
     // Mint remaining 99 timelocks
     // Each timelock uses: 2 new cancelables, 1 reused from previous (at index 1), 1 new
@@ -510,7 +526,7 @@ describe("TokenLockup stress test", () => {
       ];
       cancelableIndex += 3;
 
-      timelockId = await mintReleaseSchedule(
+      const result = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(490),
@@ -525,10 +541,23 @@ describe("TokenLockup stress test", () => {
         reserveAdminWalletRolePubkey,
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
-        testEnvironment.accessControlHelper.program.programId
-      );
-      assert(timelockId === i);
+        testEnvironment.accessControlHelper.program.programId,
+        true // return signature
+      ) as { timelockId: number | string; signature: string };
+      
+      assert.equal(result.timelockId, i);
       timelockCancelables.push([...cancelableBy]);
+
+      // Get compute units for this mint
+      try {
+        const computeUnits = await getTransactionComputeUnits(
+          testEnvironment.connection,
+          result.signature
+        );
+        computeUnitsUsed.push(computeUnits);
+      } catch (error) {
+        console.warn(`Failed to get compute units for mint ${i + 1}:`, error);
+      }
     }
 
     // Validate timelock data
@@ -605,7 +634,243 @@ describe("TokenLockup stress test", () => {
     }
 
     console.log(
-      `Validation complete: 100 timelocks with ${timelockData.cancelables.length} unique cancelables`
+      `✅ Validation complete: ${iterations} timelocks with ${timelockData.cancelables.length} unique cancelables`
     );
+
+    // Compute units statistics
+    if (computeUnitsUsed.length > 0) {
+      const minComputeUnits = Math.min(...computeUnitsUsed);
+      const maxComputeUnits = Math.max(...computeUnitsUsed);
+      const avgComputeUnits = Math.round(
+        computeUnitsUsed.reduce((a, b) => a + b, 0) / computeUnitsUsed.length
+      );
+      const firstMintComputeUnits = computeUnitsUsed[0];
+      const subsequentAvgComputeUnits = computeUnitsUsed.length > 1
+        ? Math.round(
+            computeUnitsUsed.slice(1).reduce((a, b) => a + b, 0) / (computeUnitsUsed.length - 1)
+          )
+        : 0;
+      
+      console.log(`\n📊 Compute Units Statistics:`);
+      console.log(`   First mint: ${firstMintComputeUnits.toLocaleString()} CU`);
+      console.log(`   Subsequent mints avg: ${subsequentAvgComputeUnits.toLocaleString()} CU`);
+      console.log(`   Overall min: ${minComputeUnits.toLocaleString()} CU`);
+      console.log(`   Overall max: ${maxComputeUnits.toLocaleString()} CU`);
+      console.log(`   Overall avg: ${avgComputeUnits.toLocaleString()} CU`);
+      if (subsequentAvgComputeUnits > 0) {
+        console.log(`   First mint overhead: ${(firstMintComputeUnits - subsequentAvgComputeUnits).toLocaleString()} CU`);
+      }
+    }
+  });
+
+  it("Mint 100 release schedules with same 10 cancelables - verify space reuse", async () => {
+    const totalBatches = 3;
+    const firstDelay = 0;
+    const firstBatchBips = 800; // 8%
+    const batchDelay = fromDaysToSeconds(4); // 4 days
+    const commence = -3600 * 24;
+
+    const scheduleId = await createReleaseSchedule(
+      tokenlockProgram,
+      tokenlockDataPubkey,
+      totalBatches,
+      new anchor.BN(firstDelay),
+      firstBatchBips,
+      new anchor.BN(batchDelay),
+      testEnvironment.accessControlHelper.accessControlPubkey,
+      reserveAdminWalletRolePubkey,
+      reserveAdmin
+    );
+    console.log("scheduleId=", scheduleId);
+    assert(scheduleId === 0);
+
+    await topUpWallet(
+      testEnvironment.connection,
+      reserveAdmin.publicKey,
+      10_000_000_000 // Enough for 100 mints
+    );
+    let nowTs = await getNowTs(testEnvironment.connection);
+
+    // Generate 10 cancelable wallets that will be reused for all mints
+    const cancelableWallets: Keypair[] = [];
+    for (let i = 0; i < 10; i++) {
+      cancelableWallets.push(Keypair.generate());
+    }
+    const sameCancelables = cancelableWallets.map((w) => w.publicKey);
+
+    const targetWallet = walletB.publicKey;
+    const timelockAccount = getTimelockAccount(
+      tokenlockProgram.programId,
+      tokenlockDataPubkey,
+      targetWallet
+    );
+
+    // Constants from the Rust code
+    const PUBKEY_BYTES = 32;
+    const TIMELOCK_DEFAULT_SIZE = 57; // 2 + 8 + 8 + 8 + 1 + 10 + 20
+    const VEC_LEN_SIZE = 4;
+    const HEADERS_LEN = 8 + PUBKEY_BYTES + PUBKEY_BYTES; // discriminator + tokenlock_account + target_account
+
+    // Track account sizes after each mint
+    const accountSizes: number[] = [];
+
+    // Get initial account size (should be null or 0 if not initialized)
+    let accInfo = await testEnvironment.connection.getAccountInfo(
+      timelockAccount
+    );
+    let initialSize = accInfo ? accInfo.data.length : 0;
+    const emptyAccountSize = HEADERS_LEN + VEC_LEN_SIZE * 2; // Size of initialized empty account
+    console.log(`Initial account size: ${initialSize} bytes (empty account would be ${emptyAccountSize} bytes)`);
+
+    // Calculate expected size after first mint (10 cancelables + 1 timelock)
+    const expectedFirstMintSize =
+      HEADERS_LEN +
+      VEC_LEN_SIZE * 2 +
+      10 * PUBKEY_BYTES +
+      1 * TIMELOCK_DEFAULT_SIZE;
+
+    // Track compute units for each mint
+    const computeUnitsUsed: number[] = [];
+
+    // Mint 100 timelocks with the same 10 cancelables
+    for (let i = 0; i < 100; i++) {
+      const result = await mintReleaseSchedule(
+        testEnvironment.connection,
+        tokenlockProgram,
+        new anchor.BN(490),
+        new anchor.BN(nowTs + commence),
+        scheduleId,
+        sameCancelables,
+        tokenlockDataPubkey,
+        escrowAccount,
+        escrowOwnerPubkey,
+        targetWallet,
+        reserveAdmin,
+        reserveAdminWalletRolePubkey,
+        testEnvironment.accessControlHelper.accessControlPubkey,
+        mintPubkey,
+        testEnvironment.accessControlHelper.program.programId,
+        true // return signature
+      ) as { timelockId: number | string; signature: string };
+      
+      assert.equal(result.timelockId, i, `Expected timelock ID ${i}, got ${result.timelockId}`);
+
+      // Get compute units used for this transaction
+      try {
+        const computeUnits = await getTransactionComputeUnits(
+          testEnvironment.connection,
+          result.signature
+        );
+        computeUnitsUsed.push(computeUnits);
+      } catch (error) {
+        console.warn(`Failed to get compute units for mint ${i + 1}:`, error);
+      }
+
+      // Get account size after mint
+      accInfo = await testEnvironment.connection.getAccountInfo(timelockAccount);
+      if (!accInfo) {
+        throw new Error(`Account should exist after mint ${i + 1}`);
+      }
+      const currentSize = accInfo.data.length;
+      accountSizes.push(currentSize);
+
+      if (i === 0) {
+        // First mint: should have 10 cancelables + 1 timelock
+        assert.equal(
+          currentSize,
+          expectedFirstMintSize,
+          `First mint: Expected size ${expectedFirstMintSize}, got ${currentSize}`
+        );
+        console.log(`After 1st mint: ${currentSize} bytes (expected: ${expectedFirstMintSize})`);
+      } else {
+        // Subsequent mints: should only increase by TIMELOCK_DEFAULT_SIZE (57 bytes)
+        // since cancelables are reused
+        const expectedSize =
+          expectedFirstMintSize + i * TIMELOCK_DEFAULT_SIZE;
+        assert.equal(
+          currentSize,
+          expectedSize,
+          `After mint ${i + 1}: Expected size ${expectedSize}, got ${currentSize}`
+        );
+
+        // Verify the increase is exactly TIMELOCK_DEFAULT_SIZE
+        const sizeIncrease = currentSize - accountSizes[i - 1];
+        assert.equal(
+          sizeIncrease,
+          TIMELOCK_DEFAULT_SIZE,
+          `After mint ${i + 1}: Size increased by ${sizeIncrease} bytes, expected ${TIMELOCK_DEFAULT_SIZE}`
+        );
+      }
+    }
+
+    // Final validation: verify timelock data
+    const timelockData = await tokenlockProgram.account.timelockData.fetch(
+      timelockAccount
+    );
+
+    // Should have exactly 100 timelocks
+    assert.equal(
+      timelockData.timelocks.length,
+      100,
+      `Expected 100 timelocks, got ${timelockData.timelocks.length}`
+    );
+
+    // Should have exactly 10 cancelables (all reused)
+    assert.equal(
+      timelockData.cancelables.length,
+      10,
+      `Expected 10 unique cancelables, got ${timelockData.cancelables.length}`
+    );
+
+    // Verify all cancelables are the same as input
+    for (let i = 0; i < 10; i++) {
+      assert.equal(
+        timelockData.cancelables[i].toBase58(),
+        sameCancelables[i].toBase58(),
+        `Cancelable ${i} mismatch`
+      );
+    }
+
+    // Verify final account size
+    const finalExpectedSize =
+      expectedFirstMintSize + 99 * TIMELOCK_DEFAULT_SIZE;
+    assert.equal(
+      accountSizes[99],
+      finalExpectedSize,
+      `Final size: Expected ${finalExpectedSize}, got ${accountSizes[99]}`
+    );
+
+    console.log(
+      `✅ Validation complete: 100 timelocks with ${timelockData.cancelables.length} unique cancelables`
+    );
+    console.log(
+      `✅ Account size: ${accountSizes[99]} bytes (started at ${initialSize}, increased by ${accountSizes[99] - initialSize})`
+    );
+    console.log(
+      `✅ Each mint after the first increased size by exactly ${TIMELOCK_DEFAULT_SIZE} bytes (timelock size only)`
+    );
+    
+    // Compute units statistics
+    if (computeUnitsUsed.length > 0) {
+      const minComputeUnits = Math.min(...computeUnitsUsed);
+      const maxComputeUnits = Math.max(...computeUnitsUsed);
+      const avgComputeUnits = Math.round(
+        computeUnitsUsed.reduce((a, b) => a + b, 0) / computeUnitsUsed.length
+      );
+      const firstMintComputeUnits = computeUnitsUsed[0];
+      const subsequentAvgComputeUnits = computeUnitsUsed.length > 1
+        ? Math.round(
+            computeUnitsUsed.slice(1).reduce((a, b) => a + b, 0) / (computeUnitsUsed.length - 1)
+          )
+        : 0;
+      
+      console.log(`\n📊 Compute Units Statistics:`);
+      console.log(`   First mint: ${firstMintComputeUnits.toLocaleString()} CU`);
+      console.log(`   Subsequent mints avg: ${subsequentAvgComputeUnits.toLocaleString()} CU`);
+      console.log(`   Overall min: ${minComputeUnits.toLocaleString()} CU`);
+      console.log(`   Overall max: ${maxComputeUnits.toLocaleString()} CU`);
+      console.log(`   Overall avg: ${avgComputeUnits.toLocaleString()} CU`);
+      console.log(`   First mint overhead: ${(firstMintComputeUnits - subsequentAvgComputeUnits).toLocaleString()} CU`);
+    }
   });
 });

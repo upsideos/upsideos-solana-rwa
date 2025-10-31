@@ -64,14 +64,34 @@ impl TimelockData {
     }
 
     /// Calculate the expected new size for the timelock account after adding a new timelock and cancelables
-    pub fn expected_new_size(&self, current_data_len: usize, cancelable_by_len: usize) -> usize {
+    /// 
+    /// # Arguments
+    /// * `current_data_len` - Current size of the timelock account data
+    /// * `cancelable_by` - Slice of cancelable addresses to add (duplicates will be counted only once)
+    /// 
+    /// # Returns
+    /// The expected new size including space for the new timelock and any new cancelables
+    pub fn expected_new_size(&self, current_data_len: usize, cancelable_by: &[Pubkey]) -> usize {
+        // Count how many cancelables in cancelable_by are NOT already in self.cancelables
+        let mut new_cancelable_count = 0usize;
+        for cancelable in cancelable_by {
+            if self.get_cancelable_index(cancelable).is_none() {
+                new_cancelable_count = new_cancelable_count.checked_add(1).unwrap();
+            }
+        }
+
         let cancelables_space = if self.cancelables.len()
-            .checked_add(cancelable_by_len)
+            .checked_add(new_cancelable_count)
             .unwrap() < Timelock::MAX_CANCELABLES_COUNT
         {
-            cancelable_by_len.checked_mul(PUBKEY_BYTES).unwrap()
+            // We're below the max, allocate space for all new cancelables
+            new_cancelable_count.checked_mul(PUBKEY_BYTES).unwrap()
         } else {
-            Timelock::MAX_CANCELABLES_COUNT.checked_mul(PUBKEY_BYTES).unwrap()
+            // We would exceed the max, only allocate space for the cancelables we can actually add
+            let available_slots = Timelock::MAX_CANCELABLES_COUNT
+                .checked_sub(self.cancelables.len())
+                .unwrap();
+            available_slots.checked_mul(PUBKEY_BYTES).unwrap()
         };
         
         current_data_len

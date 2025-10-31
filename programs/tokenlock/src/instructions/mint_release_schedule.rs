@@ -25,7 +25,7 @@ pub struct MintReleaseSchedule<'info> {
     #[account(mut,
         realloc = timelock_account.expected_new_size(
             timelock_account.to_account_info().data_len(),
-            cancelable_by.len()
+            &cancelable_by
         ),
         realloc::payer = authority,
         realloc::zero = false,

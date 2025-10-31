@@ -544,8 +544,9 @@ export async function mintReleaseSchedule(
   authorityWalletRolePubkey: PublicKey,
   accessControlPubkey: PublicKey,
   mintPubkey: PublicKey,
-  accessControlProgramId: PublicKey
-): Promise<number | string> {
+  accessControlProgramId: PublicKey,
+  returnSignature?: boolean
+): Promise<number | string | { timelockId: number | string; signature: string }> {
   const timelockAccount = getTimelockAccount(
     program.programId,
     tokenlockAccount,
@@ -572,6 +573,7 @@ export async function mintReleaseSchedule(
   for (let i = 0; i < cancelByCount; i++) cancelBy.push(cancelableBy[i]);
 
   let result: number | string;
+  let signature: string | undefined;
   try {
     const modifyComputeUnitsInstruction =
       ComputeBudgetProgram.setComputeUnitLimit({
@@ -603,7 +605,7 @@ export async function mintReleaseSchedule(
         }
       );
 
-    await sendAndConfirmTransaction(
+    signature = await sendAndConfirmTransaction(
       connection,
       new Transaction().add(
         ...[modifyComputeUnitsInstruction, mintReleaseScheduleInstruction]
@@ -624,10 +626,18 @@ export async function mintReleaseSchedule(
         break;
       }
     }
+
+    if (returnSignature) {
+      return { timelockId: result, signature };
+    }
   } catch (e) {
     if (!e.error || !e.logs) {
       result = parseAnchorErrorNumber(program.idl.errors, e.logs);
     } else result = e.error.errorMessage;
+    
+    if (returnSignature && signature) {
+      return { timelockId: result, signature };
+    }
   }
 
   return result;
