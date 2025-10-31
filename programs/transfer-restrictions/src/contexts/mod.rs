@@ -53,3 +53,6 @@ pub use set_lockup_escrow_account::*;
 
 pub mod enforce_transfer_restrictions;
 pub use enforce_transfer_restrictions::*;
+
+pub mod initialize_default_security_accounts;
+pub use initialize_default_security_accounts::*;
