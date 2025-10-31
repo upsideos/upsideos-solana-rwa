@@ -543,7 +543,7 @@ export type Dividends = {
           writable: true
         },
         {
-          name: "claimant"
+          name: "target"
         },
         {
           name: "payer";
@@ -571,7 +571,7 @@ export type Dividends = {
         {
           name: "authority";
           docs: [
-            "Payer of the reclaim."
+            "Authority of the reclaim."
           ];
           signer: true
         },

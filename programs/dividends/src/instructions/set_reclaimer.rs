@@ -30,14 +30,14 @@ pub struct SetReclaimer<'info> {
         ],
         bump,
         seeds::program = AccessControlProgram::id(),
-      )]
+    )]
     pub access_control: Account<'info, AccessControl>,
 
     /// Authority wallet role to set the reclaimer.
     #[account(
-        constraint = authority_wallet_role.owner == authority.key() @ DividendsErrorCode::Unauthorized,
+        constraint = authority_wallet_role.owner == authority.key(),
         constraint = authority_wallet_role.has_any_role(access_control::Roles::ContractAdmin as u8) @ DividendsErrorCode::Unauthorized,
-        constraint = authority_wallet_role.access_control == access_control.key() @ DividendsErrorCode::Unauthorized,
+        constraint = authority_wallet_role.access_control == access_control.key(),
         owner = AccessControlProgram::id(),
     )]
     pub authority_wallet_role: Account<'info, WalletRole>,

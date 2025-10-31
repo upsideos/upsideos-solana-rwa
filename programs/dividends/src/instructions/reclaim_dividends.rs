@@ -70,7 +70,7 @@ pub struct ReclaimDividends<'info> {
 
     /// CHECK: On behalf of the which the reclaimer is claiming.
     #[account()]
-    pub claimant: AccountInfo<'info>,
+    pub target: AccountInfo<'info>,
 
     /// Payer of the claim.
     #[account(mut)]
@@ -83,7 +83,7 @@ pub struct ReclaimDividends<'info> {
     /// Authority wallet role to pause the distributor.
     #[account(
         constraint = authority_wallet_role.owner == authority.key(),
-        constraint = authority_wallet_role.has_any_role(access_control::Roles::ContractAdmin as u8 | access_control::Roles::TransferAdmin as u8) @ DividendsErrorCode::Unauthorized,
+        constraint = authority_wallet_role.has_any_role(access_control::Roles::TransferAdmin as u8) @ DividendsErrorCode::Unauthorized,
         constraint = authority_wallet_role.access_control == access_control.key(),
     )]
     pub authority_wallet_role: Account<'info, WalletRole>,
@@ -95,7 +95,7 @@ pub struct ReclaimDividends<'info> {
     )]
     pub access_control: Account<'info, AccessControl>,
 
-    /// Payer of the reclaim.
+    /// Authority of the reclaim.
     #[account()]
     pub authority: Signer<'info>,
 
@@ -126,7 +126,7 @@ pub fn reclaim_dividends<'info>(
         DividendsErrorCode::DropAlreadyClaimed
     );
 
-    let claimant_account = &ctx.accounts.claimant;
+    let target_account = &ctx.accounts.target;
     let distributor = &ctx.accounts.distributor;
     require!(
         distributor.ready_to_claim,
@@ -136,7 +136,7 @@ pub fn reclaim_dividends<'info>(
     // Verify the merkle proof.
     verify_merkle_proof(
         index,
-        &claimant_account.key(),
+        &target_account.key(),
         amount,
         proof,
         distributor.root,
@@ -163,7 +163,7 @@ pub fn reclaim_dividends<'info>(
     emit!(ReclaimedEvent {
         index,
         claimant: ctx.accounts.authority.key(),
-        target: ctx.accounts.claimant.key(),
+        target: ctx.accounts.target.key(),
         amount
     });
     Ok(())

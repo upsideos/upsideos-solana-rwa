@@ -207,7 +207,7 @@ testCases.forEach(({ tokenProgramId, programName }) => {
               claimStatus: claimPubkey,
               from: distributorATA,
               to: reclaimerATA,
-              claimant: userKP.publicKey,
+              target: userKP.publicKey,
               payer: transferAdmin.publicKey,
               mint: mintKeypair.publicKey,
               authorityWalletRole:
@@ -338,7 +338,7 @@ testCases.forEach(({ tokenProgramId, programName }) => {
               claimStatus: claimPubkey,
               from: distributorATA,
               to: attackerATA, // Attacker's ATA, not reclaimer's
-              claimant: userKP.publicKey,
+              target: userKP.publicKey,
               payer: transferAdmin.publicKey,
               mint: mintKeypair.publicKey,
               authorityWalletRole:
@@ -467,7 +467,7 @@ testCases.forEach(({ tokenProgramId, programName }) => {
             claimStatus: claimPubkey,
             from: distributorATA,
             to: reclaimerATA,
-            claimant: userKP.publicKey,
+            target: userKP.publicKey,
             payer: transferAdmin.publicKey,
             mint: mintKeypair.publicKey,
             authorityWalletRole:
@@ -493,7 +493,7 @@ testCases.forEach(({ tokenProgramId, programName }) => {
               claimStatus: claimPubkey,
               from: distributorATA,
               to: reclaimerATA,
-              claimant: userKP.publicKey,
+              target: userKP.publicKey,
               payer: transferAdmin.publicKey,
               mint: mintKeypair.publicKey,
               authorityWalletRole:
@@ -647,7 +647,7 @@ testCases.forEach(({ tokenProgramId, programName }) => {
               claimStatus: claimPubkey,
               from: distributorATA,
               to: reclaimerATA,
-              claimant: userKP.publicKey,
+              target: userKP.publicKey,
               payer: transferAdmin.publicKey,
               mint: mintKeypair.publicKey,
               authorityWalletRole:
@@ -778,7 +778,7 @@ testCases.forEach(({ tokenProgramId, programName }) => {
             claimStatus: claimPubkey,
             from: distributorATA,
             to: reclaimerATA,
-            claimant: userKP.publicKey,
+            target: userKP.publicKey,
             payer: transferAdmin.publicKey,
             mint: mintKeypair.publicKey,
             authorityWalletRole:
@@ -932,7 +932,7 @@ testCases.forEach(({ tokenProgramId, programName }) => {
             claimStatus: claimPubkey,
             from: distributorATA,
             to: reclaimerATA,
-            claimant: userKP.publicKey,
+            target: userKP.publicKey,
             payer: transferAdmin.publicKey,
             mint: mintKeypair.publicKey,
             authorityWalletRole:
