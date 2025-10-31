@@ -51,4 +51,23 @@ pub mod dividends {
     pub fn pause<'info>(ctx: Context<Pause>, paused: bool) -> Result<()> {
         instructions::pause(ctx, paused)
     }
+
+    /// Sets the reclaimer wallet address for dividends.
+    pub fn set_reclaimer<'info>(
+        ctx: Context<SetReclaimer>,
+        reclaimer_wallet: Pubkey,
+    ) -> Result<()> {
+        instructions::set_reclaimer(ctx, reclaimer_wallet)
+    }
+
+    /// Reclaims all remaining unclaimed dividends and sends them to the reclaimer address.
+    pub fn reclaim_dividends<'info>(
+        ctx: Context<'_, '_, '_, 'info, ReclaimDividends<'info>>,
+        _bump: u8,
+        index: u64,
+        amount: u64,
+        proof: Vec<[u8; 32]>,
+    ) -> Result<()> {
+        instructions::reclaim_dividends(ctx, _bump, index, amount, proof)
+    }
 }
