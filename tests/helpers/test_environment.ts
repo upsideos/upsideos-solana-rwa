@@ -166,12 +166,28 @@ export class TestEnvironment {
   async mintToReserveAdmin() {
     const reserveAdminAssociatedTokenAccount =
       this.mintHelper.getAssocciatedTokenAddress(this.reserveAdmin.publicKey);
+    
+    const [reserveAdminSaaPubkey] = this.transferRestrictionsHelper.securityAssociatedAccountPDA(
+      reserveAdminAssociatedTokenAccount
+    );
+
+    const [walletsAdminWalletRole] = this.accessControlHelper.walletRolePDA(
+      this.walletsAdmin.publicKey
+    );
+
+    await this.transferRestrictionsHelper.initializeSecurityAssociatedAccountIfNotExists(
+      this.reserveAdmin.publicKey,
+      reserveAdminAssociatedTokenAccount,
+      walletsAdminWalletRole,
+      this.walletsAdmin
+    );
 
     await this.accessControlHelper.mintSecurities(
       new BN(this.params.initialSupply),
       this.reserveAdmin.publicKey,
       reserveAdminAssociatedTokenAccount,
-      this.reserveAdmin
+      this.reserveAdmin,
+      reserveAdminSaaPubkey
     );
   }
 }

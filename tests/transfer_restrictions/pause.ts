@@ -180,42 +180,50 @@ describe("Pause transfers", () => {
         testEnvironment.reserveAdmin.publicKey
       );
     investorTokenAccountPubkey =
-      await testEnvironment.mintHelper.createAssociatedTokenAccount(
-        investor.publicKey,
-        testEnvironment.reserveAdmin
+    await testEnvironment.mintHelper.createAssociatedTokenAccount(
+      investor.publicKey,
+      testEnvironment.reserveAdmin
+    );
+    [transferAdminWalletRole] =
+      testEnvironment.accessControlHelper.walletRolePDA(
+        testEnvironment.transferAdmin.publicKey
       );
+    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionGroup(
+      new anchor.BN(groupId),
+      transferAdminWalletRole,
+      testEnvironment.transferAdmin
+    );
+    [walletsAdminWalletRole] =
+      testEnvironment.accessControlHelper.walletRolePDA(
+        testEnvironment.walletsAdmin.publicKey
+      );
+    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccountIfNotExists(
+      testEnvironment.reserveAdmin.publicKey,
+      reserveAdminTokenAccountPubkey,
+      walletsAdminWalletRole,
+      testEnvironment.walletsAdmin,
+      new anchor.BN(groupId)
+    );
+
+    const [reserveAdminSaaPubkey] = testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+      reserveAdminTokenAccountPubkey
+    );
 
     await testEnvironment.accessControlHelper.mintSecurities(
       new anchor.BN(amount),
       testEnvironment.reserveAdmin.publicKey,
       reserveAdminTokenAccountPubkey,
-      testEnvironment.reserveAdmin
+      testEnvironment.reserveAdmin,
+      reserveAdminSaaPubkey
     );
     const { amount: amountAfterMint } =
       await testEnvironment.mintHelper.getAccount(
         reserveAdminTokenAccountPubkey
       );
     assert.equal(amountAfterMint.toString(), amount.toString());
-
     const forceTransferAmount =
       100_000 * 10 ** testEnvironmentParams.mint.decimals;
-    [walletsAdminWalletRole] =
-      testEnvironment.accessControlHelper.walletRolePDA(
-        testEnvironment.walletsAdmin.publicKey
-      );
-    [transferAdminWalletRole] =
-      testEnvironment.accessControlHelper.walletRolePDA(
-        testEnvironment.transferAdmin.publicKey
-      );
-    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
-      new anchor.BN(holderReserveAdminId),
-      walletsAdminWalletRole,
-      testEnvironment.walletsAdmin
-    );
-    [reserveAdminHolderPubkey] =
-      testEnvironment.transferRestrictionsHelper.holderPDA(
-        new anchor.BN(holderReserveAdminId)
-      );
+
     await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
       new anchor.BN(holderInvestorId),
       walletsAdminWalletRole,
@@ -225,25 +233,8 @@ describe("Pause transfers", () => {
       testEnvironment.transferRestrictionsHelper.holderPDA(
         new anchor.BN(holderInvestorId)
       );
-    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionGroup(
-      new anchor.BN(groupId),
-      transferAdminWalletRole,
-      testEnvironment.transferAdmin
-    );
     [groupPubkey] = testEnvironment.transferRestrictionsHelper.groupPDA(
       new anchor.BN(groupId)
-    );
-    [reserveAdminHolderGroupPubkey] =
-      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
-        reserveAdminHolderPubkey,
-        new anchor.BN(groupId)
-      );
-    await testEnvironment.transferRestrictionsHelper.initializeHolderGroup(
-      reserveAdminHolderGroupPubkey,
-      reserveAdminHolderPubkey,
-      groupPubkey,
-      walletsAdminWalletRole,
-      testEnvironment.walletsAdmin
     );
     [investorHolderGroupPubkey] =
       testEnvironment.transferRestrictionsHelper.holderGroupPDA(
@@ -254,15 +245,6 @@ describe("Pause transfers", () => {
       investorHolderGroupPubkey,
       investorHolderPubkey,
       groupPubkey,
-      walletsAdminWalletRole,
-      testEnvironment.walletsAdmin
-    );
-    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      reserveAdminHolderPubkey,
-      reserveAdminHolderGroupPubkey,
-      testEnvironment.reserveAdmin.publicKey,
-      reserveAdminTokenAccountPubkey,
       walletsAdminWalletRole,
       testEnvironment.walletsAdmin
     );
@@ -285,6 +267,7 @@ describe("Pause transfers", () => {
       testEnvironment.reserveAdmin,
       testEnvironment.connection
     );
+
     const { amount: amountAfterForceTransfer } =
       await testEnvironment.mintHelper.getAccount(investorTokenAccountPubkey);
     assert.equal(
@@ -307,13 +290,6 @@ describe("Pause transfers", () => {
         testEnvironment.commitment,
         TOKEN_2022_PROGRAM_ID
       );
-
-    const sourceAccount = await testEnvironment.mintHelper.getAccount(
-      investorTokenAccountPubkey
-    );
-    const destinationAccount = await testEnvironment.mintHelper.getAccount(
-      reserveAdminTokenAccountPubkey
-    );
 
     await topUpWallet(
       testEnvironment.connection,

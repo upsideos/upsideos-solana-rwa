@@ -262,7 +262,7 @@ describe("Enforce transfer restrictions", () => {
       const lockedUntil = await getNowTs(testEnvironment.connection);
 
       await testEnvironment.transferRestrictionsHelper.setAllowTransferRule(
-        new anchor.BN(lockedUntil + 1000),
+        new anchor.BN(lockedUntil + 2000),
         transferRulePubkey,
         transferGroupPubkey,
         transferGroupPubkey,

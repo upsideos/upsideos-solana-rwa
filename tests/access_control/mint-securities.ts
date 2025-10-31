@@ -51,12 +51,16 @@ describe("Access Control mint securities", () => {
     const amount = maxTotalSupply
       .sub(new anchor.BN(testEnvironmentParams.initialSupply))
       .addn(1);
+    const [mintRecipientSaaPubkey] = testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+      mintRecipientTokenAccount
+    );
     try {
       await testEnvironment.accessControlHelper.mintSecurities(
         amount,
         mintRecipient.publicKey,
         mintRecipientTokenAccount,
-        testEnvironment.reserveAdmin
+        testEnvironment.reserveAdmin,
+        mintRecipientSaaPubkey
       );
       assert.fail("Expected an error");
     } catch ({ error }) {
@@ -70,12 +74,16 @@ describe("Access Control mint securities", () => {
 
   it("does not allow minting by non-reserve admin", async () => {
     const amount = new anchor.BN(1_000_000);
+    const [mintRecipientSaaPubkey] = testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+      mintRecipientTokenAccount
+    );
     try {
       await testEnvironment.accessControlHelper.mintSecurities(
         amount,
         mintRecipient.publicKey,
         mintRecipientTokenAccount,
-        testEnvironment.walletsAdmin
+        testEnvironment.walletsAdmin,
+        mintRecipientSaaPubkey
       );
       assert.fail("Expected an error");
     } catch ({ error }) {
@@ -92,6 +100,9 @@ describe("Access Control mint securities", () => {
       reserveAdminPretender.publicKey,
       solToLamports(1)
     );
+    const [mintRecipientSaaPubkey] = testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+      mintRecipientTokenAccount
+    );
 
     try {
       await testEnvironment.accessControlHelper.program.methods
@@ -105,6 +116,7 @@ describe("Access Control mint securities", () => {
           destinationAccount: mintRecipientTokenAccount,
           destinationAuthority: mintRecipient.publicKey,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
+          securityAssociatedAccount: mintRecipientSaaPubkey,
         })
         .signers([reserveAdminPretender])
         .rpc({ commitment: testEnvironment.commitment });
@@ -137,6 +149,9 @@ describe("Access Control mint securities", () => {
       attackerEnvironment.accessControlHelper.walletRolePDA(
         attackerEnvironment.reserveAdmin.publicKey
       );
+    const [mintRecipientSaaPubkey] = testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+      mintRecipientTokenAccount
+    );
     try {
       await testEnvironment.accessControlHelper.program.methods
         .mintSecurities(amount)
@@ -149,6 +164,7 @@ describe("Access Control mint securities", () => {
           destinationAccount: mintRecipientTokenAccount,
           destinationAuthority: mintRecipient.publicKey,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
+          securityAssociatedAccount: mintRecipientSaaPubkey,
         })
         .signers([attackerEnvironment.reserveAdmin])
         .rpc({ commitment: testEnvironment.commitment });
@@ -163,11 +179,26 @@ describe("Access Control mint securities", () => {
     const amount = new anchor.BN(1_000_000);
     const { supply: supplyBeforeMint } =
       await testEnvironment.mintHelper.getMint();
+    const [mintRecipientSaaPubkey] = testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+      mintRecipientTokenAccount
+    );
+
+    const [walletsAdminWalletRole] = testEnvironment.accessControlHelper.walletRolePDA(
+      testEnvironment.walletsAdmin.publicKey
+    );
+    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccountIfNotExists(
+      mintRecipient.publicKey,
+      mintRecipientTokenAccount,
+      walletsAdminWalletRole,
+      testEnvironment.walletsAdmin
+    );
+
     await testEnvironment.accessControlHelper.mintSecurities(
       amount,
       mintRecipient.publicKey,
       mintRecipientTokenAccount,
-      testEnvironment.reserveAdmin
+      testEnvironment.reserveAdmin,
+      mintRecipientSaaPubkey
     );
 
     const { supply: supplyAfterMint } =
