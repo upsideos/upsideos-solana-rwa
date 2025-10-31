@@ -378,6 +378,7 @@ describe("token lockup", () => {
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             accessControlProgram:
               testEnvironment.accessControlHelper.program.programId,
+            systemProgram: SystemProgram.programId,
           },
           signers: [testEnvironment.reserveAdmin],
         }
