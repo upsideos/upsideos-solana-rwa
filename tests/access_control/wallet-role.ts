@@ -6,6 +6,7 @@ import {
   TestEnvironmentParams,
 } from "../helpers/test_environment";
 import { Roles } from "../helpers/access-control_helper";
+import { topUpWallet, solToLamports } from "../utils";
 
 describe("Access Control wallet role", () => {
   const testEnvironmentParams: TestEnvironmentParams = {
@@ -261,5 +262,70 @@ describe("Access Control wallet role", () => {
       assert.equal(error.errorCode.code, "InvalidRole");
       assert.equal(error.errorMessage, "Invalid role");
     }
+  });
+
+  it("grants wallet role with different payer than authority", async () => {
+    // Create a separate payer wallet
+    const payer = new Keypair();
+    
+    // Fund the payer wallet
+    await topUpWallet(
+      testEnvironment.connection,
+      payer.publicKey,
+      solToLamports(1) // Fund with 1 SOL
+    );
+
+    // Create a new investor to grant role to
+    const newInvestor = new Keypair();
+    const newInvestorWalletRolePubkey = testEnvironment.accessControlHelper.walletRolePDA(
+      newInvestor.publicKey
+    )[0];
+
+    // Verify wallet role doesn't exist or has no role
+    try {
+      const walletRoleDataBefore = await testEnvironment.accessControlHelper.walletRoleData(
+        newInvestorWalletRolePubkey
+      );
+      // If it exists, it should have no role
+      if (walletRoleDataBefore.role !== Roles.None) {
+        // Revoke any existing roles first
+        await testEnvironment.accessControlHelper.revokeRole(
+          newInvestor.publicKey,
+          walletRoleDataBefore.role,
+          testEnvironment.contractAdmin
+        );
+      }
+    } catch (error) {
+      // Account doesn't exist yet, that's fine
+    }
+
+    // Grant role with authority as contractAdmin but payer as separate wallet
+    await testEnvironment.accessControlHelper.grantRole(
+      newInvestor.publicKey,
+      Roles.WalletsAdmin,
+      testEnvironment.contractAdmin,
+      payer // Different payer
+    );
+
+    // Verify the role was granted correctly
+    const walletRoleData = await testEnvironment.accessControlHelper.walletRoleData(
+      newInvestorWalletRolePubkey
+    );
+    assert.equal(walletRoleData.role, Roles.WalletsAdmin);
+    assert.strictEqual(
+      walletRoleData.owner.toString(),
+      newInvestor.publicKey.toString()
+    );
+    assert.strictEqual(
+      walletRoleData.accessControl.toString(),
+      testEnvironment.accessControlHelper.accessControlPubkey.toString()
+    );
+
+    // Verify that payer and authority are different
+    assert.notEqual(
+      payer.publicKey.toString(),
+      testEnvironment.contractAdmin.publicKey.toString(),
+      "Payer and authority should be different"
+    );
   });
 });

@@ -25,7 +25,7 @@ pub struct GrantRole<'info> {
         seeds = [
             WALLET_ROLE_PREFIX,
             &security_token.key().to_bytes(),
-            &payer.key().to_bytes(),
+            &authority.key().to_bytes(),
         ],
         bump,
     )]
@@ -43,6 +43,8 @@ pub struct GrantRole<'info> {
 
     /// CHECK: Wallet address to be controlled by the access control
     pub user_wallet: AccountInfo<'info>,
+    #[account()]
+    pub authority: Signer<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
