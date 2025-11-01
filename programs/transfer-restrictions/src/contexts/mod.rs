@@ -56,3 +56,6 @@ pub use enforce_transfer_restrictions::*;
 
 pub mod initialize_default_security_accounts;
 pub use initialize_default_security_accounts::*;
+
+pub mod set_address_permission;
+pub use set_address_permission::*;

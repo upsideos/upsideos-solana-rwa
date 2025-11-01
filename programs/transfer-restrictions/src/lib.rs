@@ -120,4 +120,12 @@ pub mod transfer_restrictions {
     ) -> Result<()> {
         instructions::transfer_restrictions::initialize_default_security_accounts(ctx, holder_id)
     }
+
+    pub fn set_address_permission(
+        ctx: Context<SetAddressPermission>,
+        group_id: u64,
+        frozen: bool,
+    ) -> Result<()> {
+        instructions::transfer_restrictions::set_address_permission(ctx, group_id, frozen)
+    }
 }
