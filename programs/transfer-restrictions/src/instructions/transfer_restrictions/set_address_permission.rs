@@ -2,7 +2,12 @@ use access_control::Roles;
 use anchor_lang::prelude::*;
 use spl_token_2022::state::AccountState;
 
-use crate::{errors::TransferRestrictionsError, SetAddressPermission};
+use crate::errors::TransferRestrictionsError;
+use crate::helpers::{
+    check_if_group_will_change, initialize_security_associated_account_fields,
+    transfer_wallet_between_groups,
+};
+use crate::SetAddressPermission;
 
 pub fn set_address_permission(
     ctx: Context<SetAddressPermission>,
@@ -17,7 +22,9 @@ pub fn set_address_permission(
 
     let security_associated_account = &mut ctx.accounts.security_associated_account;
     let holder = &mut ctx.accounts.transfer_restriction_holder;
-    let holder_group_new = &mut ctx.accounts.holder_group_new;
+    
+    // Check current frozen state once (used for both new and existing wallets)
+    let is_currently_frozen = ctx.accounts.user_associated_token_account.state == AccountState::Frozen;
     
     // Determine if this is a new wallet (security_associated_account not initialized or has no holder)
     let is_new_wallet = security_associated_account.holder.is_none();
@@ -30,26 +37,16 @@ pub fn set_address_permission(
             return Err(TransferRestrictionsError::InvalidHolderIndex.into());
         }
         
-        // Initialize security associated account
-        security_associated_account.group = group_id;
-        security_associated_account.holder = Some(holder.key());
-        
-        // Update holder_group wallet count
-        holder_group_new.current_wallets_count = holder_group_new.current_wallets_count.checked_add(1).unwrap();
-        
-        // Update group's holder count if this is the first wallet in holder_group
+        // Initialize security associated account and update all related counts
         let group_new = &mut ctx.accounts.transfer_restriction_group_new;
-        if holder_group_new.current_wallets_count == 1 {
-            group_new.current_holders_count = group_new.current_holders_count.checked_add(1).unwrap();
-        }
-        
-        // Check group max holders constraint
-        if group_new.current_holders_count > group_new.max_holders && group_new.max_holders != 0 {
-            return Err(TransferRestrictionsError::MaxHoldersReachedInsideTheGroup.into());
-        }
-        
-        // Update holder's wallet count
-        holder.current_wallets_count = holder.current_wallets_count.checked_add(1).unwrap();
+        let holder_group_new = &mut ctx.accounts.holder_group_new;
+        initialize_security_associated_account_fields(
+            security_associated_account,
+            group_new,
+            holder_group_new,
+            holder,
+            group_id,
+        )?;
     } else {
         // Scenario 2: Existing wallet - update wallet group
         let existing_holder_key = security_associated_account.holder.unwrap();
@@ -65,72 +62,49 @@ pub fn set_address_permission(
         }
         
         // Validate that holder_group_new uses the correct holder
-        if holder_group_new.holder != existing_holder_key {
+        if ctx.accounts.holder_group_new.holder != existing_holder_key {
             return Err(TransferRestrictionsError::InvalidPDA.into());
         }
         
-        // Get current and new groups
-        // Both holder_group_current and transfer_restriction_group_current are guaranteed to be Some
-        // due to validation above
-        let group_new = &mut ctx.accounts.transfer_restriction_group_new;
-        let group_current = &ctx.accounts.transfer_restriction_group_current.as_ref().unwrap();
-        let holder_group_current_ref = &ctx.accounts.holder_group_current.as_ref().unwrap();
+        let group_current_ref = ctx.accounts.transfer_restriction_group_current.as_ref().unwrap();
+        let holder_group_current_ref = ctx.accounts.holder_group_current.as_ref().unwrap();
         
-        // Check current frozen state to determine if freeze status will change
-        let is_currently_frozen = ctx.accounts.user_associated_token_account.state == AccountState::Frozen;
+        
+        // Determine if freeze status will change
         let freeze_status_will_change = frozen != is_currently_frozen;
         
-        // Check if group will change
-        let group_will_change = group_current.key() != group_new.key() 
-            || holder_group_current_ref.key() != holder_group_new.key()
-            || holder_group_current_ref.group != holder_group_new.group;
+        // Check if group will change using helper
+        let group_will_change = check_if_group_will_change(
+            &group_current_ref.key(),
+            &ctx.accounts.transfer_restriction_group_new.key(),
+            &holder_group_current_ref.key(),
+            &ctx.accounts.holder_group_new.key(),
+            holder_group_current_ref.group,
+            ctx.accounts.holder_group_new.group,
+        );
         
         // Only fail if both group and freeze status are unchanged (no changes at all)
         if !group_will_change && !freeze_status_will_change {
             return Err(TransferRestrictionsError::ValueUnchanged.into());
         }
         
-        // If group is changing, proceed with group update logic
+        // If group is changing, proceed with group update logic using helper
         if group_will_change {
-            // Holder joins new group if it is the first wallet
-            if holder_group_new.current_wallets_count == 0 {
-                group_new.current_holders_count = group_new.current_holders_count.checked_add(1).unwrap();
-            }
-            
-            // Check group max count
-            if group_new.current_holders_count > group_new.max_holders && group_new.max_holders != 0 {
-                return Err(TransferRestrictionsError::MaxHoldersReached.into());
-            }
-            
-            // Update wallet counts
-            let holder_group_current_mut = &mut ctx.accounts.holder_group_current.as_mut().unwrap();
-            holder_group_current_mut.current_wallets_count = holder_group_current_mut
-                .current_wallets_count
-                .checked_sub(1)
-                .unwrap();
-            holder_group_new.current_wallets_count = holder_group_new
-                .current_wallets_count
-                .checked_add(1)
-                .unwrap();
-            
-            // Holder leaves current group if it is the last wallet
-            if holder_group_current_mut.current_wallets_count == 0 {
-                let group_current_mut = &mut ctx.accounts.transfer_restriction_group_current.as_mut().unwrap();
-                group_current_mut.current_holders_count = group_current_mut
-                    .current_holders_count
-                    .checked_sub(1)
-                    .unwrap();
-            }
-            
-            // Update security_associated_account group
-            security_associated_account.group = group_id;
+            let group_new = &mut ctx.accounts.transfer_restriction_group_new;
+            let holder_group_new = &mut ctx.accounts.holder_group_new;
+            transfer_wallet_between_groups(
+                group_new,
+                ctx.accounts.transfer_restriction_group_current.as_mut().unwrap(),
+                ctx.accounts.holder_group_current.as_mut().unwrap(),
+                holder_group_new,
+                security_associated_account,
+                group_id,
+            )?;
         }
     }
     
-    // Check current frozen state and only call CPI if state needs to change
-    let is_currently_frozen = ctx.accounts.user_associated_token_account.state == AccountState::Frozen;
-    
-    // Only call freeze/thaw CPI if the state needs to change
+    // Call freeze/thaw CPI if the state needs to change
+    // Note: is_currently_frozen is already computed at the beginning
     if frozen != is_currently_frozen {
         let access_control_program = &ctx.accounts.access_control_program;
         
