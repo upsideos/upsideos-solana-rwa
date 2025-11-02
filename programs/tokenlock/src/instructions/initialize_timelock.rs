@@ -4,7 +4,7 @@ use access_control::{
 use anchor_lang::{prelude::*, solana_program::program_memory::sol_memcmp, Discriminator};
 
 use tokenlock_accounts::{
-    states::{TimelockData, TokenLockData},
+    states::{TimelockData, TokenLockData, VEC_LEN_SIZE},
     wrappers::TokenLockDataWrapper,
 };
 
@@ -15,7 +15,7 @@ pub struct InitializeTimeLock<'info> {
     /// CHECK: implemented own serialization in order to save compute units
     pub tokenlock_account: AccountInfo<'info>,
 
-    #[account(init, payer = authority, space = 10240,
+    #[account(init, payer = authority, space = TimelockData::HEADERS_LEN + VEC_LEN_SIZE * 2,
         seeds = [tokenlock_account.key.as_ref(), target_account.key.as_ref()],
         bump,
     )]
