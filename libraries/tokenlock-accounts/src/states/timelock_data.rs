@@ -20,7 +20,7 @@ pub struct Timelock {
 impl Timelock {
     pub const MAX_CANCELABLES_COUNT: usize = 256;
     pub const CANCELABLE_BY_COUNT_MAX: u8 = 10;
-    pub const DEFAULT_SIZE: usize = 2 + 8 + 8 + 8 + 32 + 1 + 10 + 20;
+    pub const DEFAULT_SIZE: usize = 2 + 8 + 8 + 8 + 1 + 10 + 20;
 
     pub fn has_cancelable_by(&self, cancelable_by_index: u8) -> bool {
         for i in 0..self.cancelable_by_count {
@@ -61,6 +61,44 @@ impl TimelockData {
             .checked_add(Self::HEADERS_LEN)?
             .checked_add(VEC_LEN_SIZE * 2)?;
         return total_size.checked_sub(total_used);
+    }
+
+    /// Calculate the expected new size for the timelock account after adding a new timelock and cancelables
+    /// 
+    /// # Arguments
+    /// * `current_data_len` - Current size of the timelock account data
+    /// * `cancelable_by` - Slice of cancelable addresses to add (duplicates will be counted only once)
+    /// 
+    /// # Returns
+    /// The expected new size including space for the new timelock and any new cancelables
+    pub fn expected_new_size(&self, current_data_len: usize, cancelable_by: &[Pubkey]) -> usize {
+        // Count how many cancelables in cancelable_by are NOT already in self.cancelables
+        let mut new_cancelable_count = 0usize;
+        for cancelable in cancelable_by {
+            if self.get_cancelable_index(cancelable).is_none() {
+                new_cancelable_count = new_cancelable_count.checked_add(1).unwrap();
+            }
+        }
+
+        let cancelables_space = if self.cancelables.len()
+            .checked_add(new_cancelable_count)
+            .unwrap() < Timelock::MAX_CANCELABLES_COUNT
+        {
+            // We're below the max, allocate space for all new cancelables
+            new_cancelable_count.checked_mul(PUBKEY_BYTES).unwrap()
+        } else {
+            // We would exceed the max, only allocate space for the cancelables we can actually add
+            let available_slots = Timelock::MAX_CANCELABLES_COUNT
+                .checked_sub(self.cancelables.len())
+                .unwrap();
+            available_slots.checked_mul(PUBKEY_BYTES).unwrap()
+        };
+        
+        current_data_len
+            .checked_add(cancelables_space)
+            .unwrap()
+            .checked_add(Timelock::DEFAULT_SIZE)
+            .unwrap()
     }
 
     pub fn get_cancelable_index(&self, canceler: &Pubkey) -> Option<u8> {
