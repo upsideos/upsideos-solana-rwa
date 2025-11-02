@@ -304,6 +304,7 @@ describe("TokenLockup tokenlock discriminator tests", () => {
             accessControlProgram:
               testEnvironment.accessControlHelper.program.programId,
             systemProgram: anchor.web3.SystemProgram.programId,
+            payer: reserveAdmin.publicKey,
           },
           signers: [reserveAdmin],
         }
@@ -371,7 +372,7 @@ describe("TokenLockup tokenlock discriminator tests", () => {
 
     const commencementTimestamp = -3600 * 24;
     const nowTs = await getNowTs(testEnvironment.connection);
-    const timelockId = await mintReleaseSchedule(
+    const { timelockId } = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(100510),
@@ -387,7 +388,7 @@ describe("TokenLockup tokenlock discriminator tests", () => {
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
-    );
+    ) as { timelockId: number };
     assert(timelockId === 0);
 
     const groupId = new anchor.BN(0);
@@ -535,7 +536,7 @@ describe("TokenLockup tokenlock discriminator tests", () => {
 
     const commencementTimestamp = -3600 * 24;
     const nowTs = await getNowTs(testEnvironment.connection);
-    const timelockId = await mintReleaseSchedule(
+    const { timelockId } = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(100510),
@@ -551,7 +552,7 @@ describe("TokenLockup tokenlock discriminator tests", () => {
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
-    );
+    ) as { timelockId: number };
     assert(timelockId === 0);
     const groupId = new anchor.BN(0);
     const [groupPubkey] =

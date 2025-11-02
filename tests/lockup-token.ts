@@ -373,6 +373,7 @@ describe("token lockup", () => {
             accessControlProgram:
               testEnvironment.accessControlHelper.program.programId,
             systemProgram: SystemProgram.programId,
+            payer: testEnvironment.reserveAdmin.publicKey,
           },
           signers: [testEnvironment.reserveAdmin],
         }

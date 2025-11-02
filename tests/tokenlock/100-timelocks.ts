@@ -180,7 +180,7 @@ describe("TokenLockup stress test", () => {
     let nowTs = await getNowTs(testEnvironment.connection);
     const iterations = 100;
     for (let i = 0; i < iterations; i++) {
-      const timelockId = await mintReleaseSchedule(
+      const { timelockId } = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(490),
@@ -196,7 +196,7 @@ describe("TokenLockup stress test", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
         testEnvironment.accessControlHelper.program.programId
-      );
+      ) as { timelockId: number };
       console.log("created timelock=", i);
       assert(timelockId === i);
     }
@@ -208,7 +208,7 @@ describe("TokenLockup stress test", () => {
     );
     nowTs = await getNowTs(testEnvironment.connection);
     for (let i = 0; i < iterations; i++) {
-      const timelockId = await mintReleaseSchedule(
+      const { timelockId } = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(490),
@@ -224,7 +224,7 @@ describe("TokenLockup stress test", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
         testEnvironment.accessControlHelper.program.programId
-      );
+      ) as { timelockId: number };
       console.log("2nd created timelock=", i);
       assert(timelockId === i);
     }
@@ -371,7 +371,7 @@ describe("TokenLockup stress test", () => {
     );
     let nowTs = await getNowTs(testEnvironment.connection);
     for (let i = 0; i < 100; i++) {
-      const timelockId = await mintReleaseSchedule(
+      const { timelockId } = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(490),
@@ -387,7 +387,7 @@ describe("TokenLockup stress test", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
         testEnvironment.accessControlHelper.program.programId
-      );
+      ) as { timelockId: number };
       console.log("created timelock=", i);
       assert(timelockId === i);
     }
@@ -399,7 +399,7 @@ describe("TokenLockup stress test", () => {
     );
     nowTs = await getNowTs(testEnvironment.connection);
     for (let i = 0; i < 100; i++) {
-      const timelockId = await mintReleaseSchedule(
+      const { timelockId } = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(490),
@@ -415,7 +415,7 @@ describe("TokenLockup stress test", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
         testEnvironment.accessControlHelper.program.programId
-      );
+      ) as { timelockId: number };
       console.log("2nd created timelock=", i);
       assert(timelockId === i);
     }

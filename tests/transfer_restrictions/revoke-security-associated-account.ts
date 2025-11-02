@@ -6,6 +6,7 @@ import {
   TestEnvironment,
   TestEnvironmentParams,
 } from "../helpers/test_environment";
+import { topUpWallet } from "../utils";
 
 describe("Revoke security associated account", () => {
   const testEnvironmentParams: TestEnvironmentParams = {
@@ -182,6 +183,7 @@ describe("Revoke security associated account", () => {
           associatedTokenAccount: investorsTokenAccounts[holderIdx],
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -227,6 +229,7 @@ describe("Revoke security associated account", () => {
           associatedTokenAccount: investorsTokenAccounts[holderIdx],
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -287,6 +290,7 @@ describe("Revoke security associated account", () => {
           associatedTokenAccount: investorsTokenAccounts[0],
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -370,6 +374,7 @@ describe("Revoke security associated account", () => {
           associatedTokenAccount: investorsTokenAccounts[1],
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -402,5 +407,86 @@ describe("Revoke security associated account", () => {
         groupCurrentHoldersCountBefore.toNumber()
       );
     });
+  });
+
+  it("payer can be different from authority and pays all fees", async () => {
+    const payer = Keypair.generate();
+    await topUpWallet(testEnvironment.connection, payer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+
+    const investorWallet = Keypair.generate();
+    const investorTokenAccount =
+      await testEnvironment.mintHelper.createAssociatedTokenAccount(
+        investorWallet.publicKey,
+        testEnvironment.transferAdmin
+      );
+
+    const authority = testEnvironment.transferAdmin;
+    const [authorityWalletRolePubkey] =
+      testEnvironment.accessControlHelper.walletRolePDA(authority.publicKey);
+    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccountIfNotExists(
+      investorWallet.publicKey,
+      investorTokenAccount,
+      authorityWalletRolePubkey,
+      authority,
+      groupId
+    );
+    const [securityAssociatedAccountPubkey] =
+      testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+        investorTokenAccount
+      );
+    const securityAssociatedAccountData = await testEnvironment.transferRestrictionsHelper.securityAssociatedAccountData(
+      securityAssociatedAccountPubkey
+    );
+
+    const holderPubkey = securityAssociatedAccountData.holder;
+    const [holderGroupPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
+        holderPubkey,
+        groupId
+      );
+
+
+    const payerBalanceBefore =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceBefore =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    await testEnvironment.transferRestrictionsHelper.program.methods
+      .revokeSecurityAssociatedAccount()
+      .accountsStrict({
+        securityAssociatedAccount: securityAssociatedAccountPubkey,
+        group: groupPubkey,
+        holder: holderPubkey,
+        holderGroup: holderGroupPubkey,
+        securityToken: testEnvironment.mintKeypair.publicKey,
+        transferRestrictionData:
+          testEnvironment.transferRestrictionsHelper
+            .transferRestrictionDataPubkey,
+        userWallet: investorWallet.publicKey,
+        associatedTokenAccount: investorTokenAccount,
+        authorityWalletRole: authorityWalletRolePubkey,
+        payer: payer.publicKey,
+        authority: authority.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([authority, payer])
+      .rpc({ commitment: testEnvironment.commitment });
+
+    const payerBalanceAfter =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceAfter =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    // Payer's balance should have increased (revoking security associated account paid fees)
+    assert.isTrue(
+      payerBalanceAfter > payerBalanceBefore,
+      "Payer balance should increase after revoking security associated account (paid fees)"
+    );
+    // Authority's balance should not decrease (only payer pays)
+    assert.equal(
+      authorityBalanceAfter,
+      authorityBalanceBefore,
+      "Authority balance should not change when not the payer"
+    );
   });
 });

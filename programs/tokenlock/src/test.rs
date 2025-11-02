@@ -320,6 +320,7 @@ impl<'a> TestFixture {
             token_program: Program::try_from(token_program_info)?,
             access_control_program: Program::try_from(access_control_program_info)?,
             escrow_account_owner: pda_account_info,
+            payer: Signer::try_from(authority_info)?,
             system_program: Program::try_from(system_program_info)?,
         })
     }

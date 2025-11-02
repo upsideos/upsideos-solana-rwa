@@ -602,6 +602,7 @@ export async function mintReleaseSchedule(
             mintAddress: mintPubkey,
             to,
             authority: signer.publicKey,
+            payer: signer.publicKey,
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             accessControlProgram: accessControlProgramId,
             systemProgram: SystemProgram.programId,
@@ -628,12 +629,8 @@ export async function mintReleaseSchedule(
           commencementTimestamp.toString()
       ) {
         result = i;
-        break;
+        return { timelockId: i, signature };
       }
-    }
-
-    if (returnSignature) {
-      return { timelockId: result, signature };
     }
   } catch (e) {
     if (!e.error || !e.logs) {
@@ -867,6 +864,7 @@ export async function batchMintReleaseSchedule(
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           accessControlProgram: accessControlProgram.programId,
           systemProgram: SystemProgram.programId,
+          payer: signer.publicKey,
         },
         signers: [signer],
       }

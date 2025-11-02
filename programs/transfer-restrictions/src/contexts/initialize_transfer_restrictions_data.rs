@@ -46,12 +46,14 @@ pub struct InitializeTransferRestrictionData<'info> {
     )]
     pub access_control_account: Account<'info, AccessControl>,
     #[account(
-        constraint = authority_wallet_role.owner == payer.key(),
+        constraint = authority_wallet_role.owner == authority.key(),
         constraint = authority_wallet_role.access_control == access_control_account.key(),
     )]
     pub authority_wallet_role: Account<'info, WalletRole>,
     #[account(mut)]
     pub payer: Signer<'info>,
+    #[account()]
+    pub authority: Signer<'info>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token2022>,
 }

@@ -317,8 +317,12 @@ export type Tokenlock = {
           }
         },
         {
-          name: "authority";
+          name: "payer";
           writable: true;
+          signer: true
+        },
+        {
+          name: "authority";
           signer: true
         },
         {

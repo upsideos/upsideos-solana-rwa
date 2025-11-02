@@ -7,6 +7,7 @@ import {
   TestEnvironmentParams,
 } from "../helpers/test_environment";
 import { createMint, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+import { topUpWallet } from "../utils";
 
 describe("Initialize transfer restriction data", () => {
   const testEnvironmentParams: TestEnvironmentParams = {
@@ -49,6 +50,7 @@ describe("Initialize transfer restriction data", () => {
           mint: testEnvironment.mintKeypair.publicKey,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: testEnvironment.contractAdmin.publicKey,
+          authority: testEnvironment.contractAdmin.publicKey,
           zeroTransferRestrictionGroup: groupPDA,
           systemProgram: SystemProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
@@ -96,6 +98,7 @@ describe("Initialize transfer restriction data", () => {
           authorityWalletRole: authorityWalletRolePubkey,
           payer: testEnvironment.contractAdmin.publicKey,
           zeroTransferRestrictionGroup: groupPDA,
+          authority: testEnvironment.contractAdmin.publicKey,
           systemProgram: SystemProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
         })
@@ -130,6 +133,7 @@ describe("Initialize transfer restriction data", () => {
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
           zeroTransferRestrictionGroup: groupPDA,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
         })
@@ -164,6 +168,7 @@ describe("Initialize transfer restriction data", () => {
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
           zeroTransferRestrictionGroup: groupPDA,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
         })
@@ -198,6 +203,7 @@ describe("Initialize transfer restriction data", () => {
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
           zeroTransferRestrictionGroup: groupPDA,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
         })
@@ -232,6 +238,7 @@ describe("Initialize transfer restriction data", () => {
         authorityWalletRole: authorityWalletRolePubkey,
         payer: testEnvironment.contractAdmin.publicKey,
         zeroTransferRestrictionGroup: groupPDA,
+        authority: testEnvironment.contractAdmin.publicKey,
         systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_2022_PROGRAM_ID,
       })
@@ -264,6 +271,65 @@ describe("Initialize transfer restriction data", () => {
     assert.equal(
       groupData.transferRestrictionData.toString(),
       testEnvironment.transferRestrictionsHelper.transferRestrictionDataPubkey.toString()
+    );
+  });
+
+  it("payer can be different from authority and pays all fees", async () => {
+    const payer = Keypair.generate();
+    await topUpWallet(testEnvironment.connection, payer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+
+    // Create a new test environment to avoid interfering with other tests
+    const newTestEnvironment = new TestEnvironment(testEnvironmentParams);
+    await newTestEnvironment.setupAccessControl();
+    const authority = newTestEnvironment.contractAdmin;
+
+    const [groupPDA] = newTestEnvironment.transferRestrictionsHelper.groupPDA(
+      new anchor.BN(0)
+    );
+    const [authorityWalletRolePubkey] =
+      newTestEnvironment.accessControlHelper.walletRolePDA(authority.publicKey);
+
+    const payerBalanceBefore =
+      await newTestEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceBefore =
+      await newTestEnvironment.connection.getBalance(authority.publicKey);
+
+    await newTestEnvironment.transferRestrictionsHelper.program.methods
+      .initializeTransferRestrictionsData(
+        new anchor.BN(testEnvironmentParams.maxHolders)
+      )
+      .accountsStrict({
+        transferRestrictionData:
+          newTestEnvironment.transferRestrictionsHelper
+            .transferRestrictionDataPubkey,
+        accessControlAccount:
+          newTestEnvironment.accessControlHelper.accessControlPubkey,
+        mint: newTestEnvironment.mintKeypair.publicKey,
+        authorityWalletRole: authorityWalletRolePubkey,
+        payer: payer.publicKey,
+        zeroTransferRestrictionGroup: groupPDA,
+        authority: authority.publicKey,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+      })
+      .signers([authority, payer])
+      .rpc({ commitment: newTestEnvironment.commitment });
+
+    const payerBalanceAfter =
+      await newTestEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceAfter =
+      await newTestEnvironment.connection.getBalance(authority.publicKey);
+
+    // Payer's balance should have decreased (paid fees)
+    assert.isTrue(
+      payerBalanceAfter < payerBalanceBefore,
+      "Payer balance should decrease after paying fees"
+    );
+    // Authority's balance should not decrease (only payer pays)
+    assert.equal(
+      authorityBalanceAfter,
+      authorityBalanceBefore,
+      "Authority balance should not change when not the payer"
     );
   });
 });

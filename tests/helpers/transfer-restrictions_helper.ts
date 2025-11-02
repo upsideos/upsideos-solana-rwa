@@ -168,7 +168,8 @@ export class TransferRestrictionsHelper {
   initializeTransferRestrictionData(
     maxHolders: BN,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): any {
     const [groupPDA] = this.groupPDA(new BN(0));
     return this.program.methods
@@ -178,12 +179,13 @@ export class TransferRestrictionsHelper {
         accessControlAccount: this.accessControlPubkey,
         mint: this.mintPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
-        payer: payer.publicKey,
+        payer: payer ? payer.publicKey : authority.publicKey,
+        authority: authority.publicKey,
         zeroTransferRestrictionGroup: groupPDA,
         systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_2022_PROGRAM_ID,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payer] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
@@ -512,7 +514,8 @@ export class TransferRestrictionsHelper {
     lockupEscrowAccountPubkey: PublicKey,
     tokenlockAccountPubkey: PublicKey,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): Promise<string> {
     const [escrowSecurityAssociatedAccountPubkey] =
       this.securityAssociatedAccountPDA(lockupEscrowAccountPubkey);
@@ -526,68 +529,12 @@ export class TransferRestrictionsHelper {
         authorityWalletRole: authorityWalletRolePubkey,
         escrowAccount: lockupEscrowAccountPubkey,
         tokenlockAccount: tokenlockAccountPubkey,
-        payer: payer.publicKey,
+        payer: payer ? payer.publicKey : authority.publicKey,
+        authority: authority.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payer] : [authority])
       .rpc({ commitment: this.commitment });
-  }
-
-  async initializeSecurityAssociatedAccountIfNotExists(
-    userWalletPubkey: PublicKey,
-    userWalletAssociatedAccountPubkey: PublicKey,
-    authorityWalletRolePubkey: PublicKey,
-    authority: Keypair,
-    groupIdx: BN = new BN(0)
-  ) {
-    const [securityAssociatedAccountPubkey] = this.securityAssociatedAccountPDA(
-      userWalletAssociatedAccountPubkey
-    );
-
-    // Check if security_associated_account exists
-    const saaAccountInfo = await this.program.provider.connection.getAccountInfo(securityAssociatedAccountPubkey);
-    const saaExists = saaAccountInfo !== null && saaAccountInfo.data.length > 0;
-
-    if (!saaExists) {
-      // Initialize holder, holder_group, and SAA with group 0
-      const transferRestrictionData = await this.transferRestrictionData();
-      const holderId = transferRestrictionData.holderIds;
-
-      // Initialize holder
-      await this.initializeTransferRestrictionHolder(
-        holderId,
-        authorityWalletRolePubkey,
-        authority
-      );
-
-      // Get PDAs
-      const [holderPubkey] = this.holderPDA(holderId);
-      const [groupPubkey] = this.groupPDA(groupIdx);
-      const [holderGroupPubkey] = this.holderGroupPDA(
-        holderPubkey,
-        groupIdx
-      );
-
-      // Initialize holder group
-      await this.initializeHolderGroup(
-        holderGroupPubkey,
-        holderPubkey,
-        groupPubkey,
-        authorityWalletRolePubkey,
-        authority
-      );
-
-      // Initialize security associated account
-      await this.initializeSecurityAssociatedAccount(
-        groupPubkey,
-        holderPubkey,
-        holderGroupPubkey,
-        userWalletPubkey,
-        userWalletAssociatedAccountPubkey,
-        authorityWalletRolePubkey,
-        authority
-      );
-    }
   }
 
   async initializeSecurityAssociatedAccountIfNotExists(
@@ -607,7 +554,6 @@ export class TransferRestrictionsHelper {
     const saaExists = saaAccountInfo !== null && saaAccountInfo.data.length > 0;
 
     if (!saaExists) {
-      console.log('initializeSecurityAssociatedAccountIfNotExists');
       // Initialize holder, holder_group, and SAA with group 0
       const transferRestrictionData = await this.transferRestrictionData();
       const holderId = transferRestrictionData.holderIds;
