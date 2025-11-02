@@ -51,9 +51,9 @@ describe("token lockup", () => {
   const testEnvironment = new TestEnvironment(testEnvironmentParams);
   const tokenlockProgram = anchor.workspace.Tokenlock as Program<Tokenlock>;
   let group1Pubkey: PublicKey, group2Pubkey: PublicKey, group3Pubkey: PublicKey;
-  let holder0Pubkey: PublicKey,
-    holder1Pubkey: PublicKey,
-    holder2Pubkey: PublicKey;
+  let holder1Pubkey: PublicKey,
+    holder2Pubkey: PublicKey,
+    holder3Pubkey: PublicKey;
 
   before("setups environment", async () => {
     await testEnvironment.setupAccessControl();
@@ -133,7 +133,7 @@ describe("token lockup", () => {
       transferRestrictionData.accessControlAccount,
       testEnvironment.accessControlHelper.accessControlPubkey
     );
-    assert.equal(transferRestrictionData.currentHoldersCount.toNumber(), 0);
+    assert.equal(transferRestrictionData.currentHoldersCount.toNumber(), 1);
     assert.equal(
       transferRestrictionData.maxHolders.toNumber(),
       testEnvironmentParams.maxHolders
@@ -245,6 +245,14 @@ describe("token lockup", () => {
     assert.deepEqual(
       transferRestrictionData.lockupEscrowAccount,
       escrowAccount
+    );
+  });
+
+  it("sets escrow account into access control data", async () => {
+    await testEnvironment.accessControlHelper.setLockupEscrowAccount(
+      escrowAccount,
+      tokenlockDataPubkey,
+      testEnvironment.contractAdmin
     );
   });
 
@@ -371,6 +379,7 @@ describe("token lockup", () => {
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             accessControlProgram:
               testEnvironment.accessControlHelper.program.programId,
+            systemProgram: SystemProgram.programId,
           },
           signers: [testEnvironment.reserveAdmin],
         }
@@ -481,14 +490,6 @@ describe("token lockup", () => {
       testEnvironment.accessControlHelper.walletRolePDA(
         testEnvironment.transferAdmin.publicKey
       );
-    holder0Pubkey = testEnvironment.transferRestrictionsHelper.holderPDA(
-      new anchor.BN(0)
-    )[0];
-    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
-      new anchor.BN(0),
-      transferAdminWalletRole,
-      testEnvironment.transferAdmin
-    );
     holder1Pubkey = testEnvironment.transferRestrictionsHelper.holderPDA(
       new anchor.BN(1)
     )[0];
@@ -505,49 +506,57 @@ describe("token lockup", () => {
       transferAdminWalletRole,
       testEnvironment.transferAdmin
     );
+    holder3Pubkey = testEnvironment.transferRestrictionsHelper.holderPDA(
+      new anchor.BN(3)
+    )[0];
+    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
+      new anchor.BN(3),
+      transferAdminWalletRole,
+      testEnvironment.transferAdmin
+    );
   });
 
-  let holderGroup0Pubkey: PublicKey,
-    holderGroup1Pubkey: PublicKey,
-    holderGroup2Pubkey: PublicKey;
+  let holderGroup1Pubkey: PublicKey,
+    holderGroup2Pubkey: PublicKey,
+    holderGroup3Pubkey: PublicKey;
   it("creates holder group 0, 1 and 2", async () => {
     const [transferAdminWalletRole] =
       testEnvironment.accessControlHelper.walletRolePDA(
         testEnvironment.transferAdmin.publicKey
       );
 
-    holderGroup0Pubkey =
-      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
-        holder0Pubkey,
-        new anchor.BN(1)
-      )[0];
-    await testEnvironment.transferRestrictionsHelper.initializeHolderGroup(
-      holderGroup0Pubkey,
-      holder0Pubkey,
-      group1Pubkey,
-      transferAdminWalletRole,
-      testEnvironment.transferAdmin
-    );
     holderGroup1Pubkey =
       testEnvironment.transferRestrictionsHelper.holderGroupPDA(
         holder1Pubkey,
-        new anchor.BN(2)
+        new anchor.BN(1)
       )[0];
     await testEnvironment.transferRestrictionsHelper.initializeHolderGroup(
       holderGroup1Pubkey,
       holder1Pubkey,
-      group2Pubkey,
+      group1Pubkey,
       transferAdminWalletRole,
       testEnvironment.transferAdmin
     );
     holderGroup2Pubkey =
       testEnvironment.transferRestrictionsHelper.holderGroupPDA(
         holder2Pubkey,
-        new anchor.BN(3)
+        new anchor.BN(2)
       )[0];
     await testEnvironment.transferRestrictionsHelper.initializeHolderGroup(
       holderGroup2Pubkey,
       holder2Pubkey,
+      group2Pubkey,
+      transferAdminWalletRole,
+      testEnvironment.transferAdmin
+    );
+    holderGroup3Pubkey =
+      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
+        holder3Pubkey,
+        new anchor.BN(3)
+      )[0];
+    await testEnvironment.transferRestrictionsHelper.initializeHolderGroup(
+      holderGroup3Pubkey,
+      holder3Pubkey,
       group3Pubkey,
       transferAdminWalletRole,
       testEnvironment.transferAdmin
@@ -564,8 +573,8 @@ describe("token lockup", () => {
   it("initializes security associated account group3 holder2", async () => {
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
       group3Pubkey,
-      holder2Pubkey,
-      holderGroup2Pubkey,
+      holder3Pubkey,
+      holderGroup3Pubkey,
       investor.publicKey,
       investorTokenAccountPubkey,
       testEnvironment.accessControlHelper.walletRolePDA(
@@ -591,8 +600,8 @@ describe("token lockup", () => {
   it("initializes investor recipient security associated account group1 holder0", async () => {
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
       group1Pubkey,
-      holder0Pubkey,
-      holderGroup0Pubkey,
+      holder1Pubkey,
+      holderGroup1Pubkey,
       investorRecipient.publicKey,
       investorRecipientTokenAccountPubkey,
       testEnvironment.accessControlHelper.walletRolePDA(

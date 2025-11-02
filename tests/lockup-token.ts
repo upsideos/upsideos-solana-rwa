@@ -129,7 +129,7 @@ describe("token lockup", () => {
       transferRestrictionData.accessControlAccount,
       testEnvironment.accessControlHelper.accessControlPubkey
     );
-    assert.equal(transferRestrictionData.currentHoldersCount.toNumber(), 0);
+    assert.equal(transferRestrictionData.currentHoldersCount.toNumber(), 1);
     assert.equal(
       transferRestrictionData.maxHolders.toNumber(),
       testEnvironmentParams.maxHolders
@@ -234,6 +234,12 @@ describe("token lockup", () => {
     console.log(
       "Set escrow account into transfer restriction data tx:",
       txSignature
+    );
+
+    await testEnvironment.accessControlHelper.setLockupEscrowAccount(
+      escrowAccount,
+      tokenlockDataPubkey,
+      testEnvironment.contractAdmin
     );
 
     transferRestrictionData =
@@ -366,6 +372,7 @@ describe("token lockup", () => {
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             accessControlProgram:
               testEnvironment.accessControlHelper.program.programId,
+            systemProgram: SystemProgram.programId,
           },
           signers: [testEnvironment.reserveAdmin],
         }
@@ -437,21 +444,14 @@ describe("token lockup", () => {
       testEnvironment.accessControlHelper.walletRolePDA(
         testEnvironment.transferAdmin.publicKey
       );
-    // Initialize holders
     const reserveAdminHolderId = new anchor.BN(0);
-    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
-      reserveAdminHolderId,
-      transferAdminWalletRole,
-      testEnvironment.transferAdmin
-    );
+    // Initialize holders
     const recipientHolderId = new anchor.BN(1);
     await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
       recipientHolderId,
       transferAdminWalletRole,
       testEnvironment.transferAdmin
     );
-
-    // Initialize transfer groups
     const reserveAdminGroupId = new anchor.BN(1);
     await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionGroup(
       reserveAdminGroupId,
@@ -505,23 +505,29 @@ describe("token lockup", () => {
       testEnvironment.transferAdmin
     );
 
-    // Initialize Security Associated Accounts
-    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      testEnvironment.transferRestrictionsHelper.groupPDA(
-        reserveAdminGroupId
+    const [reserveAdminCurrentGroupPubkey] = testEnvironment.transferRestrictionsHelper.groupPDA(
+      new anchor.BN(0)
+    );
+    const [reserveAdminCurrentHolderGroupPubkey] = testEnvironment.transferRestrictionsHelper.holderGroupPDA(
+      reserveAdminHolderPubkey,
+      new anchor.BN(0)
+    );
+    const reserveAdminTokenAccountPubkey = testEnvironment.mintHelper.getAssocciatedTokenAddress(
+      testEnvironment.reserveAdmin.publicKey
+    );
+    // Update wallet group
+    await testEnvironment.transferRestrictionsHelper.updateWalletGroup(
+      testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+        reserveAdminTokenAccountPubkey
       )[0],
-      testEnvironment.transferRestrictionsHelper.holderPDA(
-        reserveAdminHolderId
-      )[0],
+      reserveAdminCurrentGroupPubkey,
+      reserveAdminGroupPubkey,
+      reserveAdminCurrentHolderGroupPubkey,
       reserveAdminHolderGroupPubkey,
+      transferAdminWalletRole,
       testEnvironment.reserveAdmin.publicKey,
-      testEnvironment.mintHelper.getAssocciatedTokenAddress(
-        testEnvironment.reserveAdmin.publicKey
-      ),
-      testEnvironment.accessControlHelper.walletRolePDA(
-        testEnvironment.walletsAdmin.publicKey
-      )[0],
-      testEnvironment.walletsAdmin
+      reserveAdminTokenAccountPubkey,
+      testEnvironment.transferAdmin
     );
     // Initialize Transfer Restrictions Rule
     const tsNow = await getNowTs(testEnvironment.connection);

@@ -69,30 +69,6 @@ describe("Access Control force transfer between", () => {
       );
   });
 
-  it("fails to mint more than maxTotalSupply", async () => {
-    const { maxTotalSupply: maxTotalSupply } =
-      await testEnvironment.accessControlHelper.accessControlData();
-
-    const amount = maxTotalSupply
-      .sub(new anchor.BN(testEnvironmentParams.initialSupply))
-      .addn(1);
-    try {
-      await testEnvironment.accessControlHelper.mintSecurities(
-        amount,
-        recipient.publicKey,
-        recipientTokenAccount,
-        testEnvironment.reserveAdmin
-      );
-      assert.fail("Expected an error");
-    } catch ({ error }) {
-      assert.equal(error.errorCode.code, "MintExceedsMaxTotalSupply");
-      assert.equal(
-        error.errorMessage,
-        "Cannot mint more than max total supply"
-      );
-    }
-  });
-
   it("fails when transfer hook data is not initialized", async () => {
     const amount = 1_000_000;
     try {
@@ -111,8 +87,8 @@ describe("Access Control force transfer between", () => {
     }
   });
 
-  const targetHolderId = 0;
-  const recipientHolderId = 1;
+  const targetHolderId = 1;
+  const recipientHolderId = 2;
   const groupId = 1;
   let groupPubkey: PublicKey;
   let targetHolderPubkey: PublicKey;
@@ -187,6 +163,40 @@ describe("Access Control force transfer between", () => {
       walletsAdminWalletRole,
       testEnvironment.walletsAdmin
     );
+  });
+
+  it("fails to mint more than maxTotalSupply", async () => {
+    const { maxTotalSupply: maxTotalSupply } =
+      await testEnvironment.accessControlHelper.accessControlData();
+
+    const amount = maxTotalSupply
+      .sub(new anchor.BN(testEnvironmentParams.initialSupply))
+      .addn(1);
+    const [recipientSaaPubkey] = testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+      recipientTokenAccount
+    );
+    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccountIfNotExists(
+      recipient.publicKey,
+      recipientTokenAccount,
+      walletsAdminWalletRole,
+      testEnvironment.walletsAdmin
+    );
+    try {
+      await testEnvironment.accessControlHelper.mintSecurities(
+        amount,
+        recipient.publicKey,
+        recipientTokenAccount,
+        testEnvironment.reserveAdmin,
+        recipientSaaPubkey
+      );
+      assert.fail("Expected an error");
+    } catch ({ error }) {
+      assert.equal(error.errorCode.code, "MintExceedsMaxTotalSupply");
+      assert.equal(
+        error.errorMessage,
+        "Cannot mint more than max total supply"
+      );
+    }
   });
 
   const unauthorizedErrorMsg =
@@ -264,11 +274,21 @@ describe("Access Control force transfer between", () => {
   });
 
   it("force transfer between 2 wallets by reserve admin", async () => {
+    const [targetSaaPubkey] = testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+      targetTokenAccount
+    );
+    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccountIfNotExists(
+      target.publicKey,
+      targetTokenAccount,
+      walletsAdminWalletRole,
+      testEnvironment.walletsAdmin
+    );
     await testEnvironment.accessControlHelper.mintSecurities(
       new anchor.BN(amount),
       target.publicKey,
       targetTokenAccount,
-      testEnvironment.reserveAdmin
+      testEnvironment.reserveAdmin,
+      targetSaaPubkey
     );
     let { amount: targetAmountBefore } =
       await testEnvironment.mintHelper.getAccount(targetTokenAccount);
