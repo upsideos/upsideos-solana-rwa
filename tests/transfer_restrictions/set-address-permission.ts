@@ -624,6 +624,7 @@ describe("Set Address Permission", () => {
       const tokenAccountBefore = await testEnvironment.mintHelper.getAccount(
         existingUserTokenAccount
       );
+      assert.equal(tokenAccountBefore.isFrozen, true);
 
       // Set address permission (thaw) for existing wallet in same group
       await testEnvironment.transferRestrictionsHelper.program.methods
@@ -750,6 +751,7 @@ describe("Set Address Permission", () => {
       const tokenAccountBefore = await testEnvironment.mintHelper.getAccount(
         existingUserTokenAccount
       );
+      assert.isFalse(tokenAccountBefore.isFrozen);
 
       // Verify initial state
       assert.equal(securityAssociatedAccountDataBefore.group.toNumber(), 0);
@@ -946,8 +948,7 @@ describe("Set Address Permission", () => {
           .signers([signer])
           .rpc({ commitment: testEnvironment.commitment });
         assert.fail("Expect an error");
-      } catch (err: any) {
-        const error = err.error || err;
+      } catch ({ error }) {
         assert.equal(error.errorCode.code, "CurrentGroupRequiredForExistingWallet");
         assert.equal(
           error.errorMessage,
@@ -1125,6 +1126,7 @@ describe("Set Address Permission", () => {
       const tokenAccountBefore = await testEnvironment.mintHelper.getAccount(
         existingUserTokenAccount
       );
+      assert.isTrue(tokenAccountBefore.isFrozen);
 
       // Verify initial state
       assert.equal(securityAssociatedAccountDataBefore.group.toNumber(), 1);
@@ -1305,8 +1307,7 @@ describe("Set Address Permission", () => {
           .signers([signer])
           .rpc({ commitment: testEnvironment.commitment });
         assert.fail("Expect an error");
-      } catch (err: any) {
-        const error = err.error || err;
+      } catch ({ error }) {
         assert.equal(error.errorCode.code, "Unauthorized");
         assert.equal(error.errorMessage, "Unauthorized");
       }
