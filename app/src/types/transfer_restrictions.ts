@@ -1631,6 +1631,341 @@ export type TransferRestrictions = {
       args: []
     },
     {
+      name: "setAddressPermission";
+      discriminator: [
+        206,
+        98,
+        48,
+        240,
+        226,
+        102,
+        10,
+        236
+      ];
+      accounts: [
+        {
+          name: "securityAssociatedAccount";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  115,
+                  97,
+                  97
+                ]
+              },
+              {
+                kind: "account";
+                path: "userAssociatedTokenAccount"
+              }
+            ]
+          }
+        },
+        {
+          name: "transferRestrictionGroupNew";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  103
+                ]
+              },
+              {
+                kind: "account";
+                path: "transferRestrictionData"
+              },
+              {
+                kind: "arg";
+                path: "groupId"
+              }
+            ]
+          }
+        },
+        {
+          name: "transferRestrictionGroupCurrent";
+          writable: true;
+          optional: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  103
+                ]
+              },
+              {
+                kind: "account";
+                path: "transferRestrictionData"
+              },
+              {
+                kind: "account";
+                path: "security_associated_account.group";
+                account: "securityAssociatedAccount"
+              }
+            ]
+          }
+        },
+        {
+          name: "transferRestrictionHolder";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  104
+                ]
+              },
+              {
+                kind: "account";
+                path: "transferRestrictionData"
+              },
+              {
+                kind: "account";
+                path: "transfer_restriction_holder.id";
+                account: "transferRestrictionHolder"
+              }
+            ]
+          }
+        },
+        {
+          name: "holderGroupNew";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  104,
+                  103
+                ]
+              },
+              {
+                kind: "account";
+                path: "transferRestrictionHolder"
+              },
+              {
+                kind: "arg";
+                path: "groupId"
+              }
+            ]
+          }
+        },
+        {
+          name: "holderGroupCurrent";
+          writable: true;
+          optional: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  104,
+                  103
+                ]
+              },
+              {
+                kind: "account";
+                path: "security_associated_account.holder";
+                account: "securityAssociatedAccount"
+              },
+              {
+                kind: "account";
+                path: "security_associated_account.group";
+                account: "securityAssociatedAccount"
+              }
+            ]
+          }
+        },
+        {
+          name: "securityToken"
+        },
+        {
+          name: "transferRestrictionData";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  100
+                ]
+              },
+              {
+                kind: "account";
+                path: "securityToken"
+              }
+            ]
+          }
+        },
+        {
+          name: "userWallet"
+        },
+        {
+          name: "userAssociatedTokenAccount";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "account";
+                path: "userWallet"
+              },
+              {
+                kind: "const";
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  238,
+                  117,
+                  143,
+                  222,
+                  24,
+                  66,
+                  93,
+                  188,
+                  228,
+                  108,
+                  205,
+                  218,
+                  182,
+                  26,
+                  252,
+                  77,
+                  131,
+                  185,
+                  13,
+                  39,
+                  254,
+                  189,
+                  249,
+                  40,
+                  216,
+                  161,
+                  139,
+                  252
+                ]
+              },
+              {
+                kind: "account";
+                path: "securityToken"
+              }
+            ];
+            program: {
+              kind: "const";
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          name: "authorityWalletRole"
+        },
+        {
+          name: "securityMint";
+          writable: true
+        },
+        {
+          name: "accessControlAccount";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  97,
+                  99
+                ]
+              },
+              {
+                kind: "account";
+                path: "securityMint"
+              }
+            ];
+            program: {
+              kind: "account";
+              path: "accessControlProgram"
+            }
+          }
+        },
+        {
+          name: "accessControlProgram";
+          address: "4X79YRjz9KNMhdjdxXg2ZNTS3YnMGYdwJkBHnezMJwr3"
+        },
+        {
+          name: "tokenProgram";
+          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          name: "payer";
+          writable: true;
+          signer: true
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111"
+        }
+      ];
+      args: [
+        {
+          name: "groupId";
+          type: "u64"
+        },
+        {
+          name: "frozen";
+          type: "bool"
+        }
+      ]
+    },
+    {
       name: "setAllowTransferRule";
       discriminator: [
         4,
@@ -2431,6 +2766,11 @@ export type TransferRestrictions = {
     },
     {
       code: 6024;
+      name: "currentGroupRequiredForExistingWallet";
+      msg: "Current group and holder group must be provided for existing wallet"
+    },
+    {
+      code: 6025;
       name: "holderGroupAlreadyInitialized";
       msg: "Holder group already initialized"
     }
