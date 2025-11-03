@@ -40,7 +40,7 @@ pub fn create_release_schedule(
 ) -> Result<()> {
     let tokenlock_account = &mut ctx.accounts.tokenlock_account;
     let mut tokenlock_account_data = tokenlock_account.try_borrow_mut_data()?;
-    let discriminator = TokenLockData::discriminator();
+    let discriminator = TokenLockData::DISCRIMINATOR;
     if sol_memcmp(&discriminator, &tokenlock_account_data, discriminator.len()) != 0 {
         return Err(TokenlockErrors::IncorrectTokenlockAccount.into());
     }

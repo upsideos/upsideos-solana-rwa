@@ -132,6 +132,11 @@ describe("TokenLockup tokenlock discriminator tests", () => {
       contractAdminWalletRole,
       testEnvironment.contractAdmin
     );
+    await testEnvironment.accessControlHelper.setLockupEscrowAccount(
+      escrowAccount,
+      tokenlockDataPubkey,
+      testEnvironment.contractAdmin
+    );
   });
 
   it("initialize timelock with wrong tokenlock account", async () => {
@@ -297,6 +302,7 @@ describe("TokenLockup tokenlock discriminator tests", () => {
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             accessControlProgram:
               testEnvironment.accessControlHelper.program.programId,
+            systemProgram: anchor.web3.SystemProgram.programId,
           },
           signers: [reserveAdmin],
         }
@@ -386,7 +392,7 @@ describe("TokenLockup tokenlock discriminator tests", () => {
     const groupId = new anchor.BN(0);
     const [groupPubkey] =
       testEnvironment.transferRestrictionsHelper.groupPDA(groupId);
-    const holderId = new anchor.BN(0);
+    const holderId = new anchor.BN(1);
     const [holderPubkey] =
       testEnvironment.transferRestrictionsHelper.holderPDA(holderId);
     const [holderGroupPubkey] =
@@ -549,7 +555,7 @@ describe("TokenLockup tokenlock discriminator tests", () => {
     const groupId = new anchor.BN(0);
     const [groupPubkey] =
       testEnvironment.transferRestrictionsHelper.groupPDA(groupId);
-    const holderId = new anchor.BN(0);
+    const holderId = new anchor.BN(1);
     const [holderPubkey] =
       testEnvironment.transferRestrictionsHelper.holderPDA(holderId);
     const [holderGroupPubkey] =

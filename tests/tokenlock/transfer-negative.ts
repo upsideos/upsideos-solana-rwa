@@ -174,6 +174,11 @@ describe("Transfer Negative cases", async () => {
       contractAdminWalletRole,
       testEnvironment.contractAdmin
     );
+    await testEnvironment.accessControlHelper.setLockupEscrowAccount(
+      escrowAccount,
+      tokenlockDataPubkey,
+      testEnvironment.contractAdmin
+    );
 
     let scheduleId = await createReleaseSchedule(
       tokenlockProgram,

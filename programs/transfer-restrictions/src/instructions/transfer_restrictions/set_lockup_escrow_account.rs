@@ -13,7 +13,7 @@ pub fn set_lockup_escrow_account(ctx: Context<SetLockupEscrowAccount>) -> Result
         return Err(TransferRestrictionsError::Unauthorized.into());
     }
 
-    let discriminator = TokenLockData::discriminator();
+    let discriminator = TokenLockData::DISCRIMINATOR;
     let tokenlock_account = &ctx.accounts.tokenlock_account;
     let tokenlock_account_data = tokenlock_account.try_borrow_data()?;
     if sol_memcmp(&discriminator, &tokenlock_account_data, discriminator.len()) != 0 {

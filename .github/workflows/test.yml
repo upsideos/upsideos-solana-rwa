@@ -4,15 +4,18 @@ on: [push]
 
 jobs:
   Test:
-    runs-on: [ubuntu-22.04]
+    runs-on: [ubuntu-24.04]
     env:
-      RUST_VERSION: 1.78.0
-      SOLANA_VERSION: 1.18.17
-      ANCHOR_VERSION: 0.30.1
+      RUST_VERSION: 1.90.0
+      SOLANA_VERSION: 2.2.20
+      ANCHOR_VERSION: 0.32.1
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential pkg-config libudev-dev llvm libclang-dev protobuf-compiler libssl-dev
 
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
@@ -22,15 +25,16 @@ jobs:
           components: rustfmt, clippy
 
       - name: Install Solana
-        uses: metadaoproject/setup-solana@v1.0
-        with: 
-          solana-cli-version: ${{ env.SOLANA_VERSION }}
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+
+      - name: Install Anchor
+        run: cargo install --git https://github.com/coral-xyz/anchor --tag v${{ env.ANCHOR_VERSION }} anchor-cli
       
       - name: Generate Key
         run: solana-keygen new --no-passphrase
-
-      - name: Install Anchor
-        run: cargo install --git https://github.com/coral-xyz/anchor --tag v${{ env.ANCHOR_VERSION }} anchor-cli --locked
 
       - name: Build
         run: anchor build

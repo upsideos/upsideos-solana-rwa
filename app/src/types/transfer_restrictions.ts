@@ -10,21 +10,30 @@ export type TransferRestrictions = {
     name: "transferRestrictions";
     version: "0.1.0";
     spec: "0.1.0";
-    description: "Transfer restrictions for Solana tokens";
+    description: "Transfer restrictions for Solana tokens"
   };
   instructions: [
     {
       name: "enforceTransferRestrictions";
-      discriminator: [77, 50, 36, 109, 250, 175, 122, 22];
+      discriminator: [
+        77,
+        50,
+        36,
+        109,
+        250,
+        175,
+        122,
+        22
+      ];
       accounts: [
         {
-          name: "sourceAccount";
+          name: "sourceAccount"
         },
         {
-          name: "mint";
+          name: "mint"
         },
         {
-          name: "destinationAccount";
+          name: "destinationAccount"
         },
         {
           name: "transferRestrictionData";
@@ -32,14 +41,18 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
-                path: "mint";
+                path: "mint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "securityAssociatedAccountFrom";
@@ -47,14 +60,18 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [115, 97, 97];
+                value: [
+                  115,
+                  97,
+                  97
+                ]
               },
               {
                 kind: "account";
-                path: "sourceAccount";
+                path: "sourceAccount"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "securityAssociatedAccountTo";
@@ -62,14 +79,18 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [115, 97, 97];
+                value: [
+                  115,
+                  97,
+                  97
+                ]
               },
               {
                 kind: "account";
-                path: "destinationAccount";
+                path: "destinationAccount"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "transferRule";
@@ -77,44 +98,58 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114];
+                value: [
+                  116,
+                  114
+                ]
               },
               {
                 kind: "account";
-                path: "transferRestrictionData";
+                path: "transferRestrictionData"
               },
               {
                 kind: "account";
                 path: "security_associated_account_from.group";
-                account: "securityAssociatedAccount";
+                account: "securityAssociatedAccount"
               },
               {
                 kind: "account";
                 path: "security_associated_account_to.group";
-                account: "securityAssociatedAccount";
+                account: "securityAssociatedAccount"
               }
-            ];
-          };
+            ]
+          }
         }
       ];
-      args: [];
+      args: []
     },
     {
       name: "executeTransaction";
-      docs: ["execute transfer hook"];
-      discriminator: [105, 37, 101, 197, 75, 251, 102, 26];
+      docs: [
+        "execute transfer hook"
+      ];
+      discriminator: [
+        105,
+        37,
+        101,
+        197,
+        75,
+        251,
+        102,
+        26
+      ];
       accounts: [
         {
-          name: "sourceAccount";
+          name: "sourceAccount"
         },
         {
-          name: "mint";
+          name: "mint"
         },
         {
-          name: "destinationAccount";
+          name: "destinationAccount"
         },
         {
-          name: "ownerDelegate";
+          name: "ownerDelegate"
         },
         {
           name: "extraMetasAccount";
@@ -142,401 +177,47 @@ export type TransferRestrictions = {
                   116,
                   97,
                   115
-                ];
+                ]
               },
               {
                 kind: "account";
-                path: "mint";
+                path: "mint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "transferRestrictionData";
+          name: "transferRestrictionData"
         },
         {
-          name: "securityAssociatedAccountFrom";
+          name: "securityAssociatedAccountFrom"
         },
         {
-          name: "securityAssociatedAccountTo";
+          name: "securityAssociatedAccountTo"
         },
         {
-          name: "transferRule";
+          name: "transferRule"
         }
       ];
       args: [
         {
           name: "amount";
-          type: "u64";
+          type: "u64"
         }
-      ];
+      ]
     },
     {
-      name: "initializeExtraAccountMetaList";
-      discriminator: [92, 197, 174, 197, 41, 124, 19, 3];
-      accounts: [
-        {
-          name: "extraMetasAccount";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [
-                  101,
-                  120,
-                  116,
-                  114,
-                  97,
-                  45,
-                  97,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116,
-                  45,
-                  109,
-                  101,
-                  116,
-                  97,
-                  115
-                ];
-              },
-              {
-                kind: "account";
-                path: "securityMint";
-              }
-            ];
-          };
-        },
-        {
-          name: "securityMint";
-        },
-        {
-          name: "authorityWalletRole";
-        },
-        {
-          name: "accessControl";
-        },
-        {
-          name: "payer";
-          writable: true;
-          signer: true;
-        },
-        {
-          name: "systemProgram";
-          address: "11111111111111111111111111111111";
-        }
+      name: "initializeDefaultSecurityAccounts";
+      discriminator: [
+        81,
+        54,
+        165,
+        92,
+        129,
+        149,
+        40,
+        235
       ];
-      args: [];
-    },
-    {
-      name: "initializeHolderGroup";
-      discriminator: [236, 173, 120, 20, 217, 85, 57, 26];
-      accounts: [
-        {
-          name: "holderGroup";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [116, 114, 104, 103];
-              },
-              {
-                kind: "account";
-                path: "holder";
-              },
-              {
-                kind: "account";
-                path: "group.id";
-                account: "transferRestrictionGroup";
-              }
-            ];
-          };
-        },
-        {
-          name: "transferRestrictionData";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [116, 114, 100];
-              },
-              {
-                kind: "account";
-                path: "transfer_restriction_data.security_token_mint";
-                account: "transferRestrictionData";
-              }
-            ];
-          };
-        },
-        {
-          name: "group";
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [116, 114, 103];
-              },
-              {
-                kind: "account";
-                path: "transferRestrictionData";
-              },
-              {
-                kind: "account";
-                path: "group.id";
-                account: "transferRestrictionGroup";
-              }
-            ];
-          };
-        },
-        {
-          name: "holder";
-          writable: true;
-        },
-        {
-          name: "authorityWalletRole";
-        },
-        {
-          name: "payer";
-          writable: true;
-          signer: true;
-        },
-        {
-          name: "systemProgram";
-          address: "11111111111111111111111111111111";
-        }
-      ];
-      args: [];
-    },
-    {
-      name: "initializeSecurityAssociatedAccount";
-      discriminator: [154, 169, 189, 28, 30, 71, 161, 50];
-      accounts: [
-        {
-          name: "securityAssociatedAccount";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [115, 97, 97];
-              },
-              {
-                kind: "account";
-                path: "associatedTokenAccount";
-              }
-            ];
-          };
-        },
-        {
-          name: "group";
-          writable: true;
-        },
-        {
-          name: "holder";
-          writable: true;
-        },
-        {
-          name: "holderGroup";
-          writable: true;
-        },
-        {
-          name: "securityToken";
-        },
-        {
-          name: "transferRestrictionData";
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [116, 114, 100];
-              },
-              {
-                kind: "account";
-                path: "securityToken";
-              }
-            ];
-          };
-        },
-        {
-          name: "userWallet";
-        },
-        {
-          name: "associatedTokenAccount";
-          pda: {
-            seeds: [
-              {
-                kind: "account";
-                path: "userWallet";
-              },
-              {
-                kind: "const";
-                value: [
-                  6,
-                  221,
-                  246,
-                  225,
-                  238,
-                  117,
-                  143,
-                  222,
-                  24,
-                  66,
-                  93,
-                  188,
-                  228,
-                  108,
-                  205,
-                  218,
-                  182,
-                  26,
-                  252,
-                  77,
-                  131,
-                  185,
-                  13,
-                  39,
-                  254,
-                  189,
-                  249,
-                  40,
-                  216,
-                  161,
-                  139,
-                  252
-                ];
-              },
-              {
-                kind: "account";
-                path: "securityToken";
-              }
-            ];
-            program: {
-              kind: "const";
-              value: [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ];
-            };
-          };
-        },
-        {
-          name: "authorityWalletRole";
-        },
-        {
-          name: "payer";
-          writable: true;
-          signer: true;
-        },
-        {
-          name: "systemProgram";
-          address: "11111111111111111111111111111111";
-        }
-      ];
-      args: [];
-    },
-    {
-      name: "initializeTransferRestrictionGroup";
-      discriminator: [62, 223, 111, 8, 59, 225, 31, 108];
-      accounts: [
-        {
-          name: "transferRestrictionGroup";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [116, 114, 103];
-              },
-              {
-                kind: "account";
-                path: "transferRestrictionData";
-              },
-              {
-                kind: "arg";
-                path: "id";
-              }
-            ];
-          };
-        },
-        {
-          name: "transferRestrictionData";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [116, 114, 100];
-              },
-              {
-                kind: "account";
-                path: "access_control_account.mint";
-                account: "accessControl";
-              }
-            ];
-          };
-        },
-        {
-          name: "accessControlAccount";
-        },
-        {
-          name: "authorityWalletRole";
-        },
-        {
-          name: "payer";
-          writable: true;
-          signer: true;
-        },
-        {
-          name: "systemProgram";
-          address: "11111111111111111111111111111111";
-        }
-      ];
-      args: [
-        {
-          name: "id";
-          type: "u64";
-        }
-      ];
-    },
-    {
-      name: "initializeTransferRestrictionHolder";
-      discriminator: [184, 97, 123, 132, 240, 132, 91, 118];
       accounts: [
         {
           name: "transferRestrictionHolder";
@@ -545,18 +226,112 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 104];
+                value: [
+                  116,
+                  114,
+                  104
+                ]
               },
               {
                 kind: "account";
-                path: "transferRestrictionData";
+                path: "transferRestrictionData"
               },
               {
                 kind: "arg";
-                path: "id";
+                path: "id"
               }
-            ];
-          };
+            ]
+          }
+        },
+        {
+          name: "holderGroup";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  104,
+                  103
+                ]
+              },
+              {
+                kind: "account";
+                path: "transferRestrictionHolder"
+              },
+              {
+                kind: "const";
+                value: [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "securityAssociatedAccount";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  115,
+                  97,
+                  97
+                ]
+              },
+              {
+                kind: "account";
+                path: "associatedTokenAccount"
+              }
+            ]
+          }
+        },
+        {
+          name: "group";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  103
+                ]
+              },
+              {
+                kind: "account";
+                path: "transferRestrictionData"
+              },
+              {
+                kind: "const";
+                value: [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "securityToken"
         },
         {
           name: "transferRestrictionData";
@@ -565,42 +340,652 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
-                path: "access_control_account.mint";
-                account: "accessControl";
+                path: "securityToken"
+              }
+            ]
+          }
+        },
+        {
+          name: "userWallet"
+        },
+        {
+          name: "associatedTokenAccount";
+          pda: {
+            seeds: [
+              {
+                kind: "account";
+                path: "userWallet"
+              },
+              {
+                kind: "const";
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  238,
+                  117,
+                  143,
+                  222,
+                  24,
+                  66,
+                  93,
+                  188,
+                  228,
+                  108,
+                  205,
+                  218,
+                  182,
+                  26,
+                  252,
+                  77,
+                  131,
+                  185,
+                  13,
+                  39,
+                  254,
+                  189,
+                  249,
+                  40,
+                  216,
+                  161,
+                  139,
+                  252
+                ]
+              },
+              {
+                kind: "account";
+                path: "securityToken"
               }
             ];
-          };
+            program: {
+              kind: "const";
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          name: "accessControlAccount";
-        },
-        {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
           name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          address: "11111111111111111111111111111111"
+        }
+      ];
+      args: [
+        {
+          name: "holderId";
+          type: "u64"
+        }
+      ]
+    },
+    {
+      name: "initializeExtraAccountMetaList";
+      discriminator: [
+        92,
+        197,
+        174,
+        197,
+        41,
+        124,
+        19,
+        3
+      ];
+      accounts: [
+        {
+          name: "extraMetasAccount";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  101,
+                  120,
+                  116,
+                  114,
+                  97,
+                  45,
+                  97,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  115
+                ]
+              },
+              {
+                kind: "account";
+                path: "securityMint"
+              }
+            ]
+          }
+        },
+        {
+          name: "securityMint"
+        },
+        {
+          name: "authorityWalletRole"
+        },
+        {
+          name: "accessControl"
+        },
+        {
+          name: "payer";
+          writable: true;
+          signer: true
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111"
+        }
+      ];
+      args: []
+    },
+    {
+      name: "initializeHolderGroup";
+      discriminator: [
+        236,
+        173,
+        120,
+        20,
+        217,
+        85,
+        57,
+        26
+      ];
+      accounts: [
+        {
+          name: "holderGroup";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  104,
+                  103
+                ]
+              },
+              {
+                kind: "account";
+                path: "holder"
+              },
+              {
+                kind: "account";
+                path: "group.id";
+                account: "transferRestrictionGroup"
+              }
+            ]
+          }
+        },
+        {
+          name: "transferRestrictionData";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  100
+                ]
+              },
+              {
+                kind: "account";
+                path: "transfer_restriction_data.security_token_mint";
+                account: "transferRestrictionData"
+              }
+            ]
+          }
+        },
+        {
+          name: "group";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  103
+                ]
+              },
+              {
+                kind: "account";
+                path: "transferRestrictionData"
+              },
+              {
+                kind: "account";
+                path: "group.id";
+                account: "transferRestrictionGroup"
+              }
+            ]
+          }
+        },
+        {
+          name: "holder";
+          writable: true
+        },
+        {
+          name: "authorityWalletRole"
+        },
+        {
+          name: "payer";
+          writable: true;
+          signer: true
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111"
+        }
+      ];
+      args: []
+    },
+    {
+      name: "initializeSecurityAssociatedAccount";
+      discriminator: [
+        154,
+        169,
+        189,
+        28,
+        30,
+        71,
+        161,
+        50
+      ];
+      accounts: [
+        {
+          name: "securityAssociatedAccount";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  115,
+                  97,
+                  97
+                ]
+              },
+              {
+                kind: "account";
+                path: "associatedTokenAccount"
+              }
+            ]
+          }
+        },
+        {
+          name: "group";
+          writable: true
+        },
+        {
+          name: "holder";
+          writable: true
+        },
+        {
+          name: "holderGroup";
+          writable: true
+        },
+        {
+          name: "securityToken"
+        },
+        {
+          name: "transferRestrictionData";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  100
+                ]
+              },
+              {
+                kind: "account";
+                path: "securityToken"
+              }
+            ]
+          }
+        },
+        {
+          name: "userWallet"
+        },
+        {
+          name: "associatedTokenAccount";
+          pda: {
+            seeds: [
+              {
+                kind: "account";
+                path: "userWallet"
+              },
+              {
+                kind: "const";
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  238,
+                  117,
+                  143,
+                  222,
+                  24,
+                  66,
+                  93,
+                  188,
+                  228,
+                  108,
+                  205,
+                  218,
+                  182,
+                  26,
+                  252,
+                  77,
+                  131,
+                  185,
+                  13,
+                  39,
+                  254,
+                  189,
+                  249,
+                  40,
+                  216,
+                  161,
+                  139,
+                  252
+                ]
+              },
+              {
+                kind: "account";
+                path: "securityToken"
+              }
+            ];
+            program: {
+              kind: "const";
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          name: "authorityWalletRole"
+        },
+        {
+          name: "payer";
+          writable: true;
+          signer: true
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111"
+        }
+      ];
+      args: []
+    },
+    {
+      name: "initializeTransferRestrictionGroup";
+      discriminator: [
+        62,
+        223,
+        111,
+        8,
+        59,
+        225,
+        31,
+        108
+      ];
+      accounts: [
+        {
+          name: "transferRestrictionGroup";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  103
+                ]
+              },
+              {
+                kind: "account";
+                path: "transferRestrictionData"
+              },
+              {
+                kind: "arg";
+                path: "id"
+              }
+            ]
+          }
+        },
+        {
+          name: "transferRestrictionData";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  100
+                ]
+              },
+              {
+                kind: "account";
+                path: "access_control_account.mint";
+                account: "accessControl"
+              }
+            ]
+          }
+        },
+        {
+          name: "accessControlAccount"
+        },
+        {
+          name: "authorityWalletRole"
+        },
+        {
+          name: "payer";
+          writable: true;
+          signer: true
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111"
         }
       ];
       args: [
         {
           name: "id";
-          type: "u64";
+          type: "u64"
+        }
+      ]
+    },
+    {
+      name: "initializeTransferRestrictionHolder";
+      discriminator: [
+        184,
+        97,
+        123,
+        132,
+        240,
+        132,
+        91,
+        118
+      ];
+      accounts: [
+        {
+          name: "transferRestrictionHolder";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  104
+                ]
+              },
+              {
+                kind: "account";
+                path: "transferRestrictionData"
+              },
+              {
+                kind: "arg";
+                path: "id"
+              }
+            ]
+          }
+        },
+        {
+          name: "transferRestrictionData";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  116,
+                  114,
+                  100
+                ]
+              },
+              {
+                kind: "account";
+                path: "access_control_account.mint";
+                account: "accessControl"
+              }
+            ]
+          }
+        },
+        {
+          name: "accessControlAccount"
+        },
+        {
+          name: "authorityWalletRole"
+        },
+        {
+          name: "payer";
+          writable: true;
+          signer: true
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111"
         }
       ];
+      args: [
+        {
+          name: "id";
+          type: "u64"
+        }
+      ]
     },
     {
       name: "initializeTransferRestrictionsData";
-      discriminator: [214, 241, 131, 83, 138, 120, 171, 133];
+      discriminator: [
+        214,
+        241,
+        131,
+        83,
+        138,
+        120,
+        171,
+        133
+      ];
       accounts: [
         {
           name: "transferRestrictionData";
@@ -609,14 +994,18 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
-                path: "mint";
+                path: "mint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "zeroTransferRestrictionGroup";
@@ -625,52 +1014,74 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 103];
+                value: [
+                  116,
+                  114,
+                  103
+                ]
               },
               {
                 kind: "account";
-                path: "transferRestrictionData";
+                path: "transferRestrictionData"
               },
               {
                 kind: "const";
-                value: [0, 0, 0, 0, 0, 0, 0, 0];
+                value: [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "mint";
+          name: "mint"
         },
         {
-          name: "accessControlAccount";
+          name: "accessControlAccount"
         },
         {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
           name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          address: "11111111111111111111111111111111"
         },
         {
           name: "tokenProgram";
-          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         }
       ];
       args: [
         {
           name: "maxHolders";
-          type: "u64";
+          type: "u64"
         }
-      ];
+      ]
     },
     {
       name: "initializeTransferRule";
-      discriminator: [24, 28, 16, 18, 72, 26, 87, 49];
+      discriminator: [
+        24,
+        28,
+        16,
+        18,
+        72,
+        26,
+        87,
+        49
+      ];
       accounts: [
         {
           name: "transferRule";
@@ -679,24 +1090,27 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114];
+                value: [
+                  116,
+                  114
+                ]
               },
               {
                 kind: "account";
-                path: "transferRestrictionData";
+                path: "transferRestrictionData"
               },
               {
                 kind: "account";
                 path: "transfer_restriction_group_from.id";
-                account: "transferRestrictionGroup";
+                account: "transferRestrictionGroup"
               },
               {
                 kind: "account";
                 path: "transfer_restriction_group_to.id";
-                account: "transferRestrictionGroup";
+                account: "transferRestrictionGroup"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "transferRestrictionData";
@@ -704,51 +1118,64 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
                 path: "access_control_account.mint";
-                account: "accessControl";
+                account: "accessControl"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "transferRestrictionGroupFrom";
+          name: "transferRestrictionGroupFrom"
         },
         {
-          name: "transferRestrictionGroupTo";
+          name: "transferRestrictionGroupTo"
         },
         {
-          name: "accessControlAccount";
+          name: "accessControlAccount"
         },
         {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
           name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          address: "11111111111111111111111111111111"
         }
       ];
       args: [
         {
           name: "lockUntil";
-          type: "u64";
+          type: "u64"
         }
-      ];
+      ]
     },
     {
       name: "pause";
-      discriminator: [211, 22, 221, 251, 74, 121, 193, 47];
+      discriminator: [
+        211,
+        22,
+        221,
+        251,
+        74,
+        121,
+        193,
+        47
+      ];
       accounts: [
         {
-          name: "securityMint";
+          name: "securityMint"
         },
         {
           name: "transferRestrictionData";
@@ -757,37 +1184,50 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
-                path: "securityMint";
+                path: "securityMint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "accessControlAccount";
+          name: "accessControlAccount"
         },
         {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         }
       ];
       args: [
         {
           name: "paused";
-          type: "bool";
+          type: "bool"
         }
-      ];
+      ]
     },
     {
       name: "revokeHolder";
-      discriminator: [250, 238, 38, 18, 138, 55, 227, 111];
+      discriminator: [
+        250,
+        238,
+        38,
+        18,
+        138,
+        55,
+        227,
+        111
+      ];
       accounts: [
         {
           name: "holder";
@@ -796,19 +1236,23 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 104];
+                value: [
+                  116,
+                  114,
+                  104
+                ]
               },
               {
                 kind: "account";
-                path: "transferRestrictionData";
+                path: "transferRestrictionData"
               },
               {
                 kind: "account";
                 path: "holder.id";
-                account: "transferRestrictionHolder";
+                account: "transferRestrictionHolder"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "transferRestrictionData";
@@ -817,35 +1261,48 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
                 path: "transfer_restriction_data.security_token_mint";
-                account: "transferRestrictionData";
+                account: "transferRestrictionData"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "authorityWalletRole";
-          writable: true;
+          writable: true
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
           name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          address: "11111111111111111111111111111111"
         }
       ];
-      args: [];
+      args: []
     },
     {
       name: "revokeHolderGroup";
-      discriminator: [33, 153, 183, 187, 204, 120, 164, 40];
+      discriminator: [
+        33,
+        153,
+        183,
+        187,
+        204,
+        120,
+        164,
+        40
+      ];
       accounts: [
         {
           name: "holder";
@@ -854,19 +1311,23 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 104];
+                value: [
+                  116,
+                  114,
+                  104
+                ]
               },
               {
                 kind: "account";
-                path: "transferRestrictionData";
+                path: "transferRestrictionData"
               },
               {
                 kind: "account";
                 path: "holder.id";
-                account: "transferRestrictionHolder";
+                account: "transferRestrictionHolder"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "holderGroup";
@@ -875,19 +1336,24 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 104, 103];
+                value: [
+                  116,
+                  114,
+                  104,
+                  103
+                ]
               },
               {
                 kind: "account";
-                path: "holder";
+                path: "holder"
               },
               {
                 kind: "account";
                 path: "group.id";
-                account: "transferRestrictionGroup";
+                account: "transferRestrictionGroup"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "transferRestrictionData";
@@ -896,15 +1362,19 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
                 path: "transfer_restriction_data.security_token_mint";
-                account: "transferRestrictionData";
+                account: "transferRestrictionData"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "group";
@@ -912,39 +1382,52 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 103];
+                value: [
+                  116,
+                  114,
+                  103
+                ]
               },
               {
                 kind: "account";
-                path: "transferRestrictionData";
+                path: "transferRestrictionData"
               },
               {
                 kind: "account";
                 path: "group.id";
-                account: "transferRestrictionGroup";
+                account: "transferRestrictionGroup"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "authorityWalletRole";
-          writable: true;
+          writable: true
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
           name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          address: "11111111111111111111111111111111"
         }
       ];
-      args: [];
+      args: []
     },
     {
       name: "revokeSecurityAssociatedAccount";
-      discriminator: [75, 206, 46, 31, 84, 165, 44, 66];
+      discriminator: [
+        75,
+        206,
+        46,
+        31,
+        84,
+        165,
+        44,
+        66
+      ];
       accounts: [
         {
           name: "securityAssociatedAccount";
@@ -953,29 +1436,33 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [115, 97, 97];
+                value: [
+                  115,
+                  97,
+                  97
+                ]
               },
               {
                 kind: "account";
-                path: "associatedTokenAccount";
+                path: "associatedTokenAccount"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "group";
-          writable: true;
+          writable: true
         },
         {
           name: "holder";
-          writable: true;
+          writable: true
         },
         {
           name: "holderGroup";
-          writable: true;
+          writable: true
         },
         {
-          name: "securityToken";
+          name: "securityToken"
         },
         {
           name: "transferRestrictionData";
@@ -983,17 +1470,21 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
-                path: "securityToken";
+                path: "securityToken"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "userWallet";
+          name: "userWallet"
         },
         {
           name: "associatedTokenAccount";
@@ -1001,7 +1492,7 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "account";
-                path: "userWallet";
+                path: "userWallet"
               },
               {
                 kind: "const";
@@ -1038,11 +1529,11 @@ export type TransferRestrictions = {
                   161,
                   139,
                   252
-                ];
+                ]
               },
               {
                 kind: "account";
-                path: "securityToken";
+                path: "securityToken"
               }
             ];
             program: {
@@ -1080,28 +1571,37 @@ export type TransferRestrictions = {
                 233,
                 248,
                 89
-              ];
-            };
-          };
+              ]
+            }
+          }
         },
         {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
           name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          address: "11111111111111111111111111111111"
         }
       ];
-      args: [];
+      args: []
     },
     {
       name: "setAllowTransferRule";
-      discriminator: [4, 83, 246, 172, 106, 193, 31, 116];
+      discriminator: [
+        4,
+        83,
+        246,
+        172,
+        106,
+        193,
+        31,
+        116
+      ];
       accounts: [
         {
           name: "transferRule";
@@ -1110,24 +1610,27 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114];
+                value: [
+                  116,
+                  114
+                ]
               },
               {
                 kind: "account";
-                path: "transferRestrictionData";
+                path: "transferRestrictionData"
               },
               {
                 kind: "account";
                 path: "transfer_restriction_group_from.id";
-                account: "transferRestrictionGroup";
+                account: "transferRestrictionGroup"
               },
               {
                 kind: "account";
                 path: "transfer_restriction_group_to.id";
-                account: "transferRestrictionGroup";
+                account: "transferRestrictionGroup"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "transferRestrictionData";
@@ -1135,44 +1638,57 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
                 path: "access_control_account.mint";
-                account: "accessControl";
+                account: "accessControl"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "transferRestrictionGroupFrom";
+          name: "transferRestrictionGroupFrom"
         },
         {
-          name: "transferRestrictionGroupTo";
+          name: "transferRestrictionGroupTo"
         },
         {
-          name: "accessControlAccount";
+          name: "accessControlAccount"
         },
         {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         }
       ];
       args: [
         {
           name: "lockedUntil";
-          type: "u64";
+          type: "u64"
         }
-      ];
+      ]
     },
     {
       name: "setHolderGroupMax";
-      discriminator: [83, 33, 238, 145, 212, 216, 16, 197];
+      discriminator: [
+        83,
+        33,
+        238,
+        145,
+        212,
+        216,
+        16,
+        197
+      ];
       accounts: [
         {
           name: "transferRestrictionData";
@@ -1180,23 +1696,27 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
-                path: "mint";
+                path: "mint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "mint";
+          name: "mint"
         },
         {
-          name: "accessControlAccount";
+          name: "accessControlAccount"
         },
         {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
           name: "group";
@@ -1205,36 +1725,49 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 103];
+                value: [
+                  116,
+                  114,
+                  103
+                ]
               },
               {
                 kind: "account";
-                path: "transferRestrictionData";
+                path: "transferRestrictionData"
               },
               {
                 kind: "account";
                 path: "group.id";
-                account: "transferRestrictionGroup";
+                account: "transferRestrictionGroup"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         }
       ];
       args: [
         {
           name: "holderGroupMax";
-          type: "u64";
+          type: "u64"
         }
-      ];
+      ]
     },
     {
       name: "setHolderMax";
-      discriminator: [254, 104, 250, 53, 13, 151, 2, 161];
+      discriminator: [
+        254,
+        104,
+        250,
+        53,
+        13,
+        151,
+        2,
+        161
+      ];
       accounts: [
         {
           name: "transferRestrictionData";
@@ -1243,40 +1776,53 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
-                path: "mint";
+                path: "mint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "mint";
+          name: "mint"
         },
         {
-          name: "accessControlAccount";
+          name: "accessControlAccount"
         },
         {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         }
       ];
       args: [
         {
           name: "holderMax";
-          type: "u64";
+          type: "u64"
         }
-      ];
+      ]
     },
     {
       name: "setLockupEscrowAccount";
-      discriminator: [134, 172, 249, 223, 25, 118, 55, 93];
+      discriminator: [
+        134,
+        172,
+        249,
+        223,
+        25,
+        118,
+        55,
+        93
+      ];
       accounts: [
         {
           name: "transferRestrictionData";
@@ -1285,14 +1831,18 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
-                path: "mint";
+                path: "mint"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "escrowSecurityAssociatedAccount";
@@ -1301,45 +1851,58 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [115, 97, 97];
+                value: [
+                  115,
+                  97,
+                  97
+                ]
               },
               {
                 kind: "account";
-                path: "escrowAccount";
+                path: "escrowAccount"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "mint";
+          name: "mint"
         },
         {
-          name: "accessControlAccount";
+          name: "accessControlAccount"
         },
         {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
-          name: "escrowAccount";
+          name: "escrowAccount"
         },
         {
-          name: "tokenlockAccount";
+          name: "tokenlockAccount"
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
           name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          address: "11111111111111111111111111111111"
         }
       ];
-      args: [];
+      args: []
     },
     {
       name: "updateWalletGroup";
-      discriminator: [225, 33, 252, 93, 186, 129, 24, 241];
+      discriminator: [
+        225,
+        33,
+        252,
+        93,
+        186,
+        129,
+        24,
+        241
+      ];
       accounts: [
         {
           name: "securityAssociatedAccount";
@@ -1348,17 +1911,21 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [115, 97, 97];
+                value: [
+                  115,
+                  97,
+                  97
+                ]
               },
               {
                 kind: "account";
-                path: "userAssociatedTokenAccount";
+                path: "userAssociatedTokenAccount"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "securityToken";
+          name: "securityToken"
         },
         {
           name: "transferRestrictionData";
@@ -1366,14 +1933,18 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 100];
+                value: [
+                  116,
+                  114,
+                  100
+                ]
               },
               {
                 kind: "account";
-                path: "securityToken";
+                path: "securityToken"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "transferRestrictionGroupCurrent";
@@ -1382,19 +1953,23 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 103];
+                value: [
+                  116,
+                  114,
+                  103
+                ]
               },
               {
                 kind: "account";
-                path: "transferRestrictionData";
+                path: "transferRestrictionData"
               },
               {
                 kind: "account";
                 path: "transfer_restriction_group_current.id";
-                account: "transferRestrictionGroup";
+                account: "transferRestrictionGroup"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "transferRestrictionGroupNew";
@@ -1403,19 +1978,23 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 103];
+                value: [
+                  116,
+                  114,
+                  103
+                ]
               },
               {
                 kind: "account";
-                path: "transferRestrictionData";
+                path: "transferRestrictionData"
               },
               {
                 kind: "account";
                 path: "transfer_restriction_group_new.id";
-                account: "transferRestrictionGroup";
+                account: "transferRestrictionGroup"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "holderGroupCurrent";
@@ -1424,20 +2003,25 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 104, 103];
+                value: [
+                  116,
+                  114,
+                  104,
+                  103
+                ]
               },
               {
                 kind: "account";
                 path: "security_associated_account.holder";
-                account: "securityAssociatedAccount";
+                account: "securityAssociatedAccount"
               },
               {
                 kind: "account";
                 path: "security_associated_account.group";
-                account: "securityAssociatedAccount";
+                account: "securityAssociatedAccount"
               }
-            ];
-          };
+            ]
+          }
         },
         {
           name: "holderGroupNew";
@@ -1446,26 +2030,31 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "const";
-                value: [116, 114, 104, 103];
+                value: [
+                  116,
+                  114,
+                  104,
+                  103
+                ]
               },
               {
                 kind: "account";
                 path: "security_associated_account.holder";
-                account: "securityAssociatedAccount";
+                account: "securityAssociatedAccount"
               },
               {
                 kind: "account";
                 path: "transfer_restriction_group_new.id";
-                account: "transferRestrictionGroup";
+                account: "transferRestrictionGroup"
               }
-            ];
-          };
+            ]
+          }
         },
         {
-          name: "authorityWalletRole";
+          name: "authorityWalletRole"
         },
         {
-          name: "userWallet";
+          name: "userWallet"
         },
         {
           name: "userAssociatedTokenAccount";
@@ -1473,7 +2062,7 @@ export type TransferRestrictions = {
             seeds: [
               {
                 kind: "account";
-                path: "userWallet";
+                path: "userWallet"
               },
               {
                 kind: "const";
@@ -1510,11 +2099,11 @@ export type TransferRestrictions = {
                   161,
                   139,
                   252
-                ];
+                ]
               },
               {
                 kind: "account";
-                path: "securityToken";
+                path: "securityToken"
               }
             ];
             program: {
@@ -1552,177 +2141,254 @@ export type TransferRestrictions = {
                 233,
                 248,
                 89
-              ];
-            };
-          };
+              ]
+            }
+          }
         },
         {
           name: "payer";
           writable: true;
-          signer: true;
+          signer: true
         },
         {
           name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          address: "11111111111111111111111111111111"
         }
       ];
-      args: [];
+      args: []
     }
   ];
   accounts: [
     {
       name: "accessControl";
-      discriminator: [147, 81, 178, 92, 223, 66, 181, 132];
+      discriminator: [
+        147,
+        81,
+        178,
+        92,
+        223,
+        66,
+        181,
+        132
+      ]
     },
     {
       name: "holderGroup";
-      discriminator: [136, 231, 252, 48, 92, 187, 25, 164];
+      discriminator: [
+        136,
+        231,
+        252,
+        48,
+        92,
+        187,
+        25,
+        164
+      ]
     },
     {
       name: "securityAssociatedAccount";
-      discriminator: [68, 169, 137, 56, 226, 21, 69, 124];
+      discriminator: [
+        68,
+        169,
+        137,
+        56,
+        226,
+        21,
+        69,
+        124
+      ]
     },
     {
       name: "transferRestrictionData";
-      discriminator: [166, 184, 205, 98, 165, 224, 174, 148];
+      discriminator: [
+        166,
+        184,
+        205,
+        98,
+        165,
+        224,
+        174,
+        148
+      ]
     },
     {
       name: "transferRestrictionGroup";
-      discriminator: [61, 120, 96, 96, 113, 210, 205, 223];
+      discriminator: [
+        61,
+        120,
+        96,
+        96,
+        113,
+        210,
+        205,
+        223
+      ]
     },
     {
       name: "transferRestrictionHolder";
-      discriminator: [196, 226, 112, 46, 157, 122, 48, 157];
+      discriminator: [
+        196,
+        226,
+        112,
+        46,
+        157,
+        122,
+        48,
+        157
+      ]
     },
     {
       name: "transferRule";
-      discriminator: [200, 231, 114, 91, 84, 241, 109, 172];
+      discriminator: [
+        200,
+        231,
+        114,
+        91,
+        84,
+        241,
+        109,
+        172
+      ]
     },
     {
       name: "walletRole";
-      discriminator: [219, 71, 35, 217, 102, 248, 173, 9];
+      discriminator: [
+        219,
+        71,
+        35,
+        217,
+        102,
+        248,
+        173,
+        9
+      ]
     }
   ];
   errors: [
     {
       code: 6000;
       name: "unauthorized";
-      msg: "unauthorized";
+      msg: "unauthorized"
     },
     {
       code: 6001;
       name: "maxHoldersReached";
-      msg: "Max holders reached";
+      msg: "Max holders reached"
     },
     {
       code: 6002;
       name: "transferRuleNotAllowedUntilLater";
-      msg: "Transfer rule not allowed until later";
+      msg: "Transfer rule not allowed until later"
     },
     {
       code: 6003;
       name: "invalidRole";
-      msg: "Invalid role";
+      msg: "Invalid role"
     },
     {
       code: 6004;
       name: "allTransfersPaused";
-      msg: "All transfers are paused";
+      msg: "All transfers are paused"
     },
     {
       code: 6005;
       name: "invalidPda";
-      msg: "Invalid PDA";
+      msg: "Invalid PDA"
     },
     {
       code: 6006;
       name: "balanceIsTooLow";
-      msg: "Balance is too low";
+      msg: "Balance is too low"
     },
     {
       code: 6007;
       name: "currentWalletsCountMustBeZero";
-      msg: "Current wallets count must be zero";
+      msg: "Current wallets count must be zero"
     },
     {
       code: 6008;
       name: "mismatchedEscrowAccount";
-      msg: "Mismatched escrow account";
+      msg: "Mismatched escrow account"
     },
     {
       code: 6009;
       name: "invalidHolderIndex";
-      msg: "Invalid transfer restriction holder index";
+      msg: "Invalid transfer restriction holder index"
     },
     {
       code: 6010;
       name: "maxHoldersReachedInsideTheGroup";
-      msg: "Max holders reached inside the group";
+      msg: "Max holders reached inside the group"
     },
     {
       code: 6011;
       name: "transferGroupNotApproved";
-      msg: "Transfer group not approved";
+      msg: "Transfer group not approved"
     },
     {
       code: 6012;
       name: "incorrectTokenlockAccount";
-      msg: "Wrong tokenlock account";
+      msg: "Wrong tokenlock account"
     },
     {
       code: 6013;
       name: "transferRuleAccountDataIsEmtpy";
-      msg: "Transfer rule account data is empty";
+      msg: "Transfer rule account data is empty"
     },
     {
       code: 6014;
       name: "securityAssociatedAccountDataIsEmtpy";
-      msg: "Security associated account data is empty";
+      msg: "Security associated account data is empty"
     },
     {
       code: 6015;
       name: "transferRestrictionsAccountDataIsEmtpy";
-      msg: "Transfer restrictions account data is empty";
+      msg: "Transfer restrictions account data is empty"
     },
     {
       code: 6016;
       name: "noWalletsInGroup";
-      msg: "No wallets in group";
+      msg: "No wallets in group"
     },
     {
       code: 6017;
       name: "newGroupIsTheSameAsTheCurrentGroup";
-      msg: "New group is the same as the current group";
+      msg: "New group is the same as the current group"
     },
     {
       code: 6018;
       name: "newHolderMaxMustExceedCurrentHolderCount";
-      msg: "New holder max must exceed current holder count";
+      msg: "New holder max must exceed current holder count"
     },
     {
       code: 6019;
       name: "newHolderGroupMaxMustExceedCurrentHolderGroupCount";
-      msg: "New holder group max must exceed current holder group count";
+      msg: "New holder group max must exceed current holder group count"
     },
     {
       code: 6020;
       name: "zeroGroupHolderGroupMaxCannotBeNonZero";
-      msg: "Zero group holder group max cannot be non-zero";
+      msg: "Zero group holder group max cannot be non-zero"
     },
     {
       code: 6021;
       name: "nonPositiveHolderGroupCount";
-      msg: "Non-positive holder group count";
+      msg: "Non-positive holder group count"
     },
     {
       code: 6022;
       name: "currentHolderGroupCountMustBeZero";
-      msg: "Current holder group count must be zero";
+      msg: "Current holder group count must be zero"
     },
     {
       code: 6023;
       name: "valueUnchanged";
-      msg: "The provided value is already set. No changes were made";
+      msg: "The provided value is already set. No changes were made"
+    },
+    {
+      code: 6024;
+      name: "holderGroupAlreadyInitialized";
+      msg: "Holder group already initialized"
     }
   ];
   types: [
@@ -1733,24 +2399,24 @@ export type TransferRestrictions = {
         fields: [
           {
             name: "mint";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "authority";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "maxTotalSupply";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "lockupEscrowAccount";
             type: {
-              option: "pubkey";
-            };
+              option: "pubkey"
+            }
           }
-        ];
-      };
+        ]
+      }
     },
     {
       name: "holderGroup";
@@ -1759,18 +2425,18 @@ export type TransferRestrictions = {
         fields: [
           {
             name: "group";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "holder";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "currentWalletsCount";
-            type: "u64";
+            type: "u64"
           }
-        ];
-      };
+        ]
+      }
     },
     {
       name: "securityAssociatedAccount";
@@ -1779,16 +2445,16 @@ export type TransferRestrictions = {
         fields: [
           {
             name: "group";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "holder";
             type: {
-              option: "pubkey";
-            };
+              option: "pubkey"
+            }
           }
-        ];
-      };
+        ]
+      }
     },
     {
       name: "transferRestrictionData";
@@ -1797,36 +2463,36 @@ export type TransferRestrictions = {
         fields: [
           {
             name: "securityTokenMint";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "accessControlAccount";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "currentHoldersCount";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "holderIds";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "maxHolders";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "paused";
-            type: "bool";
+            type: "bool"
           },
           {
             name: "lockupEscrowAccount";
             type: {
-              option: "pubkey";
-            };
+              option: "pubkey"
+            }
           }
-        ];
-      };
+        ]
+      }
     },
     {
       name: "transferRestrictionGroup";
@@ -1835,22 +2501,22 @@ export type TransferRestrictions = {
         fields: [
           {
             name: "id";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "currentHoldersCount";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "maxHolders";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "transferRestrictionData";
-            type: "pubkey";
+            type: "pubkey"
           }
-        ];
-      };
+        ]
+      }
     },
     {
       name: "transferRestrictionHolder";
@@ -1859,26 +2525,26 @@ export type TransferRestrictions = {
         fields: [
           {
             name: "transferRestrictionData";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "currentWalletsCount";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "currentHolderGroupCount";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "id";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "active";
-            type: "bool";
+            type: "bool"
           }
-        ];
-      };
+        ]
+      }
     },
     {
       name: "transferRule";
@@ -1887,22 +2553,22 @@ export type TransferRestrictions = {
         fields: [
           {
             name: "transferRestrictionData";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "transferGroupIdFrom";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "transferGroupIdTo";
-            type: "u64";
+            type: "u64"
           },
           {
             name: "lockedUntil";
-            type: "u64";
+            type: "u64"
           }
-        ];
-      };
+        ]
+      }
     },
     {
       name: "walletRole";
@@ -1911,18 +2577,18 @@ export type TransferRestrictions = {
         fields: [
           {
             name: "owner";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "accessControl";
-            type: "pubkey";
+            type: "pubkey"
           },
           {
             name: "role";
-            type: "u8";
+            type: "u8"
           }
-        ];
-      };
+        ]
+      }
     }
-  ];
+  ]
 };

@@ -73,7 +73,7 @@ pub fn cancel_timelock<'info>(
     let timelock_account = &mut ctx.accounts.timelock_account;
     let tokenlock_account = &ctx.accounts.tokenlock_account;
     let tokenlock_account_data = tokenlock_account.try_borrow_data()?;
-    let discriminator = TokenLockData::discriminator();
+    let discriminator = TokenLockData::DISCRIMINATOR;
     if sol_memcmp(&discriminator, &tokenlock_account_data, discriminator.len()) != 0 {
         return Err(TokenlockErrors::IncorrectTokenlockAccount.into());
     }

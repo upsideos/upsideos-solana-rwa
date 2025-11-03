@@ -4,7 +4,7 @@ use access_control::{
 use anchor_lang::{prelude::*, solana_program::program_memory::sol_memcmp, Discriminator};
 
 use tokenlock_accounts::{
-    states::{TimelockData, TokenLockData},
+    states::{TimelockData, TokenLockData, VEC_LEN_SIZE},
     wrappers::TokenLockDataWrapper,
 };
 
@@ -15,7 +15,7 @@ pub struct InitializeTimeLock<'info> {
     /// CHECK: implemented own serialization in order to save compute units
     pub tokenlock_account: AccountInfo<'info>,
 
-    #[account(init, payer = authority, space = 10240,
+    #[account(init, payer = authority, space = TimelockData::HEADERS_LEN + VEC_LEN_SIZE * 2,
         seeds = [tokenlock_account.key.as_ref(), target_account.key.as_ref()],
         bump,
     )]
@@ -46,7 +46,7 @@ pub struct InitializeTimeLock<'info> {
 pub fn initialize_timelock(ctx: Context<InitializeTimeLock>) -> Result<()> {
     let tokenlock_account = &ctx.accounts.tokenlock_account;
     let tokenlock_account_data = tokenlock_account.try_borrow_mut_data()?;
-    let discriminator = TokenLockData::discriminator();
+    let discriminator = TokenLockData::DISCRIMINATOR;
     if sol_memcmp(&discriminator, &tokenlock_account_data, discriminator.len()) != 0 {
         return Err(TokenlockErrors::IncorrectTokenlockAccount.into());
     }

@@ -22,4 +22,12 @@ pub enum AccessControlError {
     CannotFreezeLockupEscrowAccount,
     #[msg("The provided value is already set. No changes were made")]
     ValueUnchanged,
+    #[msg("Invalid security associated account")]
+    InvalidSecurityAssociatedAccount,
+    #[msg("Security associated account not initialized")]
+    SecurityAssociatedAccountNotInitialized,
+    #[msg("Transfer hook not configured on mint")]
+    TransferHookNotConfigured,
+    #[msg("Security associated account is required")]
+    SecurityAssociatedAccountRequired,
 }
