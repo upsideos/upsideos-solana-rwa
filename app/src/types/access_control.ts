@@ -495,113 +495,16 @@ export type AccessControl = {
       args: []
     },
     {
-      name: "initializeAccessControl";
-      discriminator: [
-        244,
-        90,
-        245,
-        242,
-        199,
-        224,
-        247,
-        140
-      ];
-      accounts: [
-        {
-          name: "payer";
-          writable: true;
-          signer: true
-        },
-        {
-          name: "authority"
-        },
-        {
-          name: "mint";
-          writable: true;
-          signer: true
-        },
-        {
-          name: "accessControl";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [
-                  97,
-                  99
-                ]
-              },
-              {
-                kind: "account";
-                path: "mint"
-              }
-            ]
-          }
-        },
-        {
-          name: "walletRole";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [
-                  119,
-                  97,
-                  108,
-                  108,
-                  101,
-                  116,
-                  95,
-                  114,
-                  111,
-                  108,
-                  101
-                ]
-              },
-              {
-                kind: "account";
-                path: "mint"
-              },
-              {
-                kind: "account";
-                path: "payer"
-              }
-            ]
-          }
-        },
-        {
-          name: "systemProgram";
-          address: "11111111111111111111111111111111"
-        },
-        {
-          name: "tokenProgram";
-          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
-        }
-      ];
-      args: [
-        {
-          name: "args";
-          type: {
-            defined: {
-              name: "initializeAccessControlArgs"
-            }
-          }
-        }
-      ]
-    },
-    {
-      name: "initializeWalletRole";
+      name: "grantRole";
       discriminator: [
         218,
-        166,
-        58,
-        194,
-        218,
-        211,
-        151,
-        175
+        234,
+        128,
+        15,
+        82,
+        33,
+        236,
+        253
       ];
       accounts: [
         {
@@ -709,6 +612,103 @@ export type AccessControl = {
         {
           name: "role";
           type: "u8"
+        }
+      ]
+    },
+    {
+      name: "initializeAccessControl";
+      discriminator: [
+        244,
+        90,
+        245,
+        242,
+        199,
+        224,
+        247,
+        140
+      ];
+      accounts: [
+        {
+          name: "payer";
+          writable: true;
+          signer: true
+        },
+        {
+          name: "authority"
+        },
+        {
+          name: "mint";
+          writable: true;
+          signer: true
+        },
+        {
+          name: "accessControl";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  97,
+                  99
+                ]
+              },
+              {
+                kind: "account";
+                path: "mint"
+              }
+            ]
+          }
+        },
+        {
+          name: "walletRole";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                kind: "account";
+                path: "mint"
+              },
+              {
+                kind: "account";
+                path: "payer"
+              }
+            ]
+          }
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111"
+        },
+        {
+          name: "tokenProgram";
+          address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ];
+      args: [
+        {
+          name: "args";
+          type: {
+            defined: {
+              name: "initializeAccessControlArgs"
+            }
+          }
         }
       ]
     },
@@ -859,6 +859,123 @@ export type AccessControl = {
         {
           name: "amount";
           type: "u64"
+        }
+      ]
+    },
+    {
+      name: "revokeRole";
+      discriminator: [
+        179,
+        232,
+        2,
+        180,
+        48,
+        227,
+        82,
+        7
+      ];
+      accounts: [
+        {
+          name: "walletRole";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                kind: "account";
+                path: "securityToken"
+              },
+              {
+                kind: "account";
+                path: "userWallet"
+              }
+            ]
+          }
+        },
+        {
+          name: "authorityWalletRole";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                kind: "account";
+                path: "securityToken"
+              },
+              {
+                kind: "account";
+                path: "payer"
+              }
+            ]
+          }
+        },
+        {
+          name: "accessControl";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  97,
+                  99
+                ]
+              },
+              {
+                kind: "account";
+                path: "securityToken"
+              }
+            ]
+          }
+        },
+        {
+          name: "securityToken"
+        },
+        {
+          name: "userWallet"
+        },
+        {
+          name: "payer";
+          writable: true;
+          signer: true
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111"
+        }
+      ];
+      args: [
+        {
+          name: "role";
+          type: "u8"
         }
       ]
     },
@@ -1101,123 +1218,6 @@ export type AccessControl = {
         }
       ];
       args: []
-    },
-    {
-      name: "updateWalletRole";
-      discriminator: [
-        1,
-        63,
-        55,
-        231,
-        251,
-        199,
-        154,
-        9
-      ];
-      accounts: [
-        {
-          name: "walletRole";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [
-                  119,
-                  97,
-                  108,
-                  108,
-                  101,
-                  116,
-                  95,
-                  114,
-                  111,
-                  108,
-                  101
-                ]
-              },
-              {
-                kind: "account";
-                path: "securityToken"
-              },
-              {
-                kind: "account";
-                path: "userWallet"
-              }
-            ]
-          }
-        },
-        {
-          name: "authorityWalletRole";
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [
-                  119,
-                  97,
-                  108,
-                  108,
-                  101,
-                  116,
-                  95,
-                  114,
-                  111,
-                  108,
-                  101
-                ]
-              },
-              {
-                kind: "account";
-                path: "securityToken"
-              },
-              {
-                kind: "account";
-                path: "payer"
-              }
-            ]
-          }
-        },
-        {
-          name: "accessControl";
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [
-                  97,
-                  99
-                ]
-              },
-              {
-                kind: "account";
-                path: "securityToken"
-              }
-            ]
-          }
-        },
-        {
-          name: "securityToken"
-        },
-        {
-          name: "userWallet"
-        },
-        {
-          name: "payer";
-          writable: true;
-          signer: true
-        },
-        {
-          name: "systemProgram";
-          address: "11111111111111111111111111111111"
-        }
-      ];
-      args: [
-        {
-          name: "role";
-          type: "u8"
-        }
-      ]
     }
   ];
   accounts: [
@@ -1318,6 +1318,26 @@ export type AccessControl = {
       code: 6013;
       name: "securityAssociatedAccountRequired";
       msg: "Security associated account is required"
+    },
+    {
+      code: 6014;
+      name: "alreadyHasRole";
+      msg: "Wallet already has this role"
+    },
+    {
+      code: 6015;
+      name: "cannotRevokeRole";
+      msg: "Cannot revoke role that wallet does not have"
+    },
+    {
+      code: 6016;
+      name: "invalidAccessControl";
+      msg: "Invalid access control"
+    },
+    {
+      code: 6017;
+      name: "invalidWalletRoleAccountOwner";
+      msg: "Invalid wallet role account owner"
     }
   ];
   types: [

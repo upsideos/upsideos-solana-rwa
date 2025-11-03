@@ -171,7 +171,7 @@ export class AccessControlHelper {
       .rpc({ commitment: this.commitment });
   }
 
-  async initializeWalletRole(
+  async grantRole(
     walletPubkey: PublicKey,
     role: Roles,
     authority: Keypair,
@@ -182,30 +182,30 @@ export class AccessControlHelper {
     const payerKeypair = payer || authority;
 
     return this.program.methods
-      .initializeWalletRole(role)
+      .grantRole(role)
       .accountsStrict({
         walletRole: walletRolePubkey,
         authorityWalletRole: authorityWalletRolePubkey,
         accessControl: this.accessControlPubkey,
         securityToken: this.mintPubkey,
         userWallet: walletPubkey,
+        payer: payer?.publicKey ?? authority.publicKey,
         authority: authority.publicKey,
-        payer: payerKeypair.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers(payer ? [authority, payerKeypair] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
-  async updateWalletRole(
+  async revokeRole(
     walletPubkey: PublicKey,
-    newRoles: Roles,
+    role: Roles,
     signer: Keypair
   ): Promise<string> {
     const authorityWalletRolePubkey = this.walletRolePDA(signer.publicKey)[0];
     const walletRolePubkey = this.walletRolePDA(walletPubkey)[0];
     return this.program.methods
-      .updateWalletRole(newRoles)
+      .revokeRole(role)
       .accountsStrict({
         walletRole: walletRolePubkey,
         authorityWalletRole: authorityWalletRolePubkey,
