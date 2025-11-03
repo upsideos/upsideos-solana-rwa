@@ -1,88 +1,5 @@
 # Upside OS Solana RWA
 
-# Environment Setup
-
-The environment is necessary to build and run tests of the project.
-
-1. Install Anchor 0.32.1 from https://www.anchor-lang.com/docs/installation
-
-## Build and test source code
-
-### Build programs
-```
-$ anchor build
-```
-
-### Test programs
-1. Generate payer if it doesn't exist yet
-```
-$ solana-keygen new
-```
-2. Run the functional and integration tests. First it builds and deploys the smart contract then tests are executed locally.
-```
-$ anchor test
-```
-
-# Deployment
-
-## Programs
-Generate key and airdrop SOL to the generated address. Than specify cluster and path to the keypair.
-```
-$ solana-keygen new --outfile PATH_TO_GENERATED_KEYPAIR
-``` 
-Airdrop or get some SOL to deploy programs (~20 SOL)
-```
-$ solana airdrop 20 PUBKEY --url CLUSTER_MONIKER_OR_RPC_URL
-```
-```
-$ anchor deploy --provider.cluster CLUSTER --provider.wallet PATH_TO_KEYPAIR
-```
-
-## Mint and Progrmas Accounts
-Generate or add data deployment keypair into `deploy/CLUSTER/deployer.json` file as buffer (for example: `[10, 20 .. 12]`).
-
-Configure `config.ts` where specify
-mint parameters: 
- - `decimals`
- - `name`
- - `symbol`
- - `uri` (logo)
-tokenlock parameters:
- - `maxReleaseDelay`
- - `minTimelockAmount`
- - `space` (in bytes, it is recommended to set 1 Mb)
-other parameters:
- - `maxHolders`
- - `maxTotalSupply`
- - `commitment`
- - `admins` (array of public keys and their role)
-
-Configure RPC URL inside `.env` (copy `.env.example`) if it is different from default.
-```
-$ yarn deploy:CLUSTER
-```
-
-## Deployment Result
-Deployment script generates mint.json with keypair and tokenlock-data-pubkey.json with public key.
-Print information about deployment into console.
-
-## Dividends data
-Before deploying a new dividends distributor, the following steps are required:
-1. Obtain Investor Balances:
-- Capture investor balances for a specific block.
-- Store the data in a CSV file with the format: `wallet_address, balance_amount_in_base_unit`.
-1. Build and Upload the Merkle Tree:
-Build the Merkle tree and upload it to IPFS. Use the following command to upload the Merkle tree:
-```bash
-ts-node deploy/dividends/upload-merkle-tree-to-ipfs.ts -f path_to_snapshot.csv
-```
-1. Configure the Distribution:
-- Specify all parameters for the `config` object inside the `new-dividends-distribution.ts` script.
-- Deploy the new dividends distribution using the following command:
-```bash
-ts-node deploy/new-dividends-distribution.ts --cluster localnet
-```
-
 # Overview
 
 RWA smart contract implementation from Upside.
@@ -189,6 +106,8 @@ The Transfer Admin for the TransferRestrictionsProgram can provision wallet addr
 
    - Ex.: Reg CF unaccredited Investors may be allowed to sell to Accredited US Investors but not vice versa.
 
+**Note:** For most instructions, the `payer` account (which pays account rent) can be different from the `authority` account (which signs the transaction and has the required admin role). This allows for more flexible transaction payment scenarios.
+
 Relevant methods:
 ```typescript
 /**
@@ -198,7 +117,9 @@ Relevant methods:
   * @param transferRestrictionGroup The transfer restriction group PDA as ["trg", transferRestrictionData, groupId].
   * @param transferRestrictionData The Transfer Restricition data initialized for securityToken
   * @param accessControlAccount Access Control Account.
-  * @param payer Wallet which pays transaction fee. Must be Transfer Admin
+  * @param authorityWalletRole The authority's wallet role account for permission check
+  * @param authority Wallet which signs the transaction. Must be Transfer Admin
+  * @param payer Wallet which pays account rent. Can be different from authority
   * @param systemProgram Solana System Program which is required for new on-chain account data initialization
   */
 .initializeTransferRestrictionGroup(groupId)
@@ -206,6 +127,8 @@ Relevant methods:
     transferRestrictionGroup,
     transferRestrictionData,
     accessControlAccount,
+    authorityWalletRole,
+    authority,
     payer,
     systemProgram,
   })
@@ -220,10 +143,13 @@ Relevant methods:
   * But no transfers should be authorized until explicitly allowed. Thus 0 must mean no transfer is allowed.
   * @accounts
   * @param transferRule The transfer rule PDA as ["tr", transferRestrictionGroupFrom, transferRestrictionGroupTo].
+  * @param transferRestrictionData The Transfer Restriction data initialized for securityToken
   * @param transferRestrictionGroupFrom The group the transfer is coming from.
   * @param transferRestrictionGroupTo The group the transfer is going to.
   * @param accessControlAccount Access Control Account.
-  * @param payer Wallet which pays transaction fee. Must be Transfer Admin
+  * @param authorityWalletRole The authority's wallet role account for permission check
+  * @param authority Wallet which signs the transaction. Must be Transfer Admin
+  * @param payer Wallet which pays account rent. Can be different from authority
   * @param systemProgram Solana System Program which is required for new on-chain account data initialization
   */
 initializeTransferRule(lockedUntil)
@@ -233,6 +159,8 @@ initializeTransferRule(lockedUntil)
     transferRestrictionGroupFrom,
     transferRestrictionGroupTo,
     accessControlAccount,
+    authorityWalletRole,
+    authority,
     payer,
     systemProgram,
   })
@@ -241,11 +169,14 @@ initializeTransferRule(lockedUntil)
 ```typescript
 /**
   * @dev A convenience method for initializing the new holder.
-  * @param recipientHolderId The created holderId
+  * @param holderId The created holderId
   * @accounts
   * @param transferRestrictionHolder The transfer restriction holder PDA as ["trh", transferRestrictionData, holderId].
-  * @param transferRestrictionData The Transfer Restricition data initialized for securityToken
-  * @param payer Wallet which pays transaction fee. Must be Transfer or Wallets Admin
+  * @param transferRestrictionData The Transfer Restriction data initialized for securityToken
+  * @param accessControlAccount Access Control Account
+  * @param authorityWalletRole The authority's wallet role account for permission check
+  * @param authority Wallet which signs the transaction. Must be Transfer or Wallets Admin
+  * @param payer Wallet which pays account rent. Can be different from authority
   * @param systemProgram Solana System Program which is required for new on-chain account data initialization
   */
 .initializeTransferRestrictionHolder(holderId)
@@ -253,6 +184,8 @@ initializeTransferRule(lockedUntil)
     transferRestrictionHolder,
     transferRestrictionData,
     accessControlAccount,
+    authorityWalletRole,
+    authority,
     payer,
     systemProgram,
   })
@@ -260,12 +193,15 @@ initializeTransferRule(lockedUntil)
 
 ```typescript
 /**
-  * @dev A convenience method for initializing the new holder.
+  * @dev A convenience method for initializing the holder group.
   * @accounts
-  * @param holderGroup The transfer restriction holderGroup PDA as ["trhg", transferRestrictionData, holderId].
-  * @param transferRestrictionData The Transfer Restricition data initialized for securityToken
+  * @param holderGroup The transfer restriction holderGroup PDA as ["trhg", holder, groupId].
+  * @param transferRestrictionData The Transfer Restriction data initialized for securityToken
+  * @param group The transfer restriction group PDA
   * @param holder The transfer restriction holder PDA as ["trh", transferRestrictionData, holderId].
-  * @param payer Wallet which pays transaction fee. Must be Transfer or Wallets Admin
+  * @param authorityWalletRole The authority's wallet role account for permission check
+  * @param authority Wallet which signs the transaction. Must be Transfer or Wallets Admin
+  * @param payer Wallet which pays account rent. Can be different from authority
   * @param systemProgram Solana System Program which is required for new on-chain account data initialization
   */
 .initializeHolderGroup()
@@ -275,6 +211,7 @@ initializeTransferRule(lockedUntil)
     group,
     holder,
     authorityWalletRole,
+    authority,
     payer,
     systemProgram,
   })
@@ -282,14 +219,19 @@ initializeTransferRule(lockedUntil)
 
 ```typescript
 /**
-  * @dev A convenience method for initializing the transfer group, lock until.
+  * @dev A convenience method for initializing the security associated account.
   * @accounts
   * @param securityAssociatedAccount The security associated account PDA as ["saa", associatedTokenAccount].
   * @param group The desired group account PDA linked with groupId to set for the address.
   * @param holder The holder account PDA linked with holderId
+  * @param holderGroup The holder group account linking holder to group
   * @param securityToken The Token 22 address
-  * @param transferRestrictionData The Transfer Restricition data initialized for securityToken
-  * @param payer Wallet which pays transaction fee. Must be Transfer or Wallets Admin
+  * @param transferRestrictionData The Transfer Restriction data initialized for securityToken
+  * @param userWallet The wallet address to associate
+  * @param associatedTokenAccount The user's associated token account
+  * @param authorityWalletRole The authority's wallet role account for permission check
+  * @param authority Wallet which signs the transaction. Must be Transfer or Wallets Admin
+  * @param payer Wallet which pays account rent. Can be different from authority
   * @param systemProgram Solana System Program which is required for new on-chain account data initialization
   */
 initializeSecurityAssociatedAccount()
@@ -297,10 +239,56 @@ initializeSecurityAssociatedAccount()
     securityAssociatedAccount,
     group,
     holder,
+    holderGroup,
     securityToken,
     transferRestrictionData,
     userWallet,
     associatedTokenAccount,
+    authorityWalletRole,
+    authority,
+    payer,
+    systemProgram,
+  })
+```
+
+```typescript
+/**
+  * @dev Sets address permission (group and freeze status) for a wallet.
+  * This instruction can be used for both new and existing wallets.
+  * For new wallets, it initializes the security associated account and links it to an existing holder.
+  * For existing wallets, it can update the group and/or freeze status.
+  * @param groupId The transfer group ID to assign to the wallet
+  * @param frozen Whether the wallet should be frozen (true) or unfrozen (false)
+  * @accounts
+  * @param securityAssociatedAccount The security associated account PDA as ["saa", associatedTokenAccount]
+  * @param transferRestrictionGroupNew The new transfer restriction group PDA
+  * @param transferRestrictionGroupCurrent Optional: Current transfer restriction group PDA (required for existing wallets)
+  * @param transferRestrictionHolder The holder account PDA
+  * @param holderGroupNew The new holder group PDA
+  * @param holderGroupCurrent Optional: Current holder group PDA (required for existing wallets)
+  * @param securityToken The Token 22 address
+  * @param transferRestrictionData The Transfer Restriction data initialized for securityToken
+  * @param userWallet The wallet address to set permissions for
+  * @param userAssociatedTokenAccount The user's associated token account
+  * @param authorityWalletRole The authority's wallet role account
+  * @param accessControlAccount Access Control Account
+  * @param payer Wallet which pays transaction fee. Can be different from authority
+  * @param systemProgram Solana System Program which is required for new on-chain account data initialization
+  */
+.setAddressPermission(groupId, frozen)
+  .accountsStrict({
+    securityAssociatedAccount,
+    transferRestrictionGroupNew,
+    transferRestrictionGroupCurrent: null, // Optional for new wallets
+    transferRestrictionHolder,
+    holderGroupNew,
+    holderGroupCurrent: null, // Optional for new wallets
+    securityToken,
+    transferRestrictionData,
+    userWallet,
+    userAssociatedTokenAccount,
+    authorityWalletRole,
+    accessControlAccount,
     payer,
     systemProgram,
   })
@@ -311,6 +299,8 @@ initializeSecurityAssociatedAccount()
 The variable `maxTotalSupply` is set when the contract is created and limits the total number of tokens that can be minted.
 
 **Reserve Admins can mint tokens to and burn tokens from any address. This is primarily to comply with law enforcement, regulations and stock issuance scenarios - but this centralized power could be abused. Transfer Admins, authorized by Contract Admins, can also update the transfer rules at any moment in time as many times as they want.**
+
+**Important:** The `mintSecurities` instruction requires that the destination wallet has a security associated account (SAA) initialized before minting. This ensures all recipients have proper transfer restrictions set up. The only exception is when minting to the lockup escrow account (if configured), which is allowed without a SAA. For all other destinations, the security associated account must be initialized using `initializeSecurityAssociatedAccount`, `setAddressPermission`, or `initializeDefaultSecurityAccounts` before tokens can be minted.
 
 ## Overview of Transfer Restriction Enforcement Functions
 
@@ -356,7 +346,11 @@ Typically any legal entity third-party Transfer Agent will need access to both t
 | Function                   | Contract Admin | Reserve Admin | Transfer Admin | Wallets Admin |
 | -------------------------- | -------------- | ------------- | -------------- | ------------- |
 | upgradeTransferRules()     | **yes**        | no            | no             | no            |
+| grantRole()                 | **yes**        | no            | no             | no            |
+| revokeRole()                | **yes**        | no            | no             | no            |
 | newDistributor()           | **yes**        | no            | **yes**        | no            |
+| setReclaimer()             | **yes**        | no            | no             | no            |
+| reclaimDividends()         | no             | no            | **yes**        | no            |
 | mint()                     | no             | **yes**       | no             | no            |
 | burn()                     | no             | **yes**       | no             | no            |
 | forceTransferBetween()     | no             | **yes**       | no             | no            |
@@ -366,6 +360,8 @@ Typically any legal entity third-party Transfer Agent will need access to both t
 | setHolderMax()             | no             | no            | **yes**        | no            |
 | setHolderGroupMax()        | no             | no            | **yes**        | no            |
 | initializeTransferRule()    | no             | no            | **yes**        | no            |
+| setAddressPermission()     | no             | no            | **yes**        | **yes**       |
+| initializeDefaultSecurityAccounts() | no      | **yes**       | **yes**        | **yes**       |
 | freezeWallet()             | no             | no            | **yes**        | **yes**       |
 | thawWallet()               | no             | no            | **yes**        | **yes**       |
 | setTransferGroup()         | no             | no            | **yes**        | **yes**       |
@@ -398,9 +394,9 @@ sequenceDiagram
   Deployer ->> TransferRestrictionsProgram: initializeExtraAccountMetaList(...)
   Deployer ->> TransferRestrictionsProgram: initializeTransferRestrictionsData(...)
 
-  Deployer ->> TransferRestrictionsProgram: initializeWalletRole(TransferAdmin)
-  Deployer ->> TransferRestrictionsProgram: initializeWalletRole(ReserveAdmin)
-  Deployer ->> TransferRestrictionsProgram: initializeWalletRole(WalletsAdmin)
+  Deployer ->> AccessControlProgram: grantRole(TransferAdmin, 8)
+  Deployer ->> AccessControlProgram: grantRole(ReserveAdmin, 2)
+  Deployer ->> AccessControlProgram: grantRole(WalletsAdmin, 4)
 
   TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRestrictionGroup(fromGroupId)
   TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRestrictionGroup(toGroupId)
@@ -539,6 +535,57 @@ Group 0 (the default Holder group) is the only group for which the holder group 
 `initializeSecurityAssociatedAccount` is usually used after KYC/AML verification to activate a particular wallet for transfers.
 Usualy used with `initializeTransferRestricitionHolder` and `initializeHolderGroup` if it is a new holder or new group for existing holder.
 
+## `setAddressPermission`
+
+`setAddressPermission` is a unified instruction that can be used to set address permissions (group and freeze status) for both new and existing wallets. For new wallets, it initializes the security associated account and links it to an existing holder. For existing wallets, it can update the group and/or freeze status. This instruction provides a more flexible alternative to `initializeSecurityAssociatedAccount` when working with existing holders.
+
+## `initializeDefaultSecurityAccounts`
+
+`initializeDefaultSecurityAccounts` is a convenience instruction that combines three separate initialization operations into a single transaction:
+1. Initialize Holder - Creates a new holder account using the next available holder ID
+2. Initialize Holder Group - Links the holder to group 0 (default group)
+3. Initialize Security Associated Account - Creates the security associated account for a user's token account
+
+This instruction simplifies the process of setting up a new wallet with default security settings by automatically assigning the next available holder ID and placing the holder in group 0. The payer can be different from the authority wallet.
+
+**Solana Web3 TS call:**
+```typescript
+await program.methods
+  .initializeDefaultSecurityAccounts(holderId)
+  .accountsStrict({
+    transferRestrictionHolder: holderPda,
+    holderGroup: holderGroupPda,
+    securityAssociatedAccount: securityAssociatedAccountPda,
+    group: group0Pubkey,
+    securityToken: securityMint,
+    transferRestrictionData: transferRestrictionDataPubkey,
+    userWallet: userWallet.publicKey,
+    associatedTokenAccount: userTokenAccount,
+    authorityWalletRole: authorityWalletRolePda,
+    payer: payer.publicKey,
+    systemProgram: SystemProgram.programId,
+  })
+  .signers([authority, payer])
+  .rpc({ commitment });
+```
+
+**Prerequisites:**
+- Security token mint must be initialized
+- Access control must be initialized
+- Transfer restrictions data must be initialized
+- **Group 0 must be initialized** (using `initializeTransferRestrictionGroup`)
+- The user must have an associated token account created
+
+**Benefits:**
+- Reduced transaction costs: Single transaction instead of three
+- Simplified client code: Less complexity in the frontend
+- Consistent defaults: Ensures new wallets are always placed in group 0
+- Atomic operation: All three initializations succeed or fail together
+- Automatic ID assignment: No need to track and pass holder IDs manually
+
+**Authorization:**
+Only Reserve Admin, Transfer Admin, or Wallets Admin can call this instruction.
+
 ## `initialializeTransferRule`
 
 `initializeTransferRule` is used to create new transfer rule for 2 specified groups where `..groupFrom` for senders and `..groupTo` for reveivers
@@ -547,6 +594,8 @@ Usualy used with `initializeTransferRestricitionHolder` and `initializeHolderGro
 
 In order to skip enforcement of transfer restrictions for tokenlock contract escrow account we can call `setLockupEscrowAccount(escrowAddress)`.
 If we do not do that Escrow address will be processed as usual investor account which enforces additional transfer restrictions on cancelTimelock (escrow -> reclaimer and escrow -> timelock recipient) and transferTimelock (escrow -> recipient)
+
+**Note:** Timelock accounts are now reallocated on change rather than allocated with maximum size on initialization. This improves efficiency by only allocating space as needed when adding new timelocks or cancelables. The account size is dynamically adjusted based on the actual data requirements.
 
 ### Cancel Timelock
 
@@ -779,7 +828,7 @@ return sendAndConfirmTransaction(
 
 # Access Control
 
-Access Control Program implements roles `initializeWalletRole`, `updateWalletRole` and ownership under admin RWA functions: `mintSecurities`, `burnSecurities`, `freezeWallet`, `thawWallet`, `forceTransferbetween`. This is similar to the linux file permission bitmask exposed in the `chmod` command line function.
+Access Control Program implements roles `grant_role`, `revoke_role` and ownership under admin RWA functions: `mintSecurities`, `burnSecurities`, `freezeWallet`, `thawWallet`, `forceTransferbetween`. This is similar to the linux file permission bitmask exposed in the `chmod` command line function.
 
 Our implementation uses binary bitmask determine the access control roles for an address. This optimizes the compute units usage and the size of the smart contract code itself.
 
@@ -837,9 +886,52 @@ some_number & WALLETS_ADMIN_ROLE > 0 // checking if some_number contains 0100 bi
 The contract implements simple methods to manipulate Access Controls and check the roles. Note that granting new and revoking existing roles must be done in separate transactions.
 
 ```rust
- fn initialize_wallet_role(u8 role)
+ fn grant_role(u8 role)
 
- fn updateWalletRole(u8 role)
+ fn revoke_role(u8 role)
+```
+
+### Grant Role
+
+Grants a role to a wallet address. The instruction can be called by Contract Admin only. If the wallet role account doesn't exist, it will be created automatically. If the wallet already has the role, the instruction will fail. The payer can be different from the authority.
+
+**Solana Web3 TS call:**
+```typescript
+await program.methods
+  .grantRole(role)
+  .accountsStrict({
+    walletRole: walletRolePubkey,
+    authorityWalletRole: authorityWalletRolePubkey, // Derived from authority
+    accessControl: accessControlPubkey,
+    securityToken: securityMintPubkey,
+    userWallet: userWallet.publicKey,
+    authority: signer.publicKey, // Must be Contract Admin (signer)
+    payer: payer.publicKey, // Can be different from authority
+    systemProgram: SystemProgram.programId,
+  })
+  .signers([authority, payer])
+  .rpc({ commitment });
+```
+
+### Revoke Role
+
+Revokes a role from a wallet address. The instruction can be called by Contract Admin only. The wallet role account must exist and the wallet must have the role being revoked. The payer is the signer and must be the Contract Admin (the authority_wallet_role is derived from the payer).
+
+**Solana Web3 TS call:**
+```typescript
+await program.methods
+  .revokeRole(role)
+  .accountsStrict({
+    walletRole: walletRolePubkey,
+    authorityWalletRole: authorityWalletRolePubkey, // Derived from payer
+    accessControl: accessControlPubkey,
+    securityToken: securityMintPubkey,
+    userWallet: userWallet.publicKey,
+    payer: signer.publicKey, // Must be Contract Admin (signer)
+    systemProgram: SystemProgram.programId,
+  })
+  .signers([signer])
+  .rpc({ commitment });
 ```
 
 # Appendix
@@ -896,7 +988,7 @@ After smart contract deployment, there are certain configurations to complete be
 ```mermaid
 sequenceDiagram
 Title: Post-Deployment Configuration
-  ContractAdmin->>AccessControlProgram: 1. initializeWalletRole(TransferAdmin_Address, 8)
+  ContractAdmin->>AccessControlProgram: 1. grantRole(TransferAdmin_Address, 8)
   AccessControlProgram->>TransferAdmin: Role is granted
   TransferAdmin->>TransferRestrictionProgram: 2. initializeTransferGroup(1)
   TransferAdmin->>TransferRestrictionProgram: 3. initializeTransferRule(1, 1, 1)
@@ -1045,3 +1137,162 @@ await program.methods
     .rpc({ commitment });
 ```
 
+### Set reclaimer
+
+Contract Admin can set a reclaimer wallet address for dividends. This wallet will receive unclaimed dividends when the `reclaimDividends` instruction is invoked. The reclaimer can be set or updated at any time by the Contract Admin.
+
+**Solana Web3 TS call:**
+```typescript
+await program.methods
+  .setReclaimer(reclaimerWallet)
+  .accountsStrict({
+    reclaimer: reclaimerPubkey,
+    accessControl: accessControlPubkey,
+    authorityWalletRole: authorityWalletRolePubkey,
+    securityMint: securityMintPubkey,
+    authority: signer.publicKey,
+    payer: signer.publicKey,
+    systemProgram: SystemProgram.programId,
+  })
+  .signers([signer])
+  .rpc({ commitment });
+```
+
+### Reclaim dividends
+
+Transfer Admin can reclaim unclaimed dividends on behalf of a target wallet and send them to the reclaimer address. This is useful for recovering unclaimed dividends after a distribution period has ended. The reclaimer must be set using `setReclaimer` before this instruction can be called.
+
+**Solana Web3 TS call:**
+```typescript
+await program.methods
+  .reclaimDividends(claimBump, index, amount, proofBytes)
+  .accountsStrict({
+    distributor,
+    reclaimer: reclaimerPubkey,
+    claimStatus: claimStatusPubkey,
+    from: distributorATA,
+    to: reclaimerATA,
+    target: targetWallet.publicKey,
+    payer: signer.publicKey,
+    mint: dividendsMintPubkey,
+    authorityWalletRole: authorityWalletRolePubkey,
+    accessControl: accessControlPubkey,
+    authority: signer.publicKey,
+    systemProgram: SystemProgram.programId,
+    tokenProgram: tokenProgramId,
+  })
+  .signers([signer])
+  .rpc({ commitment });
+```
+
+## Reclaim Dividends Flow
+
+The reclaim dividends flow allows Transfer Admins to recover unclaimed dividends and send them to a designated reclaimer address. This is useful when investors fail to claim their dividends within a specified period.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor CA as ContractAdmin
+    actor TA as TransferAdmin
+    actor Investor
+
+    participant DividendsContract
+    participant Distributor
+
+    CA ->> DividendsContract: setReclaimer(reclaimerWallet)
+    Note right of DividendsContract: Reclaimer wallet is set for future reclaims
+
+    Investor ->> DividendsContract: claimDividend(index, amount, proof)
+    DividendsContract ->> Investor: Transfer dividend payment token
+
+    Note over Investor,TA: Some dividends remain unclaimed after claim period
+
+    TA ->> DividendsContract: reclaimDividends(targetWallet, index, amount, proof)
+    DividendsContract ->> DividendsContract: Verify merkle proof
+    DividendsContract ->> DividendsContract: Mark as claimed
+    DividendsContract ->> DividendsContract: Transfer to reclaimer address
+    DividendsContract ->> TA: Reclaimed dividends sent to reclaimer
+```
+
+# Environment Setup
+
+The environment is necessary to build and run tests of the project.
+
+1. Install Anchor 0.32.1 from https://www.anchor-lang.com/docs/installation
+
+## Build and test source code
+
+### Build programs
+```
+$ anchor build
+```
+
+### Test programs
+1. Generate payer if it doesn't exist yet
+```
+$ solana-keygen new
+```
+2. Run the functional and integration tests. First it builds and deploys the smart contract then tests are executed locally.
+```
+$ anchor test
+```
+
+# Deployment
+
+## Programs
+Generate key and airdrop SOL to the generated address. Than specify cluster and path to the keypair.
+```
+$ solana-keygen new --outfile PATH_TO_GENERATED_KEYPAIR
+``` 
+Airdrop or get some SOL to deploy programs (~20 SOL)
+```
+$ solana airdrop 20 PUBKEY --url CLUSTER_MONIKER_OR_RPC_URL
+```
+```
+$ anchor deploy --provider.cluster CLUSTER --provider.wallet PATH_TO_KEYPAIR
+```
+
+## Mint and Progrmas Accounts
+Generate or add data deployment keypair into `deploy/CLUSTER/deployer.json` file as buffer (for example: `[10, 20 .. 12]`).
+
+Configure `config.ts` where specify
+mint parameters: 
+ - `decimals`
+ - `name`
+ - `symbol`
+ - `uri` (logo)
+tokenlock parameters:
+ - `maxReleaseDelay`
+ - `minTimelockAmount`
+ - `space` (in bytes, it is recommended to set 1 Mb)
+other parameters:
+ - `maxHolders`
+ - `maxTotalSupply`
+ - `commitment`
+ - `admins` (array of public keys and their role)
+
+Configure RPC URL inside `.env` (copy `.env.example`) if it is different from default.
+```
+$ yarn deploy:CLUSTER
+```
+
+## Deployment Result
+Deployment script generates mint.json with keypair and tokenlock-data-pubkey.json with public key.
+Print information about deployment into console.
+
+## Dividends data
+Before deploying a new dividends distributor, the following steps are required:
+1. Obtain Investor Balances:
+- Capture investor balances for a specific block.
+- Store the data in a CSV file with the format: `wallet_address, balance_amount_in_base_unit`.
+1. Build and Upload the Merkle Tree:
+Build the Merkle tree and upload it to IPFS. Use the following command to upload the Merkle tree:
+```bash
+ts-node deploy/dividends/upload-merkle-tree-to-ipfs.ts -f path_to_snapshot.csv
+```
+1. Configure the Distribution:
+- Specify all parameters for the `config` object inside the `new-dividends-distribution.ts` script.
+- Deploy the new dividends distribution using the following command:
+```bash
+ts-node deploy/new-dividends-distribution.ts --cluster localnet
+```
