@@ -93,7 +93,7 @@ This implementation attempts to balance simplicity and sufficiency for smart con
 Solana RWA consists of several modules:
 * **Access Management**
 * **Transfer Groups and Rules Management**
-* **Token2022 RWA Tansfer**
+* **Token2022 RWA Transfer**
 
 ### Disclaimer
 
@@ -512,7 +512,7 @@ Note that there are no transfers initially authorized between groups. By default
 
 Lockup periods are enforced via:
 
-- `initializeTrnasferRule(fromGroup, toGroup, unixTimestamp)` or `setAllowTransferRule(fromGroup, toGroup, unixTimestamp)` allows transfers from one Transfer Group to another after the unixTimestamp. If the unixTimestamp is 0, then no transfer is allowed.
+- `initializeTransferRule(fromGroup, toGroup, unixTimestamp)` or `setAllowTransferRule(fromGroup, toGroup, unixTimestamp)` allows transfers from one Transfer Group to another after the unixTimestamp. If the unixTimestamp is 0, then no transfer is allowed.
 
 ## Maximum Number of Holders Allowed
 
@@ -959,7 +959,7 @@ sequenceDiagram
 
 1. Anyone can fund the dividend using a payment token of specified distribution. This example uses USDC. The dividend must be funded for a specific `distributor`. Sender wallet must hold the payment token in order to fund the dividend. The payment token is extracted and sent to the `Distribution` PDA upon successful funding.
 
-1. Recipient is free to claim the dividend by invoking `claimDividend` from the `Dividends` program. Note that claiming is available only when dividends treasury balance has anough tokens to distribute dividends to all investors.
+1. Recipient is free to claim the dividend by invoking `claimDividend` from the `Dividends` program. Note that claiming is available only when dividends treasury balance has enough tokens to distribute dividends to all investors.
 
 1. Amount of entitled dividend token is transferred from the `Dividends` PDA to the rightful recipient.
 
