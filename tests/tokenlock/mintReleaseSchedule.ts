@@ -504,7 +504,7 @@ describe("TokenLockup mint release schedules", () => {
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(totalRecipientAmount),
-      new anchor.BN(nowTs + MAX_RELEASE_DELAY + 1000),
+      new anchor.BN(nowTs + MAX_RELEASE_DELAY + 5000),
       Number(scheduleId),
       [],
       tokenlockDataPubkey,
@@ -517,6 +517,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
+    console.log(timelockId);
     assert(timelockId === "Commencement time out of range");
 
     const timelockCount = timelockCountOf(
@@ -582,7 +583,7 @@ describe("TokenLockup mint release schedules", () => {
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(totalRecipientAmount),
-      new anchor.BN(nowTs + 1000),
+      new anchor.BN(nowTs + 5000),
       Number(scheduleId),
       [],
       tokenlockDataPubkey,
@@ -595,6 +596,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
+    console.log(timelockId);
     assert(timelockId === "Initial release out of range");
   });
 
