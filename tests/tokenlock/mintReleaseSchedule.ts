@@ -517,7 +517,6 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    console.log(timelockId);
     assert(timelockId === "Commencement time out of range");
 
     const timelockCount = timelockCountOf(
