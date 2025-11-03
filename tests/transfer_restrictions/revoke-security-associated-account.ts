@@ -477,10 +477,10 @@ describe("Revoke security associated account", () => {
     const authorityBalanceAfter =
       await testEnvironment.connection.getBalance(authority.publicKey);
 
-    // Payer's balance should have increased (revoking security associated account paid fees)
+    // Payer's balance should have increased (received refund for revoking security associated account)
     assert.isTrue(
       payerBalanceAfter > payerBalanceBefore,
-      "Payer balance should increase after revoking security associated account (paid fees)"
+      "Payer balance should increase after revoking security associated account (received refund)"
     );
     // Authority's balance should not decrease (only payer pays)
     assert.equal(
