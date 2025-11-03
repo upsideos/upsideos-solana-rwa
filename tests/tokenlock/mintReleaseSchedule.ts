@@ -504,7 +504,7 @@ describe("TokenLockup mint release schedules", () => {
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(totalRecipientAmount),
-      new anchor.BN(nowTs + MAX_RELEASE_DELAY + 1000),
+      new anchor.BN(nowTs + MAX_RELEASE_DELAY + 5000),
       Number(scheduleId),
       [],
       tokenlockDataPubkey,
