@@ -148,7 +148,7 @@ pub fn transfer_wallet_between_groups(
 
     // Check group max count
     if group_new.current_holders_count > group_new.max_holders && group_new.max_holders != 0 {
-        return Err(TransferRestrictionsError::MaxHoldersReached.into());
+        return Err(TransferRestrictionsError::MaxHoldersReachedInsideTheGroup.into());
     }
 
     // Update wallet counts (decrement from current, increment to new)

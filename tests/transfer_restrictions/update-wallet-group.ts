@@ -663,7 +663,7 @@ describe("Update wallet group", () => {
     );
   });
 
-  it("updates wallet group when more than 1 wallet in current group and it is already in new group", async () => {
+  it("reverts when max holders reached inside the group", async () => {
     const signer = testEnvironment.transferAdmin;
     const [authorityWalletRolePubkey] =
       testEnvironment.accessControlHelper.walletRolePDA(signer.publicKey);
@@ -742,8 +742,8 @@ describe("Update wallet group", () => {
         .rpc({ commitment: testEnvironment.commitment });
       assert.fail("Expect an error");
     } catch ({ error }) {
-      assert.equal(error.errorCode.code, "MaxHoldersReached");
-      assert.equal(error.errorMessage, "Max holders reached");
+      assert.equal(error.errorCode.code, "MaxHoldersReachedInsideTheGroup");
+      assert.equal(error.errorMessage, "Max holders reached inside the group");
     }
 
     const { currentWalletsCount: holderGroupCurrentWalletsCountAfter } =
