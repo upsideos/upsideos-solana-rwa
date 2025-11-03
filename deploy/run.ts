@@ -15,6 +15,7 @@ import {
   readPubkeyFromFile,
   savePubkeyToFile,
   setupAccessControlData,
+  revokeContractAdminRole,
 } from "./helpers";
 import { AccessControlHelper } from "../tests/helpers/access-control_helper";
 import { TransferRestrictionsHelper } from "../tests/helpers/transfer-restrictions_helper";
@@ -133,7 +134,7 @@ const consoleLine = (symbol: string = "*") => console.log(symbol.repeat(50));
     );
     if (accountInfo === null) {
       console.log("Assigning wallet role to", adminPubkey.toBase58());
-      await accessControlHelper.initializeWalletRole(
+      await accessControlHelper.grantRole(
         adminPubkey,
         admin.role,
         deployerKeypair
@@ -289,6 +290,11 @@ const consoleLine = (symbol: string = "*") => console.log(symbol.repeat(50));
       escrowAccount.toString()
     );
   }
+  consoleLine();
+  console.log(
+    "7. Revoking ContractAdmin role from deployer and validating..."
+  );
+  await revokeContractAdminRole(accessControlHelper, deployerKeypair);
   consoleLine();
   console.log("=== FINISH ===");
   const accessControlDataFinal = await accessControlHelper.accessControlData();

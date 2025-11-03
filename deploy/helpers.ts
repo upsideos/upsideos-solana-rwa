@@ -141,3 +141,74 @@ export async function setupAccessControlData(
     transactionSignature
   );
 }
+
+export async function revokeContractAdminRole(
+  accessControlHelper: AccessControlHelper,
+  deployerKeypair: Keypair
+): Promise<void> {
+  const contractAdminRole = 1; // Roles.ContractAdmin
+  const deployerWalletRolePubkey =
+    accessControlHelper.walletRolePDA(deployerKeypair.publicKey)[0];
+  const deployerWalletRoleBefore = await accessControlHelper.walletRoleData(
+    deployerWalletRolePubkey
+  );
+  console.log(
+    "Deployer wallet role before revocation:",
+    deployerWalletRoleBefore.role.toString()
+  );
+
+  // Check if deployer has ContractAdmin role (role = 1)
+  const hasContractAdmin =
+    (deployerWalletRoleBefore.role & contractAdminRole) === contractAdminRole;
+
+  if (hasContractAdmin) {
+    console.log("Revoking ContractAdmin role from deployer...");
+    await accessControlHelper.revokeRole(
+      deployerKeypair.publicKey,
+      contractAdminRole, // ContractAdmin role
+      deployerKeypair
+    );
+    console.log("ContractAdmin role revoked successfully");
+
+    // Validate that role is now 0 (ContractAdmin bit removed)
+    const deployerWalletRoleAfter = await accessControlHelper.walletRoleData(
+      deployerWalletRolePubkey
+    );
+    console.log(
+      "Deployer wallet role after revocation:",
+      deployerWalletRoleAfter.role.toString()
+    );
+
+    // Validate that role is now 0
+    if (deployerWalletRoleAfter.role === 0) {
+      console.log("✓ Validation successful: Deployer role is now 0");
+    } else {
+      console.log(
+        "✗ Validation failed: Deployer role is",
+        deployerWalletRoleAfter.role.toString(),
+        "expected 0"
+      );
+      throw new Error(
+        "Role validation failed: expected 0, got " +
+          deployerWalletRoleAfter.role.toString()
+      );
+    }
+  } else {
+    console.log(
+      "Deployer does not have ContractAdmin role (role:",
+      deployerWalletRoleBefore.role.toString(),
+      "), skipping revocation"
+    );
+
+    // Validate that role is already 0
+    if (deployerWalletRoleBefore.role === 0) {
+      console.log("✓ Validation: Deployer role is already 0");
+    } else {
+      console.log(
+        "⚠ Warning: Deployer role is not 0 but ContractAdmin is not set (role:",
+        deployerWalletRoleBefore.role.toString(),
+        ")"
+      );
+    }
+  }
+}
