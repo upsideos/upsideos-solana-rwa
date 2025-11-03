@@ -1,5 +1,7 @@
 #![allow(unexpected_cfgs)]
 use anchor_lang::prelude::*;
+use spl_transfer_hook_interface::instruction::ExecuteInstruction;
+use spl_discriminator::SplDiscriminate;
 
 pub mod contexts;
 pub mod errors;
@@ -18,7 +20,7 @@ pub mod transfer_restrictions {
     use super::*;
 
     /// execute transfer hook
-    #[interface(spl_transfer_hook_interface::execute)]
+    #[instruction(discriminator = ExecuteInstruction::SPL_DISCRIMINATOR_SLICE)]
     pub fn execute_transaction(ctx: Context<ExecuteTransferHook>, amount: u64) -> Result<()> {
         instructions::transfer_hook::handler(ctx, amount)
     }
