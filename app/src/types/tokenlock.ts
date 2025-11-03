@@ -185,6 +185,10 @@ export type Tokenlock = {
         },
         {
           name: "authority";
+          signer: true
+        },
+        {
+          name: "payer";
           writable: true;
           signer: true
         },
@@ -313,8 +317,12 @@ export type Tokenlock = {
           }
         },
         {
-          name: "authority";
+          name: "payer";
           writable: true;
+          signer: true
+        },
+        {
+          name: "authority";
           signer: true
         },
         {
@@ -340,6 +348,10 @@ export type Tokenlock = {
         {
           name: "accessControlProgram";
           address: "4X79YRjz9KNMhdjdxXg2ZNTS3YnMGYdwJkBHnezMJwr3"
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111"
         }
       ];
       args: [

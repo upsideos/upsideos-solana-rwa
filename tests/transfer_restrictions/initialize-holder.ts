@@ -1,11 +1,12 @@
 import * as anchor from "@coral-xyz/anchor";
 import { assert } from "chai";
-import { SystemProgram } from "@solana/web3.js";
+import { SystemProgram, Keypair } from "@solana/web3.js";
 
 import {
   TestEnvironment,
   TestEnvironmentParams,
 } from "../helpers/test_environment";
+import { topUpWallet } from "../utils";
 
 describe("Initialize transfer restriction Holder", () => {
   const testEnvironmentParams: TestEnvironmentParams = {
@@ -16,7 +17,7 @@ describe("Initialize transfer restriction Holder", () => {
       uri: "https://example.com",
     },
     initialSupply: 1_000_000_000_000,
-    maxHolders: 2,
+    maxHolders: 3,
     maxTotalSupply: 100_000_000_000_000,
   };
   let testEnvironment: TestEnvironment;
@@ -46,6 +47,7 @@ describe("Initialize transfer restriction Holder", () => {
           accessControlAccount:
             testEnvironment.accessControlHelper.accessControlPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -75,6 +77,7 @@ describe("Initialize transfer restriction Holder", () => {
           accessControlAccount:
             testEnvironment.accessControlHelper.accessControlPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -107,6 +110,7 @@ describe("Initialize transfer restriction Holder", () => {
           accessControlAccount:
             testEnvironment.accessControlHelper.accessControlPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -138,6 +142,7 @@ describe("Initialize transfer restriction Holder", () => {
         accessControlAccount:
           testEnvironment.accessControlHelper.accessControlPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -176,6 +181,7 @@ describe("Initialize transfer restriction Holder", () => {
         accessControlAccount:
           testEnvironment.accessControlHelper.accessControlPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -194,6 +200,59 @@ describe("Initialize transfer restriction Holder", () => {
       await testEnvironment.transferRestrictionsHelper.transferRestrictionData();
     assert.equal(trData.currentHoldersCount.toNumber(), 2);
     assert.equal(trData.holderIds.toNumber(), 2);
+  });
+
+  it("payer can be different from authority and pays all fees", async () => {
+    const payer = Keypair.generate();
+    await topUpWallet(testEnvironment.connection, payer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+
+    const authority = testEnvironment.transferAdmin;
+    const [authorityWalletRolePubkey] =
+      testEnvironment.accessControlHelper.walletRolePDA(authority.publicKey);
+    const trData =
+      await testEnvironment.transferRestrictionsHelper.transferRestrictionData();
+    const holderIdx = trData.holderIds;
+    const [holderPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderPDA(holderIdx);
+
+    const payerBalanceBefore =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceBefore =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    await testEnvironment.transferRestrictionsHelper.program.methods
+      .initializeTransferRestrictionHolder(holderIdx)
+      .accountsStrict({
+        transferRestrictionHolder: holderPubkey,
+        transferRestrictionData:
+          testEnvironment.transferRestrictionsHelper
+            .transferRestrictionDataPubkey,
+        payer: payer.publicKey,
+        accessControlAccount:
+          testEnvironment.accessControlHelper.accessControlPubkey,
+        authorityWalletRole: authorityWalletRolePubkey,
+        authority: authority.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([authority, payer])
+      .rpc({ commitment: testEnvironment.commitment });
+
+    const payerBalanceAfter =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceAfter =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    // Payer's balance should have decreased (paid fees)
+    assert.isTrue(
+      payerBalanceAfter < payerBalanceBefore,
+      "Payer balance should decrease after paying fees"
+    );
+    // Authority's balance should not decrease (only payer pays)
+    assert.equal(
+      authorityBalanceAfter,
+      authorityBalanceBefore,
+      "Authority balance should not change when not the payer"
+    );
   });
 
   it("fails to initialize holder when max holders reached", async () => {
@@ -217,6 +276,7 @@ describe("Initialize transfer restriction Holder", () => {
           accessControlAccount:
             testEnvironment.accessControlHelper.accessControlPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -251,6 +311,7 @@ describe("Initialize transfer restriction Holder", () => {
               .transferRestrictionDataPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -283,6 +344,7 @@ describe("Initialize transfer restriction Holder", () => {
           accessControlAccount:
             testEnvironment.accessControlHelper.accessControlPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])

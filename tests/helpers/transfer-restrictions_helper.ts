@@ -168,7 +168,8 @@ export class TransferRestrictionsHelper {
   initializeTransferRestrictionData(
     maxHolders: BN,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): any {
     const [groupPDA] = this.groupPDA(new BN(0));
     return this.program.methods
@@ -178,33 +179,37 @@ export class TransferRestrictionsHelper {
         accessControlAccount: this.accessControlPubkey,
         mint: this.mintPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
-        payer: payer.publicKey,
+        payer: payer ? payer.publicKey : authority.publicKey,
+        authority: authority.publicKey,
         zeroTransferRestrictionGroup: groupPDA,
         systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_2022_PROGRAM_ID,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payer] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
   async initializeTransferRestrictionGroup(
     groupId: BN,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): Promise<string> {
     const [groupPubkey] = this.groupPDA(groupId);
+    const payerKeypair = payer || authority;
 
     return this.program.methods
       .initializeTransferRestrictionGroup(groupId)
       .accountsStrict({
         transferRestrictionGroup: groupPubkey,
         transferRestrictionData: this.transferRestrictionDataPubkey,
-        payer: payer.publicKey,
+        authority: authority.publicKey,
+        payer: payerKeypair.publicKey,
         accessControlAccount: this.accessControlPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payerKeypair] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
@@ -213,7 +218,8 @@ export class TransferRestrictionsHelper {
     transferGroupFromId: BN,
     transferGroupToId: BN,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): Promise<string> {
     const [transferRulePubkey] = this.transferRulePDA(
       transferGroupFromId,
@@ -221,6 +227,7 @@ export class TransferRestrictionsHelper {
     );
     const [transferGroupFromPubkey] = this.groupPDA(transferGroupFromId);
     const [transferGroupToPubkey] = this.groupPDA(transferGroupToId);
+    const payerKeypair = payer || authority;
 
     return this.program.methods
       .initializeTransferRule(lockedUntil)
@@ -231,31 +238,35 @@ export class TransferRestrictionsHelper {
         transferRestrictionGroupTo: transferGroupToPubkey,
         accessControlAccount: this.accessControlPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
-        payer: payer.publicKey,
+        authority: authority.publicKey,
+        payer: payerKeypair.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payerKeypair] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
   async initializeTransferRestrictionHolder(
     holderId: BN,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): Promise<string> {
     const [holderPubkey] = this.holderPDA(holderId);
+    const payerKeypair = payer || authority;
 
     return this.program.methods
       .initializeTransferRestrictionHolder(holderId)
       .accountsStrict({
         transferRestrictionHolder: holderPubkey,
         transferRestrictionData: this.transferRestrictionDataPubkey,
-        payer: payer.publicKey,
+        authority: authority.publicKey,
+        payer: payerKeypair.publicKey,
         accessControlAccount: this.accessControlPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payerKeypair] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
@@ -266,11 +277,13 @@ export class TransferRestrictionsHelper {
     userWalletPubkey: PublicKey,
     userWalletAssociatedAccountPubkey: PublicKey,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): Promise<string> {
     const [securityAssociatedAccountPubkey] = this.securityAssociatedAccountPDA(
       userWalletAssociatedAccountPubkey
     );
+    const payerKeypair = payer || authority;
 
     return this.program.methods
       .initializeSecurityAssociatedAccount()
@@ -284,10 +297,11 @@ export class TransferRestrictionsHelper {
         userWallet: userWalletPubkey,
         associatedTokenAccount: userWalletAssociatedAccountPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
-        payer: payer.publicKey,
+        authority: authority.publicKey,
+        payer: payerKeypair.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payerKeypair] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
@@ -296,8 +310,11 @@ export class TransferRestrictionsHelper {
     holderPubkey: PublicKey,
     groupPubkey: PublicKey,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): Promise<string> {
+    const payerKeypair = payer || authority;
+
     return this.program.methods
       .initializeHolderGroup()
       .accountsStrict({
@@ -306,10 +323,11 @@ export class TransferRestrictionsHelper {
         group: groupPubkey,
         holder: holderPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
-        payer: payer.publicKey,
+        authority: authority.publicKey,
+        payer: payerKeypair.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payerKeypair] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
@@ -410,7 +428,8 @@ export class TransferRestrictionsHelper {
     userWalletPubkey: PublicKey,
     userWalletAssociatedAccountPubkey: PublicKey,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): Promise<string> {
     const userWalletSecAssocAccountData =
       await this.securityAssociatedAccountData(
@@ -420,6 +439,7 @@ export class TransferRestrictionsHelper {
     const holderPubkey = userWalletSecAssocAccountData.holder;
     const [groupPubkey] = this.groupPDA(groupId);
     const [holderGroupPubkey] = this.holderGroupPDA(holderPubkey, groupId);
+    const payerKeypair = payer || authority;
 
     return this.program.methods
       .revokeSecurityAssociatedAccount()
@@ -433,28 +453,33 @@ export class TransferRestrictionsHelper {
         userWallet: userWalletPubkey,
         associatedTokenAccount: userWalletAssociatedAccountPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
-        payer: payer.publicKey,
+        authority: authority.publicKey,
+        payer: payerKeypair.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payerKeypair] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
   async revokeHolder(
     holderPubkey: PublicKey,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): Promise<string> {
+    const payerKeypair = payer || authority;
+
     return this.program.methods
       .revokeHolder()
       .accountsStrict({
         holder: holderPubkey,
         transferRestrictionData: this.transferRestrictionDataPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
-        payer: payer.publicKey,
+        authority: authority.publicKey,
+        payer: payerKeypair.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payerKeypair] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
@@ -462,10 +487,12 @@ export class TransferRestrictionsHelper {
     holderPubkey: PublicKey,
     groupId: BN,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): Promise<string> {
     const [holderGroupPubkey] = this.holderGroupPDA(holderPubkey, groupId);
     const [groupPubkey] = this.groupPDA(groupId);
+    const payerKeypair = payer || authority;
 
     return this.program.methods
       .revokeHolderGroup()
@@ -475,10 +502,11 @@ export class TransferRestrictionsHelper {
         transferRestrictionData: this.transferRestrictionDataPubkey,
         group: groupPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
-        payer: payer.publicKey,
+        authority: authority.publicKey,
+        payer: payerKeypair.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payerKeypair] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
@@ -486,7 +514,8 @@ export class TransferRestrictionsHelper {
     lockupEscrowAccountPubkey: PublicKey,
     tokenlockAccountPubkey: PublicKey,
     authorityWalletRolePubkey: PublicKey,
-    payer: Keypair
+    authority: Keypair,
+    payer?: Keypair
   ): Promise<string> {
     const [escrowSecurityAssociatedAccountPubkey] =
       this.securityAssociatedAccountPDA(lockupEscrowAccountPubkey);
@@ -500,10 +529,11 @@ export class TransferRestrictionsHelper {
         authorityWalletRole: authorityWalletRolePubkey,
         escrowAccount: lockupEscrowAccountPubkey,
         tokenlockAccount: tokenlockAccountPubkey,
-        payer: payer.publicKey,
+        payer: payer ? payer.publicKey : authority.publicKey,
+        authority: authority.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([payer])
+      .signers(payer ? [authority, payer] : [authority])
       .rpc({ commitment: this.commitment });
   }
 
@@ -512,7 +542,8 @@ export class TransferRestrictionsHelper {
     userWalletAssociatedAccountPubkey: PublicKey,
     authorityWalletRolePubkey: PublicKey,
     authority: Keypair,
-    groupIdx: BN = new BN(0)
+    groupIdx: BN = new BN(0),
+    payer?: Keypair
   ) {
     const [securityAssociatedAccountPubkey] = this.securityAssociatedAccountPDA(
       userWalletAssociatedAccountPubkey
@@ -531,7 +562,8 @@ export class TransferRestrictionsHelper {
       await this.initializeTransferRestrictionHolder(
         holderId,
         authorityWalletRolePubkey,
-        authority
+        authority,
+        payer
       );
 
       // Get PDAs
@@ -548,7 +580,8 @@ export class TransferRestrictionsHelper {
         holderPubkey,
         groupPubkey,
         authorityWalletRolePubkey,
-        authority
+        authority,
+        payer
       );
 
       // Initialize security associated account
@@ -559,7 +592,8 @@ export class TransferRestrictionsHelper {
         userWalletPubkey,
         userWalletAssociatedAccountPubkey,
         authorityWalletRolePubkey,
-        authority
+        authority,
+        payer
       );
     }
   }

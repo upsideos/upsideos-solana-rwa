@@ -1,7 +1,6 @@
 use access_control::Roles;
 use anchor_lang::prelude::*;
 
-use crate::errors::*;
 use crate::helpers::*;
 use crate::InitializeTransferRestrictionHolder;
 

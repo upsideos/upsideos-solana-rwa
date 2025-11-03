@@ -6,6 +6,7 @@ import {
   TestEnvironment,
   TestEnvironmentParams,
 } from "../helpers/test_environment";
+import { topUpWallet } from "../utils";
 
 describe("Revoke holder group", () => {
   const testEnvironmentParams: TestEnvironmentParams = {
@@ -128,6 +129,7 @@ describe("Revoke holder group", () => {
           group: groupPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -164,6 +166,7 @@ describe("Revoke holder group", () => {
           group: groupPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -205,6 +208,7 @@ describe("Revoke holder group", () => {
         group: groupPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -253,6 +257,7 @@ describe("Revoke holder group", () => {
         group: groupPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -271,6 +276,62 @@ describe("Revoke holder group", () => {
     );
   });
 
+  it("payer can be different from authority and pays all fees", async () => {
+    const payer = Keypair.generate();
+    await topUpWallet(testEnvironment.connection, payer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+
+    const authority = testEnvironment.transferAdmin;
+    const [authorityWalletRolePubkey] =
+      testEnvironment.accessControlHelper.walletRolePDA(authority.publicKey);
+    const [holderPubkey] = testEnvironment.transferRestrictionsHelper.holderPDA(
+      new anchor.BN(2)
+    );
+    const [holderGroupPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
+        holderPubkey,
+        groupId
+      );
+
+    const payerBalanceBefore =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceBefore =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    await testEnvironment.transferRestrictionsHelper.program.methods
+      .revokeHolderGroup()
+      .accountsStrict({
+        holder: holderPubkey,
+        holderGroup: holderGroupPubkey,
+        transferRestrictionData:
+          testEnvironment.transferRestrictionsHelper
+            .transferRestrictionDataPubkey,
+        group: groupPubkey,
+        authorityWalletRole: authorityWalletRolePubkey,
+        payer: payer.publicKey,
+        authority: authority.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([authority, payer])
+      .rpc({ commitment: testEnvironment.commitment });
+
+    const payerBalanceAfter =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceAfter =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    // Payer's balance should have increased (paid fees refunded)
+    assert.isTrue(
+      payerBalanceAfter > payerBalanceBefore,
+      "Payer balance should increase after paying fees (refunded)"
+    );
+    // Authority's balance should not decrease (only payer pays)
+    assert.equal(
+      authorityBalanceAfter,
+      authorityBalanceBefore,
+      "Authority balance should not change when not the payer"
+    );
+  });
+
   const investor = Keypair.generate();
   it("fails to revoke holder group if some wallets are linked with it", async () => {
     const signer = testEnvironment.transferAdmin;
@@ -284,6 +345,15 @@ describe("Revoke holder group", () => {
         holderPubkey,
         groupId
       );
+    await testEnvironment.transferRestrictionsHelper.initializeHolderGroup(
+      holderGroupPubkey,
+      holderPubkey,
+      groupPubkey,
+      testEnvironment.accessControlHelper.walletRolePDA(
+        testEnvironment.walletsAdmin.publicKey
+      )[0],
+      testEnvironment.walletsAdmin
+    );
     let accountInfo = await testEnvironment.connection.getAccountInfo(
       holderGroupPubkey
     );
@@ -318,6 +388,7 @@ describe("Revoke holder group", () => {
           group: groupPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])

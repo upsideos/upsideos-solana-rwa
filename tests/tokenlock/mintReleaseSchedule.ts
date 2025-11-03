@@ -166,7 +166,7 @@ describe("TokenLockup mint release schedules", () => {
     currentScheduleId++;
 
     nowTs = await getNowTs(testEnvironment.connection);
-    let timelockId = await mintReleaseSchedule(
+    let { timelockId } = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(490),
@@ -182,11 +182,11 @@ describe("TokenLockup mint release schedules", () => {
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
-    );
+    ) as { timelockId: number };
     assert(timelockId === walletATimelockCount);
     walletATimelockCount++;
 
-    timelockId = await mintReleaseSchedule(
+    const { timelockId: timelockId2 } = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(510),
@@ -202,8 +202,8 @@ describe("TokenLockup mint release schedules", () => {
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
-    );
-    assert(timelockId === walletATimelockCount);
+    ) as { timelockId: number };
+    assert(timelockId2 === walletATimelockCount);
     walletATimelockCount++;
 
     const timelockAccount = await getTimelockAccountData(
@@ -333,7 +333,7 @@ describe("TokenLockup mint release schedules", () => {
     currentScheduleId++;
 
     const nowTs = await getNowTs(testEnvironment.connection);
-    const timelockId = await mintReleaseSchedule(
+    const result = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(totalRecipientAmount),
@@ -350,7 +350,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    assert(timelockId === "Per release token less than 1");
+    assert(result.error?.toString() === "Per release token less than 1");
   });
 
   it("must have more tokens than minReleaseScheduleAmount", async () => {
@@ -377,7 +377,7 @@ describe("TokenLockup mint release schedules", () => {
     currentScheduleId++;
 
     const nowTs = await getNowTs(testEnvironment.connection);
-    const timelockId = await mintReleaseSchedule(
+    const result = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(totalRecipientAmount),
@@ -394,7 +394,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    assert(timelockId === "Amount < min minting amount");
+    assert(result.error?.toString() === "Amount < min minting amount");
   });
 
   it("cannot specify non existent schedule id", async () => {
@@ -420,7 +420,7 @@ describe("TokenLockup mint release schedules", () => {
     currentScheduleId++;
 
     const nowTs = await getNowTs(testEnvironment.connection);
-    const timelockId = await mintReleaseSchedule(
+    const result = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(totalRecipientAmount),
@@ -437,7 +437,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    assert(timelockId === "Invalid scheduleId");
+    assert(result.error?.toString() === "Invalid scheduleId");
   });
 
   it("returns true after mintReleaseSchdule is called", async () => {
@@ -457,7 +457,7 @@ describe("TokenLockup mint release schedules", () => {
     currentScheduleId++;
 
     const nowTs = await getNowTs(testEnvironment.connection);
-    const timelockId = await mintReleaseSchedule(
+    const { timelockId } = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(100),
@@ -473,7 +473,7 @@ describe("TokenLockup mint release schedules", () => {
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
-    );
+    ) as { timelockId: number };
     assert(timelockId === 0);
   });
 
@@ -500,11 +500,11 @@ describe("TokenLockup mint release schedules", () => {
     currentScheduleId++;
 
     const nowTs = await getNowTs(testEnvironment.connection);
-    const timelockId = await mintReleaseSchedule(
+    const result = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(totalRecipientAmount),
-      new anchor.BN(nowTs + MAX_RELEASE_DELAY + 5000),
+      new anchor.BN(nowTs + MAX_RELEASE_DELAY + 1000),
       Number(scheduleId),
       [],
       tokenlockDataPubkey,
@@ -517,8 +517,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    console.log(timelockId);
-    assert(timelockId === "Commencement time out of range");
+    assert(result.error === "Commencement time out of range");
 
     const timelockCount = timelockCountOf(
       await getTimelockAccountData(
@@ -579,7 +578,7 @@ describe("TokenLockup mint release schedules", () => {
     currentScheduleId++;
 
     const nowTs = await getNowTs(testEnvironment.connection);
-    const timelockId = await mintReleaseSchedule(
+    const result = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(totalRecipientAmount),
@@ -596,8 +595,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    console.log(timelockId);
-    assert(timelockId === "Initial release out of range");
+    assert(result.error?.toString() === "Initial release out of range");
   });
 
   it("mintReleaseRelease can be scheduled in the past", async () => {
