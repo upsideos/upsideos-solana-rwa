@@ -10,8 +10,8 @@ skip-lint = false
 [programs.localnet]
 access_control = "4X79YRjz9KNMhdjdxXg2ZNTS3YnMGYdwJkBHnezMJwr3"
 transfer_restrictions = "6yEnqdEjX3zBBDkzhwTRGJwv1jRaN4QE4gywmgdcfPBZ"
-tokenlock = "7CN3iHcRimZRa97M38cyMQAF68ecQYDqHfCUgBeSARG2"
-dividends = "BvQwgkeevtxXrUsWtZU3fUu5R3qTYne2XfrQp8dXXut3"
+tokenlock = "AoodM6rkg968933giHnigMEwp9kiGi68ZEx9bPqk71Gt"
+dividends = "FUjkkUVKa9Pofs5mBdiYQe2cBVwzrhX8SunAZhGXRkog"
 
 [registry]
 url = "https://api.apr.dev"
