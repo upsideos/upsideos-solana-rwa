@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/dividends.json`.
  */
 export type Dividends = {
-  address: "BvQwgkeevtxXrUsWtZU3fUu5R3qTYne2XfrQp8dXXut3";
+  address: "FUjkkUVKa9Pofs5mBdiYQe2cBVwzrhX8SunAZhGXRkog";
   metadata: {
     name: "dividends";
     version: "0.1.0";

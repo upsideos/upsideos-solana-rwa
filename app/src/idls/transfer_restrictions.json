@@ -201,6 +201,269 @@
       ]
     },
     {
+      "name": "initialize_default_security_accounts",
+      "discriminator": [
+        81,
+        54,
+        165,
+        92,
+        129,
+        149,
+        40,
+        235
+      ],
+      "accounts": [
+        {
+          "name": "transfer_restriction_holder",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  104
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "transfer_restriction_data"
+              },
+              {
+                "kind": "arg",
+                "path": "id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "holder_group",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  104,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "transfer_restriction_holder"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "security_associated_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  97,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "associated_token_account"
+              }
+            ]
+          }
+        },
+        {
+          "name": "group",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "transfer_restriction_data"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "security_token"
+        },
+        {
+          "name": "transfer_restriction_data",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_wallet"
+        },
+        {
+          "name": "associated_token_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user_wallet"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  238,
+                  117,
+                  143,
+                  222,
+                  24,
+                  66,
+                  93,
+                  188,
+                  228,
+                  108,
+                  205,
+                  218,
+                  182,
+                  26,
+                  252,
+                  77,
+                  131,
+                  185,
+                  13,
+                  39,
+                  254,
+                  189,
+                  249,
+                  40,
+                  216,
+                  161,
+                  139,
+                  252
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_token"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "authority_wallet_role"
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "holder_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "initialize_extra_account_meta_list",
       "discriminator": [
         92,
@@ -360,6 +623,10 @@
         },
         {
           "name": "authority_wallet_role"
+        },
+        {
+          "name": "authority",
+          "signer": true
         },
         {
           "name": "payer",
@@ -536,6 +803,10 @@
           "name": "authority_wallet_role"
         },
         {
+          "name": "authority",
+          "signer": true
+        },
+        {
           "name": "payer",
           "writable": true,
           "signer": true
@@ -610,6 +881,10 @@
         },
         {
           "name": "authority_wallet_role"
+        },
+        {
+          "name": "authority",
+          "signer": true
         },
         {
           "name": "payer",
@@ -691,6 +966,10 @@
         },
         {
           "name": "authority_wallet_role"
+        },
+        {
+          "name": "authority",
+          "signer": true
         },
         {
           "name": "payer",
@@ -790,6 +1069,10 @@
           "signer": true
         },
         {
+          "name": "authority",
+          "signer": true
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
@@ -878,6 +1161,10 @@
         },
         {
           "name": "authority_wallet_role"
+        },
+        {
+          "name": "authority",
+          "signer": true
         },
         {
           "name": "payer",
@@ -1015,6 +1302,10 @@
           "writable": true
         },
         {
+          "name": "authority",
+          "signer": true
+        },
+        {
           "name": "payer",
           "writable": true,
           "signer": true
@@ -1138,6 +1429,10 @@
         {
           "name": "authority_wallet_role",
           "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
         },
         {
           "name": "payer",
@@ -1314,6 +1609,10 @@
           "name": "authority_wallet_role"
         },
         {
+          "name": "authority",
+          "signer": true
+        },
+        {
           "name": "payer",
           "writable": true,
           "signer": true
@@ -1324,6 +1623,341 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "set_address_permission",
+      "discriminator": [
+        206,
+        98,
+        48,
+        240,
+        226,
+        102,
+        10,
+        236
+      ],
+      "accounts": [
+        {
+          "name": "security_associated_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  97,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user_associated_token_account"
+              }
+            ]
+          }
+        },
+        {
+          "name": "transfer_restriction_group_new",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "transfer_restriction_data"
+              },
+              {
+                "kind": "arg",
+                "path": "group_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "transfer_restriction_group_current",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "transfer_restriction_data"
+              },
+              {
+                "kind": "account",
+                "path": "security_associated_account.group",
+                "account": "SecurityAssociatedAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "transfer_restriction_holder",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  104
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "transfer_restriction_data"
+              },
+              {
+                "kind": "account",
+                "path": "transfer_restriction_holder.id",
+                "account": "TransferRestrictionHolder"
+              }
+            ]
+          }
+        },
+        {
+          "name": "holder_group_new",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  104,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "transfer_restriction_holder"
+              },
+              {
+                "kind": "arg",
+                "path": "group_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "holder_group_current",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  104,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_associated_account.holder",
+                "account": "SecurityAssociatedAccount"
+              },
+              {
+                "kind": "account",
+                "path": "security_associated_account.group",
+                "account": "SecurityAssociatedAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "security_token"
+        },
+        {
+          "name": "transfer_restriction_data",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_wallet"
+        },
+        {
+          "name": "user_associated_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user_wallet"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  238,
+                  117,
+                  143,
+                  222,
+                  24,
+                  66,
+                  93,
+                  188,
+                  228,
+                  108,
+                  205,
+                  218,
+                  182,
+                  26,
+                  252,
+                  77,
+                  131,
+                  185,
+                  13,
+                  39,
+                  254,
+                  189,
+                  249,
+                  40,
+                  216,
+                  161,
+                  139,
+                  252
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_token"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "authority_wallet_role"
+        },
+        {
+          "name": "security_mint",
+          "writable": true
+        },
+        {
+          "name": "access_control_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  99
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_mint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "access_control_program"
+            }
+          }
+        },
+        {
+          "name": "access_control_program",
+          "address": "4X79YRjz9KNMhdjdxXg2ZNTS3YnMGYdwJkBHnezMJwr3"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "group_id",
+          "type": "u64"
+        },
+        {
+          "name": "frozen",
+          "type": "bool"
+        }
+      ]
     },
     {
       "name": "set_allow_transfer_rule",
@@ -1617,6 +2251,10 @@
         {
           "name": "payer",
           "writable": true,
+          "signer": true
+        },
+        {
+          "name": "authority",
           "signer": true
         },
         {
@@ -2119,6 +2757,16 @@
       "code": 6023,
       "name": "ValueUnchanged",
       "msg": "The provided value is already set. No changes were made"
+    },
+    {
+      "code": 6024,
+      "name": "CurrentGroupRequiredForExistingWallet",
+      "msg": "Current group and holder group must be provided for existing wallet"
+    },
+    {
+      "code": 6025,
+      "name": "HolderGroupAlreadyInitialized",
+      "msg": "Holder group already initialized"
     }
   ],
   "types": [

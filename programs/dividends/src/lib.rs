@@ -1,3 +1,4 @@
+#![allow(unexpected_cfgs)]
 use anchor_lang::prelude::*;
 
 pub mod states;
@@ -9,7 +10,7 @@ pub mod merkle_proof;
 pub mod utils;
 use instructions::*;
 
-declare_id!("BvQwgkeevtxXrUsWtZU3fUu5R3qTYne2XfrQp8dXXut3");
+declare_id!("FUjkkUVKa9Pofs5mBdiYQe2cBVwzrhX8SunAZhGXRkog");
 
 #[program]
 pub mod dividends {

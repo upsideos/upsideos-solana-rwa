@@ -219,7 +219,7 @@ describe("set-reclaimer", () => {
       );
 
       // Initialize wallet role for unauthorized user without ContractAdmin role
-      await testEnvironment.accessControlHelper.initializeWalletRole(
+      await testEnvironment.accessControlHelper.grantRole(
         unauthorizedUser.publicKey,
         Roles.TransferAdmin, // Only TransferAdmin, not ContractAdmin
         contractAdmin
