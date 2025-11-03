@@ -21,12 +21,12 @@ pub mod access_control {
         instructions::access_control::initialize(ctx, args)
     }
 
-    pub fn initialize_wallet_role(ctx: Context<InitializeWalletRole>, role: u8) -> Result<()> {
-        instructions::access_control::initialize_wallet_role(ctx, role)
+    pub fn grant_role(ctx: Context<GrantRole>, role: u8) -> Result<()> {
+        instructions::access_control::grant_role(ctx, role)
     }
 
-    pub fn update_wallet_role(ctx: Context<UpdateWalletRole>, role: u8) -> Result<()> {
-        instructions::access_control::update_wallet_role(ctx, role)
+    pub fn revoke_role(ctx: Context<RevokeRole>, role: u8) -> Result<()> {
+        instructions::access_control::revoke_role(ctx, role)
     }
 
     pub fn mint_securities(ctx: Context<MintSecurities>, amount: u64) -> Result<()> {

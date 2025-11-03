@@ -132,7 +132,7 @@ testCases.forEach(({ tokenProgramId, programName }) => {
       const [walletRole] = testEnvironment.accessControlHelper.walletRolePDA(
         wallet.publicKey
       );
-      await testEnvironment.accessControlHelper.initializeWalletRole(
+      await testEnvironment.accessControlHelper.grantRole(
         wallet.publicKey,
         Roles.TransferAdmin,
         testEnvironment.contractAdmin
@@ -224,9 +224,14 @@ testCases.forEach(({ tokenProgramId, programName }) => {
       const [walletRole] = testEnvironment.accessControlHelper.walletRolePDA(
         wallet.publicKey
       );
-      await testEnvironment.accessControlHelper.initializeWalletRole(
+      await testEnvironment.accessControlHelper.grantRole(
         wallet.publicKey,
-        Roles.ReserveAdmin | Roles.WalletsAdmin,
+        Roles.ReserveAdmin,
+        testEnvironment.contractAdmin
+      );
+      await testEnvironment.accessControlHelper.grantRole(
+        wallet.publicKey,
+        Roles.WalletsAdmin,
         testEnvironment.contractAdmin
       );
       await topUpWallet(connection, wallet.publicKey, solToLamports(1));

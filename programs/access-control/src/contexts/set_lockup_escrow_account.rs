@@ -4,7 +4,10 @@ use anchor_spl::{
     token_interface::{Mint, TokenAccount},
 };
 
-use crate::{AccessControl, WalletRole, ACCESS_CONTROL_SEED};
+use crate::{
+    contexts::common::WalletRole,
+    AccessControl, ACCESS_CONTROL_SEED,
+};
 
 
 #[derive(Accounts)]
