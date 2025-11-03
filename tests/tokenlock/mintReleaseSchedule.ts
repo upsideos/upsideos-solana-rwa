@@ -350,7 +350,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    assert(result === "Per release token less than 1");
+    assert(result.error?.toString() === "Per release token less than 1");
   });
 
   it("must have more tokens than minReleaseScheduleAmount", async () => {
@@ -394,7 +394,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    assert(result === "Amount < min minting amount");
+    assert(result.error?.toString() === "Amount < min minting amount");
   });
 
   it("cannot specify non existent schedule id", async () => {
@@ -437,7 +437,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    assert(result === "Invalid scheduleId");
+    assert(result.error?.toString() === "Invalid scheduleId");
   });
 
   it("returns true after mintReleaseSchdule is called", async () => {
@@ -517,7 +517,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    assert(result === "Commencement time out of range");
+    assert(result.error === "Commencement time out of range");
 
     const timelockCount = timelockCountOf(
       await getTimelockAccountData(
@@ -595,7 +595,7 @@ describe("TokenLockup mint release schedules", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    assert(result === "Initial release out of range");
+    assert(result.error?.toString() === "Initial release out of range");
   });
 
   it("mintReleaseRelease can be scheduled in the past", async () => {

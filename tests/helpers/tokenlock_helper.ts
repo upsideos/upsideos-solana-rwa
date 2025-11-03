@@ -533,6 +533,12 @@ export async function initializeTimelock(
   return timelockAccount;
 }
 
+export type MintReleaseScheduleResult = {
+  timelockId: number | string;
+  signature: string;
+  error?: string | number;
+};
+
 export async function mintReleaseSchedule(
   connection: Connection,
   program: Program<Tokenlock>,
@@ -548,9 +554,8 @@ export async function mintReleaseSchedule(
   authorityWalletRolePubkey: PublicKey,
   accessControlPubkey: PublicKey,
   mintPubkey: PublicKey,
-  accessControlProgramId: PublicKey,
-  returnSignature?: boolean
-): Promise<number | string | { timelockId: number | string; signature: string }> {
+  accessControlProgramId: PublicKey
+): Promise<MintReleaseScheduleResult> {
   const timelockAccount = getTimelockAccount(
     program.programId,
     tokenlockAccount,
@@ -578,6 +583,7 @@ export async function mintReleaseSchedule(
   for (let i = 0; i < cancelByCount; i++) cancelBy.push(cancelableBy[i]);
 
   let result: number | string;
+  let error: string | number;
   let signature: string | undefined;
   try {
     const modifyComputeUnitsInstruction =
@@ -634,15 +640,16 @@ export async function mintReleaseSchedule(
     }
   } catch (e) {
     if (!e.error || !e.logs) {
-      result = parseAnchorErrorNumber(program.idl.errors, e.logs);
-    } else result = e.error.errorMessage;
+      error = parseAnchorErrorNumber(program.idl.errors, e.logs);
+    } else error = e.error.errorMessage;
     
-    if (returnSignature && signature) {
-      return { timelockId: result, signature };
-    }
   }
 
-  return result;
+  return {
+    timelockId: result,
+    signature: signature,
+    error: error,
+  };
 }
 
 export async function withdraw(

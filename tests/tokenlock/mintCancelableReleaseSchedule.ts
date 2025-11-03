@@ -267,7 +267,7 @@ describe("TokenLockup check cancelables", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    assert(result1 === "Max 10 cancelableBy addressees");
+    assert(result1.error?.toString() === "Max 10 cancelableBy addressees");
 
     cancelBy = [];
     cancelBy.push(walletA.publicKey);

@@ -490,9 +490,8 @@ describe("TokenLockup stress test", () => {
       reserveAdminWalletRolePubkey,
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
-      testEnvironment.accessControlHelper.program.programId,
-      true // return signature
-    ) as { timelockId: number | string; signature: string };
+      testEnvironment.accessControlHelper.program.programId
+    );
     
     assert.equal(firstResult.timelockId, 0);
     timelockCancelables.push([...firstCancelables]);
@@ -541,9 +540,8 @@ describe("TokenLockup stress test", () => {
         reserveAdminWalletRolePubkey,
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
-        testEnvironment.accessControlHelper.program.programId,
-        true // return signature
-      ) as { timelockId: number | string; signature: string };
+        testEnvironment.accessControlHelper.program.programId
+      );
       
       assert.equal(result.timelockId, i);
       timelockCancelables.push([...cancelableBy]);
@@ -749,9 +747,8 @@ describe("TokenLockup stress test", () => {
         reserveAdminWalletRolePubkey,
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
-        testEnvironment.accessControlHelper.program.programId,
-        true // return signature
-      ) as { timelockId: number | string; signature: string };
+        testEnvironment.accessControlHelper.program.programId
+      );
       
       assert.equal(result.timelockId, i, `Expected timelock ID ${i}, got ${result.timelockId}`);
 
