@@ -489,6 +489,127 @@
       "args": []
     },
     {
+      "name": "grant_role",
+      "discriminator": [
+        218,
+        234,
+        128,
+        15,
+        82,
+        33,
+        236,
+        253
+      ],
+      "accounts": [
+        {
+          "name": "wallet_role",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_token"
+              },
+              {
+                "kind": "account",
+                "path": "user_wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority_wallet_role",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_token"
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "access_control",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  99
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "security_token"
+        },
+        {
+          "name": "user_wallet"
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "role",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "initialize_access_control",
       "discriminator": [
         244,
@@ -582,123 +703,6 @@
               "name": "InitializeAccessControlArgs"
             }
           }
-        }
-      ]
-    },
-    {
-      "name": "initialize_wallet_role",
-      "discriminator": [
-        218,
-        166,
-        58,
-        194,
-        218,
-        211,
-        151,
-        175
-      ],
-      "accounts": [
-        {
-          "name": "wallet_role",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  119,
-                  97,
-                  108,
-                  108,
-                  101,
-                  116,
-                  95,
-                  114,
-                  111,
-                  108,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "security_token"
-              },
-              {
-                "kind": "account",
-                "path": "user_wallet"
-              }
-            ]
-          }
-        },
-        {
-          "name": "authority_wallet_role",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  119,
-                  97,
-                  108,
-                  108,
-                  101,
-                  116,
-                  95,
-                  114,
-                  111,
-                  108,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "security_token"
-              },
-              {
-                "kind": "account",
-                "path": "payer"
-              }
-            ]
-          }
-        },
-        {
-          "name": "access_control",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  97,
-                  99
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "security_token"
-              }
-            ]
-          }
-        },
-        {
-          "name": "security_token"
-        },
-        {
-          "name": "user_wallet"
-        },
-        {
-          "name": "payer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "role",
-          "type": "u8"
         }
       ]
     },
@@ -835,12 +839,137 @@
         {
           "name": "token_program",
           "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "security_associated_account",
+          "docs": [
+            "This account must be initialized before minting (holder, holder_group, and SAA must exist)",
+            "Optional: Not required when minting to lockup_escrow_account, mandatory otherwise"
+          ],
+          "optional": true
         }
       ],
       "args": [
         {
           "name": "amount",
           "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "revoke_role",
+      "discriminator": [
+        179,
+        232,
+        2,
+        180,
+        48,
+        227,
+        82,
+        7
+      ],
+      "accounts": [
+        {
+          "name": "wallet_role",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_token"
+              },
+              {
+                "kind": "account",
+                "path": "user_wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority_wallet_role",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  97,
+                  108,
+                  108,
+                  101,
+                  116,
+                  95,
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_token"
+              },
+              {
+                "kind": "account",
+                "path": "payer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "access_control",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  99
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "security_token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "security_token"
+        },
+        {
+          "name": "user_wallet"
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "role",
+          "type": "u8"
         }
       ]
     },
@@ -1083,123 +1212,6 @@
         }
       ],
       "args": []
-    },
-    {
-      "name": "update_wallet_role",
-      "discriminator": [
-        1,
-        63,
-        55,
-        231,
-        251,
-        199,
-        154,
-        9
-      ],
-      "accounts": [
-        {
-          "name": "wallet_role",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  119,
-                  97,
-                  108,
-                  108,
-                  101,
-                  116,
-                  95,
-                  114,
-                  111,
-                  108,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "security_token"
-              },
-              {
-                "kind": "account",
-                "path": "user_wallet"
-              }
-            ]
-          }
-        },
-        {
-          "name": "authority_wallet_role",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  119,
-                  97,
-                  108,
-                  108,
-                  101,
-                  116,
-                  95,
-                  114,
-                  111,
-                  108,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "security_token"
-              },
-              {
-                "kind": "account",
-                "path": "payer"
-              }
-            ]
-          }
-        },
-        {
-          "name": "access_control",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  97,
-                  99
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "security_token"
-              }
-            ]
-          }
-        },
-        {
-          "name": "security_token"
-        },
-        {
-          "name": "user_wallet"
-        },
-        {
-          "name": "payer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "role",
-          "type": "u8"
-        }
-      ]
     }
   ],
   "accounts": [
@@ -1280,6 +1292,46 @@
       "code": 6009,
       "name": "ValueUnchanged",
       "msg": "The provided value is already set. No changes were made"
+    },
+    {
+      "code": 6010,
+      "name": "InvalidSecurityAssociatedAccount",
+      "msg": "Invalid security associated account"
+    },
+    {
+      "code": 6011,
+      "name": "SecurityAssociatedAccountNotInitialized",
+      "msg": "Security associated account not initialized"
+    },
+    {
+      "code": 6012,
+      "name": "TransferHookNotConfigured",
+      "msg": "Transfer hook not configured on mint"
+    },
+    {
+      "code": 6013,
+      "name": "SecurityAssociatedAccountRequired",
+      "msg": "Security associated account is required"
+    },
+    {
+      "code": 6014,
+      "name": "AlreadyHasRole",
+      "msg": "Wallet already has this role"
+    },
+    {
+      "code": 6015,
+      "name": "CannotRevokeRole",
+      "msg": "Cannot revoke role that wallet does not have"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidAccessControl",
+      "msg": "Invalid access control"
+    },
+    {
+      "code": 6017,
+      "name": "InvalidWalletRoleAccountOwner",
+      "msg": "Invalid wallet role account owner"
     }
   ],
   "types": [

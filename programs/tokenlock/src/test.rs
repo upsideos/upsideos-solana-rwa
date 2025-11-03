@@ -45,7 +45,7 @@ struct TestFixture {
 
 impl Default for TestFixture {
     fn default() -> Self {
-        let program_id = Pubkey::from_str("7CN3iHcRimZRa97M38cyMQAF68ecQYDqHfCUgBeSARG2").unwrap();
+        let program_id = Pubkey::from_str("AoodM6rkg968933giHnigMEwp9kiGi68ZEx9bPqk71Gt").unwrap();
         let access_control_program_id = access_control::ID;
         let key = Pubkey::from_str("11111111111111111111111111111111").unwrap();
 
