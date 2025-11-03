@@ -8163,6 +8163,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "num_enum",
+ "spl-discriminator",
  "spl-tlv-account-resolution",
  "spl-token-2022",
  "spl-transfer-hook-interface",
