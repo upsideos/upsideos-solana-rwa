@@ -449,6 +449,10 @@ export type TransferRestrictions = {
           name: "authorityWalletRole"
         },
         {
+          name: "authority";
+          signer: true
+        },
+        {
           name: "payer";
           writable: true;
           signer: true
@@ -627,6 +631,10 @@ export type TransferRestrictions = {
           name: "authorityWalletRole"
         },
         {
+          name: "authority";
+          signer: true
+        },
+        {
           name: "payer";
           writable: true;
           signer: true
@@ -801,6 +809,10 @@ export type TransferRestrictions = {
           name: "authorityWalletRole"
         },
         {
+          name: "authority";
+          signer: true
+        },
+        {
           name: "payer";
           writable: true;
           signer: true
@@ -875,6 +887,10 @@ export type TransferRestrictions = {
         },
         {
           name: "authorityWalletRole"
+        },
+        {
+          name: "authority";
+          signer: true
         },
         {
           name: "payer";
@@ -956,6 +972,10 @@ export type TransferRestrictions = {
         },
         {
           name: "authorityWalletRole"
+        },
+        {
+          name: "authority";
+          signer: true
         },
         {
           name: "payer";
@@ -1055,6 +1075,10 @@ export type TransferRestrictions = {
           signer: true
         },
         {
+          name: "authority";
+          signer: true
+        },
+        {
           name: "systemProgram";
           address: "11111111111111111111111111111111"
         },
@@ -1143,6 +1167,10 @@ export type TransferRestrictions = {
         },
         {
           name: "authorityWalletRole"
+        },
+        {
+          name: "authority";
+          signer: true
         },
         {
           name: "payer";
@@ -1280,6 +1308,10 @@ export type TransferRestrictions = {
           writable: true
         },
         {
+          name: "authority";
+          signer: true
+        },
+        {
           name: "payer";
           writable: true;
           signer: true
@@ -1403,6 +1435,10 @@ export type TransferRestrictions = {
         {
           name: "authorityWalletRole";
           writable: true
+        },
+        {
+          name: "authority";
+          signer: true
         },
         {
           name: "payer";
@@ -1577,6 +1613,10 @@ export type TransferRestrictions = {
         },
         {
           name: "authorityWalletRole"
+        },
+        {
+          name: "authority";
+          signer: true
         },
         {
           name: "payer";
@@ -2217,6 +2257,10 @@ export type TransferRestrictions = {
         {
           name: "payer";
           writable: true;
+          signer: true
+        },
+        {
+          name: "authority";
           signer: true
         },
         {

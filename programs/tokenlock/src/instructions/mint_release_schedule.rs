@@ -27,7 +27,7 @@ pub struct MintReleaseSchedule<'info> {
             timelock_account.to_account_info().data_len(),
             &cancelable_by
         ),
-        realloc::payer = authority,
+        realloc::payer = payer,
         realloc::zero = false,
         constraint = timelock_account.tokenlock_account == *tokenlock_account.key,
     )]
@@ -52,6 +52,9 @@ pub struct MintReleaseSchedule<'info> {
     pub escrow_account_owner: AccountInfo<'info>,
 
     #[account(mut)]
+    pub payer: Signer<'info>,
+
+    #[account()]
     pub authority: Signer<'info>,
 
     #[account(

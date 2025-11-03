@@ -6,6 +6,7 @@ import {
   TestEnvironment,
   TestEnvironmentParams,
 } from "../helpers/test_environment";
+import { topUpWallet } from "../utils";
 
 describe("Initialize security associated account", () => {
   const testEnvironmentParams: TestEnvironmentParams = {
@@ -16,7 +17,7 @@ describe("Initialize security associated account", () => {
       uri: "https://example.com",
     },
     initialSupply: 1_000_000_000_000,
-    maxHolders: 3,
+    maxHolders: 4,
     maxTotalSupply: 100_000_000_000_000,
   };
   let testEnvironment: TestEnvironment;
@@ -157,6 +158,7 @@ describe("Initialize security associated account", () => {
           associatedTokenAccount: investorWallet1AssociatedAccount,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -202,6 +204,7 @@ describe("Initialize security associated account", () => {
           associatedTokenAccount: investorWallet1AssociatedAccount,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -255,6 +258,7 @@ describe("Initialize security associated account", () => {
         associatedTokenAccount: investorWallet1AssociatedAccount,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -336,6 +340,7 @@ describe("Initialize security associated account", () => {
         associatedTokenAccount: investorWallet2AssociatedAccount,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -375,12 +380,86 @@ describe("Initialize security associated account", () => {
     );
   });
 
+  it("payer can be different from authority and pays all fees", async () => {
+    const payer = Keypair.generate();
+    await topUpWallet(testEnvironment.connection, payer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+    const authority = testEnvironment.transferAdmin;
+    const [authorityWalletRolePubkey] =
+      testEnvironment.accessControlHelper.walletRolePDA(authority.publicKey);
+    
+    // Create a new investor wallet and token account for this test
+    const newInvestorWallet = Keypair.generate();
+    const newInvestorTokenAccount =
+      await testEnvironment.mintHelper.createAssociatedTokenAccount(
+        newInvestorWallet.publicKey,
+        testEnvironment.transferAdmin
+      );
+    
+    const holderIdx = new anchor.BN(2);
+    const [groupPubkey] =
+      testEnvironment.transferRestrictionsHelper.groupPDA(firstGroupIdx);
+    const [securityAssociatedAccountPubkey] =
+      testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+        newInvestorTokenAccount
+      );
+    const [holderPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderPDA(holderIdx);
+    const [holderGroupPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
+        holderPubkey,
+        firstGroupIdx
+      );
+
+    const payerBalanceBefore =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceBefore =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    await testEnvironment.transferRestrictionsHelper.program.methods
+      .initializeSecurityAssociatedAccount()
+      .accountsStrict({
+        securityAssociatedAccount: securityAssociatedAccountPubkey,
+        group: groupPubkey,
+        holder: holderPubkey,
+        holderGroup: holderGroupPubkey,
+        securityToken: testEnvironment.mintKeypair.publicKey,
+        transferRestrictionData:
+          testEnvironment.transferRestrictionsHelper
+            .transferRestrictionDataPubkey,
+        userWallet: newInvestorWallet.publicKey,
+        associatedTokenAccount: newInvestorTokenAccount,
+        authorityWalletRole: authorityWalletRolePubkey,
+        payer: payer.publicKey,
+        authority: authority.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([authority, payer])
+      .rpc({ commitment: testEnvironment.commitment });
+
+    const payerBalanceAfter =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceAfter =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    // Payer's balance should have decreased (paid fees)
+    assert.isTrue(
+      payerBalanceAfter < payerBalanceBefore,
+      "Payer balance should decrease after paying fees"
+    );
+    // Authority's balance should not decrease (only payer pays)
+    assert.equal(
+      authorityBalanceAfter,
+      authorityBalanceBefore,
+      "Authority balance should not change when not the payer"
+    );
+  });
+
   const investorWallet3 = Keypair.generate();
   let investorWallet3AssociatedAccount: PublicKey;
   describe("when max holders reached inside the group", () => {
     before(async () => {
       await testEnvironment.transferRestrictionsHelper.setHolderGroupMax(
-        new anchor.BN(2),
+        new anchor.BN(3),
         firstGroupPubkey,
         testEnvironment.accessControlHelper.walletRolePDA(
           testEnvironment.transferAdmin.publicKey
@@ -396,7 +475,7 @@ describe("Initialize security associated account", () => {
 
     it("fails to initialize security associated account", async () => {
       const signer = testEnvironment.transferAdmin;
-      const holderIdx = new anchor.BN(2);
+      const holderIdx = new anchor.BN(3);
       const [authorityWalletRolePubkey] =
         testEnvironment.accessControlHelper.walletRolePDA(signer.publicKey);
       const [groupPubkey] =
@@ -407,11 +486,24 @@ describe("Initialize security associated account", () => {
         );
       const [holderPubkey] =
         testEnvironment.transferRestrictionsHelper.holderPDA(holderIdx);
+      await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
+        holderIdx,
+        testEnvironment.accessControlHelper.walletRolePDA(signer.publicKey)[0],
+        signer
+      );
       const [holderGroupPubkey] =
         testEnvironment.transferRestrictionsHelper.holderGroupPDA(
           holderPubkey,
           firstGroupIdx
         );
+      await testEnvironment.transferRestrictionsHelper.initializeHolderGroup(
+        holderGroupPubkey,
+        holderPubkey,
+        groupPubkey,
+        testEnvironment.accessControlHelper.walletRolePDA(signer.publicKey)[0],
+        signer
+      );
+      
       const {
         currentHoldersCount: holderGroupCountBefore,
         maxHolders: maxHolders,
@@ -435,6 +527,7 @@ describe("Initialize security associated account", () => {
             associatedTokenAccount: investorWallet3AssociatedAccount,
             authorityWalletRole: authorityWalletRolePubkey,
             payer: signer.publicKey,
+            authority: signer.publicKey,
             systemProgram: SystemProgram.programId,
           })
           .signers([signer])

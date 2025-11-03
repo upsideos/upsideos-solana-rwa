@@ -55,10 +55,11 @@ pub struct RevokeSecurityAssociatedAccount<'info> {
     )]
     pub associated_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
     #[account(
-      constraint = authority_wallet_role.owner == payer.key(),
+      constraint = authority_wallet_role.owner == authority.key(),
       constraint = authority_wallet_role.access_control == transfer_restriction_data.access_control_account.key(),
     )]
     pub authority_wallet_role: Account<'info, WalletRole>,
+    pub authority: Signer<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
