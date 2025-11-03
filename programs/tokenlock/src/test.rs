@@ -256,6 +256,7 @@ impl<'a> TestFixture {
             tokenlock_account: tokenlock_account_info,
             timelock_account: Account::try_from_unchecked(timelock_account_info)?,
             authority: Signer::try_from(authority_info).unwrap(),
+            payer: Signer::try_from(authority_info).unwrap(),
             access_control: Account::try_from_unchecked(access_control_info).unwrap(),
             authority_wallet_role,
             target_account: target_account_info,
@@ -295,6 +296,7 @@ impl<'a> TestFixture {
         token_program_info: &'a AccountInfo<'a>,
         access_control_program_info: &'a AccountInfo<'a>,
         pda_account_info: AccountInfo<'a>,
+        system_program_info: &'a AccountInfo<'a>,
     ) -> Result<MintReleaseSchedule<'a>, ProgramError> {
         let escrow_account = InterfaceAccount::try_from(escrow_account_info)?;
         let mut tokenlock_data: Account<TokenLockData> =
@@ -318,6 +320,8 @@ impl<'a> TestFixture {
             token_program: Program::try_from(token_program_info)?,
             access_control_program: Program::try_from(access_control_program_info)?,
             escrow_account_owner: pda_account_info,
+            payer: Signer::try_from(authority_info)?,
+            system_program: Program::try_from(system_program_info)?,
         })
     }
 
@@ -914,6 +918,7 @@ fn test_mint_release_schedule() {
     let token_program_info = fixture.token_program.into_account_info();
     let access_control_program_info = fixture.access_control_program.into_account_info();
     let pda_account_info = fixture.pda_account.into_account_info();
+    let system_program_info = fixture.system_program.into_account_info();
     let mut accounts = TestFixture::mint_release_schedule(
         &escrow_account_info,
         &tokenlock_account_info,
@@ -926,6 +931,7 @@ fn test_mint_release_schedule() {
         &token_program_info,
         &access_control_program_info,
         pda_account_info,
+        &system_program_info,
     )
     .expect("Getting accounts error");
     accounts.tokenlock_account = accounts_create_release.tokenlock_account;
@@ -1264,6 +1270,7 @@ fn test_cancel_timelock() {
     let mint_info = fixture.mint_address.into_account_info();
     let access_control_program_info = fixture.access_control_program.into_account_info();
     let pda_account_info = fixture.pda_account.into_account_info();
+    let system_program_info = fixture.system_program.into_account_info();
     let mut accounts_mint_release = TestFixture::mint_release_schedule(
         &escrow_account_info,
         &tokenlock_account_info,
@@ -1276,6 +1283,7 @@ fn test_cancel_timelock() {
         &token_program_info,
         &access_control_program_info,
         pda_account_info,
+        &system_program_info,
     )
     .expect("Getting accounts error");
     accounts_mint_release.tokenlock_account = accounts_create_release.tokenlock_account;

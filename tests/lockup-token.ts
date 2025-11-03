@@ -331,6 +331,7 @@ describe("token lockup", () => {
           accessControl:
             testEnvironment.accessControlHelper.accessControlPubkey,
           authority: testEnvironment.reserveAdmin.publicKey,
+          payer: testEnvironment.reserveAdmin.publicKey,
           targetAccount: investor.publicKey,
           systemProgram: SystemProgram.programId,
           rent: SYSVAR_RENT_PUBKEY,
@@ -371,6 +372,8 @@ describe("token lockup", () => {
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             accessControlProgram:
               testEnvironment.accessControlHelper.program.programId,
+            systemProgram: SystemProgram.programId,
+            payer: testEnvironment.reserveAdmin.publicKey,
           },
           signers: [testEnvironment.reserveAdmin],
         }

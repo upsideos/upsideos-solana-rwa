@@ -6,6 +6,7 @@ import {
   TestEnvironment,
   TestEnvironmentParams,
 } from "../helpers/test_environment";
+import { topUpWallet } from "../utils";
 
 describe("Revoke holder", () => {
   const testEnvironmentParams: TestEnvironmentParams = {
@@ -121,6 +122,7 @@ describe("Revoke holder", () => {
               .transferRestrictionDataPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -150,6 +152,7 @@ describe("Revoke holder", () => {
               .transferRestrictionDataPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -185,6 +188,7 @@ describe("Revoke holder", () => {
               .transferRestrictionDataPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -237,6 +241,7 @@ describe("Revoke holder", () => {
         group: groupPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -251,6 +256,7 @@ describe("Revoke holder", () => {
             .transferRestrictionDataPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -295,6 +301,7 @@ describe("Revoke holder", () => {
         group: groupPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -308,6 +315,7 @@ describe("Revoke holder", () => {
             .transferRestrictionDataPubkey,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -367,6 +375,7 @@ describe("Revoke holder", () => {
               .transferRestrictionDataPubkey,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -380,5 +389,60 @@ describe("Revoke holder", () => {
       holderGroupPubkey
     );
     assert.isNotNull(accountInfo);
+  });
+
+  it("payer can be different from authority and pays all fees", async () => {
+    const payer = Keypair.generate();
+    await topUpWallet(testEnvironment.connection, payer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+
+    const authority = testEnvironment.transferAdmin;
+    const [authorityWalletRolePubkey] =
+      testEnvironment.accessControlHelper.walletRolePDA(authority.publicKey);
+    const holderIdx = new anchor.BN(1);
+    const [holderPubkey] = testEnvironment.transferRestrictionsHelper.holderPDA(
+      holderIdx
+    );
+    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
+      holderIdx,
+      authorityWalletRolePubkey,
+      authority
+    );
+
+    const payerBalanceBefore =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceBefore =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    await testEnvironment.transferRestrictionsHelper.program.methods
+      .revokeHolder()
+      .accountsStrict({
+        holder: holderPubkey,
+        transferRestrictionData:
+          testEnvironment.transferRestrictionsHelper
+            .transferRestrictionDataPubkey,
+        authorityWalletRole: authorityWalletRolePubkey,
+        payer: payer.publicKey,
+        authority: authority.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([authority, payer])
+      .rpc({ commitment: testEnvironment.commitment });
+
+    const payerBalanceAfter =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceAfter =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    // Payer's balance should have increased (paid fees refunded)
+    assert.isTrue(
+      payerBalanceAfter > payerBalanceBefore,
+      "Payer balance should increase after paying fees (refunded)"
+    );
+    // Authority's balance should not change (only payer pays)
+    assert.equal(
+      authorityBalanceAfter,
+      authorityBalanceBefore,
+      "Authority balance should not change when not the payer"
+    );
   });
 });

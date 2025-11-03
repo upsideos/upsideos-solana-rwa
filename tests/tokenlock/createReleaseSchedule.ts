@@ -194,7 +194,7 @@ describe("TokenLockup create release schedule", () => {
     assert(scheduleCnt === 1);
 
     const nowTs = await getNowTs(testEnvironment.connection);
-    const timelockId = await mintReleaseSchedule(
+    const result = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(10000),
@@ -210,8 +210,8 @@ describe("TokenLockup create release schedule", () => {
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
-    );
-    assert(timelockId !== undefined);
+    ) as { timelockId: number; signature: string };
+    assert(result.timelockId !== undefined);
 
     const timelockAccountData = await getTimelockAccountData(
       tokenlockProgram,
@@ -219,8 +219,8 @@ describe("TokenLockup create release schedule", () => {
       walletB.publicKey
     );
     let timelock = null;
-    if (timelockId < timelockAccountData.timelocks.length) {
-      timelock = timelockAccountData.timelocks[timelockId];
+    if (result.timelockId < timelockAccountData.timelocks.length) {
+      timelock = timelockAccountData.timelocks[result.timelockId];
     }
     assert(timelock != null && timelock.cancelableByCount === 0);
   });
@@ -243,7 +243,7 @@ describe("TokenLockup create release schedule", () => {
     assert(scheduleCount === 1);
 
     const nowTs = await getNowTs(testEnvironment.connection);
-    const timelockId = await mintReleaseSchedule(
+    const { timelockId } = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(10000),
@@ -259,7 +259,7 @@ describe("TokenLockup create release schedule", () => {
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
-    );
+    ) as { timelockId: number };
 
     const reserveAdminTokenAccountPubkey =
       testEnvironment.mintHelper.getAssocciatedTokenAddress(

@@ -179,6 +179,7 @@ export class AccessControlHelper {
   ): Promise<string> {
     const authorityWalletRolePubkey = this.walletRolePDA(authority.publicKey)[0];
     const walletRolePubkey = this.walletRolePDA(walletPubkey)[0];
+    const payerKeypair = payer || authority;
 
     return this.program.methods
       .grantRole(role)
@@ -192,7 +193,7 @@ export class AccessControlHelper {
         authority: authority.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers(payer ? [authority, payer] : [authority])
+      .signers(payer ? [authority, payerKeypair] : [authority])
       .rpc({ commitment: this.commitment });
   }
 

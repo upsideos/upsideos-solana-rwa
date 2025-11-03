@@ -17,11 +17,18 @@ use tokenlock_accounts::{
 };
 
 #[derive(Accounts)]
+#[instruction(uuid: [u8; 16], amount: u64, commencement_timestamp: u64, schedule_id: u16, cancelable_by: Vec<Pubkey>)]
 pub struct MintReleaseSchedule<'info> {
     /// CHECK: implemented own serialization in order to save compute units
     pub tokenlock_account: AccountInfo<'info>,
 
     #[account(mut,
+        realloc = timelock_account.expected_new_size(
+            timelock_account.to_account_info().data_len(),
+            &cancelable_by
+        ),
+        realloc::payer = payer,
+        realloc::zero = false,
         constraint = timelock_account.tokenlock_account == *tokenlock_account.key,
     )]
     pub timelock_account: Account<'info, TimelockData>,
@@ -45,6 +52,9 @@ pub struct MintReleaseSchedule<'info> {
     pub escrow_account_owner: AccountInfo<'info>,
 
     #[account(mut)]
+    pub payer: Signer<'info>,
+
+    #[account()]
     pub authority: Signer<'info>,
 
     #[account(
@@ -76,6 +86,8 @@ pub struct MintReleaseSchedule<'info> {
     pub token_program: Program<'info, Token2022>,
 
     pub access_control_program: Program<'info, AccessControlProgram>,
+
+    pub system_program: Program<'info, System>,
 }
 
 pub fn mint_release_schedule<'info>(

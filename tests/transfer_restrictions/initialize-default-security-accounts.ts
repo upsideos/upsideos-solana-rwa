@@ -6,6 +6,7 @@ import {
   TestEnvironment,
   TestEnvironmentParams,
 } from "../helpers/test_environment";
+import { topUpWallet } from "../utils";
 
 describe("Initialize Default Security Accounts", () => {
   const testEnvironmentParams: TestEnvironmentParams = {
@@ -93,6 +94,7 @@ describe("Initialize Default Security Accounts", () => {
         associatedTokenAccount: userTokenAccount,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -187,6 +189,7 @@ describe("Initialize Default Security Accounts", () => {
         associatedTokenAccount: userTokenAccount,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -245,6 +248,7 @@ describe("Initialize Default Security Accounts", () => {
         associatedTokenAccount: userTokenAccount,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -309,6 +313,7 @@ describe("Initialize Default Security Accounts", () => {
         associatedTokenAccount: userTokenAccount,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -421,6 +426,7 @@ describe("Initialize Default Security Accounts", () => {
           associatedTokenAccount: userTokenAccount,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -437,13 +443,7 @@ describe("Initialize Default Security Accounts", () => {
   it("Unauthorized user cannot initialize default security accounts", async () => {
     const unauthorizedWallet = Keypair.generate();
     const userWallet = Keypair.generate();
-
-    // Fund the unauthorized wallet
-    const airdropTx = await testEnvironment.connection.requestAirdrop(
-      unauthorizedWallet.publicKey,
-      2 * anchor.web3.LAMPORTS_PER_SOL
-    );
-    await testEnvironment.connection.confirmTransaction(airdropTx);
+    await topUpWallet(testEnvironment.connection, unauthorizedWallet.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
 
     const userTokenAccount =
       await testEnvironment.mintHelper.createAssociatedTokenAccount(
@@ -491,6 +491,7 @@ describe("Initialize Default Security Accounts", () => {
           associatedTokenAccount: userTokenAccount,
           authorityWalletRole: authorityWalletRolePubkey,
           payer: testEnvironment.contractAdmin.publicKey,
+          authority: testEnvironment.contractAdmin.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([testEnvironment.contractAdmin])
@@ -597,6 +598,7 @@ describe("Initialize Default Security Accounts", () => {
         associatedTokenAccount: userTokenAccount,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -746,6 +748,7 @@ describe("Initialize Default Security Accounts", () => {
         associatedTokenAccount: userTokenAccount,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -887,6 +890,7 @@ describe("Initialize Default Security Accounts", () => {
         associatedTokenAccount: userTokenAccount,
         authorityWalletRole: authorityWalletRolePubkey,
         payer: signer.publicKey,
+        authority: signer.publicKey,
         systemProgram: SystemProgram.programId,
       })
       .signers([signer])
@@ -918,6 +922,80 @@ describe("Initialize Default Security Accounts", () => {
     assert.equal(
       securityAssociatedAccountDataAfter.holder.toBase58(),
       holderPubkey.toBase58()
+    );
+  });
+
+  it("payer can be different from authority and pays all fees", async () => {
+    const payer = Keypair.generate();
+    await topUpWallet(testEnvironment.connection, payer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+
+    const authority = testEnvironment.reserveAdmin;
+    const userWallet = Keypair.generate();
+    const userTokenAccount =
+      await testEnvironment.mintHelper.createAssociatedTokenAccount(
+        userWallet.publicKey,
+        testEnvironment.reserveAdmin
+      );
+
+    const transferRestrictionData =
+      await testEnvironment.transferRestrictionsHelper.transferRestrictionData();
+    const expectedHolderId = transferRestrictionData.currentHoldersCount;
+
+    const [holderPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderPDA(expectedHolderId);
+    const [holderGroupPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
+        holderPubkey,
+        group0Idx
+      );
+    const [securityAssociatedAccountPubkey] =
+      testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+        userTokenAccount
+      );
+    const [authorityWalletRolePubkey] =
+      testEnvironment.accessControlHelper.walletRolePDA(authority.publicKey);
+
+    const payerBalanceBefore =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceBefore =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    await testEnvironment.transferRestrictionsHelper.program.methods
+      .initializeDefaultSecurityAccounts(expectedHolderId)
+      .accountsStrict({
+        transferRestrictionHolder: holderPubkey,
+        holderGroup: holderGroupPubkey,
+        securityAssociatedAccount: securityAssociatedAccountPubkey,
+        group: group0Pubkey,
+        securityToken: testEnvironment.mintKeypair.publicKey,
+        transferRestrictionData:
+          testEnvironment.transferRestrictionsHelper
+            .transferRestrictionDataPubkey,
+        userWallet: userWallet.publicKey,
+        associatedTokenAccount: userTokenAccount,
+        authorityWalletRole: authorityWalletRolePubkey,
+        payer: payer.publicKey,
+        authority: authority.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([authority, payer])
+      .rpc({ commitment: testEnvironment.commitment });
+
+    const payerBalanceAfter =
+      await testEnvironment.connection.getBalance(payer.publicKey);
+    const authorityBalanceAfter =
+      await testEnvironment.connection.getBalance(authority.publicKey);
+
+    // Payer's balance should have decreased (paid fees)
+    assert.isTrue(
+      payerBalanceAfter < payerBalanceBefore,
+      "Payer balance should decrease after paying fees"
+    );
+    // Authority's balance should not decrease (only payer pays)
+    assert.equal(
+      authorityBalanceAfter,
+      authorityBalanceBefore,
+      "Authority balance should not change when not the payer"
     );
   });
 });
