@@ -44,9 +44,10 @@ pub struct InitializeWalletRole<'info> {
     seeds = [
       WALLET_ROLE_PREFIX,
       &security_token.key().to_bytes(),
-      &payer.key().to_bytes(),
+      &authority.key().to_bytes(),
     ],
     bump,
+    constraint = authority_wallet_role.owner == authority.key(),
   )]
   pub authority_wallet_role: Account<'info, WalletRole>,
   #[account(
@@ -62,6 +63,7 @@ pub struct InitializeWalletRole<'info> {
 
   /// CHECK: Wallet address to be controlled by the access control
   pub user_wallet: AccountInfo<'info>,
+  pub authority: Signer<'info>,
   #[account(mut)]
   pub payer: Signer<'info>,
   pub system_program: Program<'info, System>,

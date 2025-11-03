@@ -250,7 +250,7 @@ describe("TokenLockup check cancelables", () => {
     }
 
     const nowTs = await getNowTs(testEnvironment.connection);
-    let timelockId = await mintReleaseSchedule(
+    const result1 = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(amount),
@@ -267,7 +267,7 @@ describe("TokenLockup check cancelables", () => {
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
     );
-    assert(timelockId === "Max 10 cancelableBy addressees");
+    assert(result1.error?.toString() === "Max 10 cancelableBy addressees");
 
     cancelBy = [];
     cancelBy.push(walletA.publicKey);
@@ -275,7 +275,7 @@ describe("TokenLockup check cancelables", () => {
       cancelBy.push(anchor.web3.Keypair.generate().publicKey);
     }
 
-    timelockId = await mintReleaseSchedule(
+    const { timelockId: timelockId2 } = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(amount),
@@ -291,10 +291,10 @@ describe("TokenLockup check cancelables", () => {
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
-    );
-    assert(timelockId === 0);
+    ) as { timelockId: number | string };
+    assert(timelockId2 === 0);
 
-    timelockId = await mintReleaseSchedule(
+    const { timelockId: timelockId3 } = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(amount),
@@ -310,8 +310,8 @@ describe("TokenLockup check cancelables", () => {
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
-    );
-    assert(timelockId === 1);
+    ) as { timelockId: number | string };
+    assert(timelockId3 === 1);
 
     const timelockCount = timelockCountOf(
       await getTimelockAccountData(
@@ -322,7 +322,7 @@ describe("TokenLockup check cancelables", () => {
     );
     assert(timelockCount === 2);
 
-    timelockId = await cancelTimelock(
+    let timelockId = await cancelTimelock(
       tokenlockProgram,
       0,
       tokenlockDataPubkey,
@@ -401,7 +401,7 @@ describe("TokenLockup check cancelables", () => {
       assert(scheduleId === 0);
 
       const nowTs = await getNowTs(testEnvironment.connection);
-      timelockId = await mintReleaseSchedule(
+      const result = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(50),
@@ -417,8 +417,9 @@ describe("TokenLockup check cancelables", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
         testEnvironment.accessControlHelper.program.programId
-      );
-      assert(timelockId === 0);
+      ) as { timelockId: number; signature: string };
+      assert(result.timelockId === 0);
+      timelockId = result.timelockId;
     });
 
     it("cancel with first canceler", async () => {
@@ -575,7 +576,6 @@ describe("TokenLockup check cancelables", () => {
 
   describe("simple 1 month delay then 50% for 2 monthly releases", () => {
     let scheduleId;
-    let transferAdminWalletRole: anchor.web3.PublicKey;
 
     beforeEach(async () => {
       scheduleId = await createReleaseSchedule(
@@ -594,7 +594,7 @@ describe("TokenLockup check cancelables", () => {
 
     it("should be able to check if the lockup is cancelable", async () => {
       const nowTs = await getNowTs(testEnvironment.connection);
-      const timelockId = await mintReleaseSchedule(
+      const { timelockId: timelockId1 } = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(100),
@@ -610,15 +610,15 @@ describe("TokenLockup check cancelables", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
         testEnvironment.accessControlHelper.program.programId
-      );
-      assert(timelockId === 0);
+      ) as { timelockId: number | string };
+      assert(timelockId1 === 0);
 
       const timelockData = await getTimelockAccountData(
         tokenlockProgram,
         tokenlockDataPubkey,
         walletA.publicKey
       );
-      const timelock = timelockOf(timelockData, timelockId);
+      const timelock = timelockOf(timelockData, timelockId1);
       assert(timelock.cancelableByCount === 1);
       assert(
         timelockData.cancelables[timelock.cancelableBy[0]].toBase58() ===
@@ -628,7 +628,7 @@ describe("TokenLockup check cancelables", () => {
 
     it("0% unlocked at start and 100% cancelable", async () => {
       let nowTs = await getNowTs(testEnvironment.connection);
-      const timelockId = await mintReleaseSchedule(
+      const { timelockId } = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(100),
@@ -644,7 +644,7 @@ describe("TokenLockup check cancelables", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
         testEnvironment.accessControlHelper.program.programId
-      );
+      ) as { timelockId: number | string };
       assert(timelockId === 0);
 
       nowTs = await getNowTs(testEnvironment.connection);
@@ -727,7 +727,7 @@ describe("TokenLockup check cancelables", () => {
 
     it("only canceler can cancel", async () => {
       const nowTs = await getNowTs(testEnvironment.connection);
-      const timelockId = await mintReleaseSchedule(
+      const { timelockId } = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(100),
@@ -743,7 +743,7 @@ describe("TokenLockup check cancelables", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
         testEnvironment.accessControlHelper.program.programId
-      );
+      ) as { timelockId: number | string };
       assert(timelockId === 0);
 
       const tid = await cancelTimelock(
@@ -764,7 +764,7 @@ describe("TokenLockup check cancelables", () => {
 
     it("cannot cancel a non existent timelock", async () => {
       let nowTs = await getNowTs(testEnvironment.connection);
-      const timelockId = await mintReleaseSchedule(
+      const { timelockId } = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(100),
@@ -780,7 +780,7 @@ describe("TokenLockup check cancelables", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
         testEnvironment.accessControlHelper.program.programId
-      );
+      ) as { timelockId: number | string };
       assert(timelockId === 0);
 
       const tid = await cancelTimelock(
@@ -823,7 +823,7 @@ describe("TokenLockup check cancelables", () => {
     it("only canceler of timelock can cancel", async () => {
       const nowTs = await getNowTs(testEnvironment.connection);
       const cancelarWallet = anchor.web3.Keypair.generate();
-      let timelockId = await mintReleaseSchedule(
+      let { timelockId } = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(100),
@@ -839,10 +839,10 @@ describe("TokenLockup check cancelables", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
         testEnvironment.accessControlHelper.program.programId
-      );
+      ) as { timelockId: number | string };
       assert(timelockId === 0);
 
-      timelockId = await mintReleaseSchedule(
+      let { timelockId: timelockId2 } = await mintReleaseSchedule(
         testEnvironment.connection,
         tokenlockProgram,
         new anchor.BN(100),
@@ -858,12 +858,12 @@ describe("TokenLockup check cancelables", () => {
         testEnvironment.accessControlHelper.accessControlPubkey,
         mintPubkey,
         testEnvironment.accessControlHelper.program.programId
-      );
-      assert(timelockId === 1);
+      ) as { timelockId: number | string };
+      assert(timelockId2 === 1);
 
       const tid = await cancelTimelock(
         tokenlockProgram,
-        Number(timelockId),
+        Number(timelockId2),
         tokenlockDataPubkey,
         testEnvironment.mintKeypair.publicKey,
         walletA.publicKey,

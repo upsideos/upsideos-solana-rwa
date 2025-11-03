@@ -503,7 +503,8 @@ export async function initializeTimelock(
   targetAccount: PublicKey,
   accessControl: PublicKey,
   authorityWalletRole: PublicKey,
-  signer: Keypair,
+  authority: Keypair,
+  payer?: Keypair,
   commitment: Commitment = "confirmed"
 ): Promise<PublicKey> {
   const timelockAccount = getTimelockAccount(
@@ -511,6 +512,8 @@ export async function initializeTimelock(
     tokenlockAccount,
     targetAccount
   );
+  const payerKeypair = payer || authority;
+
   await program.methods
     .initializeTimelock()
     .accountsStrict({
@@ -518,16 +521,23 @@ export async function initializeTimelock(
       timelockAccount: timelockAccount,
       authorityWalletRole,
       accessControl,
-      authority: signer.publicKey,
+      authority: authority.publicKey,
+      payer: payerKeypair.publicKey,
       targetAccount,
       systemProgram: SystemProgram.programId,
       rent: SYSVAR_RENT_PUBKEY,
     })
-    .signers([signer])
+    .signers(payer ? [authority, payerKeypair] : [authority])
     .rpc({ commitment });
 
   return timelockAccount;
 }
+
+export type MintReleaseScheduleResult = {
+  timelockId: number | string;
+  signature: string;
+  error?: string | number;
+};
 
 export async function mintReleaseSchedule(
   connection: Connection,
@@ -544,9 +554,8 @@ export async function mintReleaseSchedule(
   authorityWalletRolePubkey: PublicKey,
   accessControlPubkey: PublicKey,
   mintPubkey: PublicKey,
-  accessControlProgramId: PublicKey,
-  returnSignature?: boolean
-): Promise<number | string | { timelockId: number | string; signature: string }> {
+  accessControlProgramId: PublicKey
+): Promise<MintReleaseScheduleResult> {
   const timelockAccount = getTimelockAccount(
     program.programId,
     tokenlockAccount,
@@ -563,7 +572,8 @@ export async function mintReleaseSchedule(
       to,
       accessControlPubkey,
       authorityWalletRolePubkey,
-      signer
+      signer,
+      undefined
     );
   }
   const uuid = uuidBytes();
@@ -573,6 +583,7 @@ export async function mintReleaseSchedule(
   for (let i = 0; i < cancelByCount; i++) cancelBy.push(cancelableBy[i]);
 
   let result: number | string;
+  let error: string | number;
   let signature: string | undefined;
   try {
     const modifyComputeUnitsInstruction =
@@ -597,6 +608,7 @@ export async function mintReleaseSchedule(
             mintAddress: mintPubkey,
             to,
             authority: signer.publicKey,
+            payer: signer.publicKey,
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             accessControlProgram: accessControlProgramId,
             systemProgram: SystemProgram.programId,
@@ -623,24 +635,21 @@ export async function mintReleaseSchedule(
           commencementTimestamp.toString()
       ) {
         result = i;
-        break;
+        return { timelockId: i, signature };
       }
-    }
-
-    if (returnSignature) {
-      return { timelockId: result, signature };
     }
   } catch (e) {
     if (!e.error || !e.logs) {
-      result = parseAnchorErrorNumber(program.idl.errors, e.logs);
-    } else result = e.error.errorMessage;
+      error = parseAnchorErrorNumber(program.idl.errors, e.logs);
+    } else error = e.error.errorMessage;
     
-    if (returnSignature && signature) {
-      return { timelockId: result, signature };
-    }
   }
 
-  return result;
+  return {
+    timelockId: result,
+    signature: signature,
+    error: error,
+  };
 }
 
 export async function withdraw(
@@ -759,6 +768,7 @@ export async function getOrCreateTimelockAccount(
       accessControl,
       authorityWalletRole,
       signer,
+      undefined,
       commitment
     );
   }
@@ -861,6 +871,7 @@ export async function batchMintReleaseSchedule(
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           accessControlProgram: accessControlProgram.programId,
           systemProgram: SystemProgram.programId,
+          payer: signer.publicKey,
         },
         signers: [signer],
       }

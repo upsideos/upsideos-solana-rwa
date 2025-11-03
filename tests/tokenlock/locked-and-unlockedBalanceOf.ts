@@ -169,7 +169,7 @@ describe("TokenLockup timelock balances", () => {
     );
 
     nowTs = await getNowTs(testEnvironment.connection);
-    const timelockId = await mintReleaseSchedule(
+    const { timelockId } = await mintReleaseSchedule(
       testEnvironment.connection,
       tokenlockProgram,
       new anchor.BN(totalRecipientAmount),
@@ -185,7 +185,7 @@ describe("TokenLockup timelock balances", () => {
       testEnvironment.accessControlHelper.accessControlPubkey,
       mintPubkey,
       testEnvironment.accessControlHelper.program.programId
-    );
+    ) as { timelockId: number };
 
     nowTs = await getNowTs(testEnvironment.connection);
     account = await getTokenlockAccount(tokenlockProgram, tokenlockDataPubkey);
