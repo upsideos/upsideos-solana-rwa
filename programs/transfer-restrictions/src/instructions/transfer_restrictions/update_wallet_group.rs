@@ -5,7 +5,10 @@ use crate::{
 use access_control::Roles;
 use anchor_lang::prelude::*;
 
-pub fn update_wallet_group(ctx: Context<UpdateWalletGroup>) -> Result<()> {
+pub fn update_wallet_group(
+    ctx: Context<UpdateWalletGroup>,
+    new_group_id: u64,
+) -> Result<()> {
     // Check authorization
     check_authorization(
         &ctx.accounts.authority_wallet_role,
@@ -26,7 +29,6 @@ pub fn update_wallet_group(ctx: Context<UpdateWalletGroup>) -> Result<()> {
         return Err(TransferRestrictionsError::NewGroupIsTheSameAsTheCurrentGroup.into());
     }
 
-    let group_new_id = ctx.accounts.transfer_restriction_group_new.id;
     // Transfer wallet between groups, updating all related counts
     transfer_wallet_between_groups(
         &mut ctx.accounts.transfer_restriction_group_new,
@@ -34,7 +36,7 @@ pub fn update_wallet_group(ctx: Context<UpdateWalletGroup>) -> Result<()> {
         &mut ctx.accounts.holder_group_current,
         &mut ctx.accounts.holder_group_new,
         &mut ctx.accounts.security_associated_account,
-        group_new_id,
+        new_group_id,
     )?;
 
     Ok(())

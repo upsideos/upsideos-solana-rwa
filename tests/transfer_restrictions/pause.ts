@@ -249,8 +249,8 @@ describe("Pause transfers", () => {
       testEnvironment.walletsAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      investorHolderPubkey,
+      new anchor.BN(groupId),
+      new anchor.BN(holderInvestorId),
       investorHolderGroupPubkey,
       investor.publicKey,
       investorTokenAccountPubkey,

@@ -86,8 +86,8 @@ describe("Enforce transfer restrictions", () => {
         testEnvironment.reserveAdmin
       );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      firstGroupPubkey,
-      holderPubkey,
+      firstGroupIdx,
+      currentHolderIdx,
       holderGroupPubkey,
       investorWallet0.publicKey,
       investorWallet0AssociatedAccount,
@@ -123,8 +123,8 @@ describe("Enforce transfer restrictions", () => {
         testEnvironment.reserveAdmin
       );
     testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      firstGroupPubkey,
-      holderPubkey,
+      firstGroupIdx,
+      currentHolderIdx,
       holderGroupPubkey,
       investorWallet1.publicKey,
       investorWallet1AssociatedAccount,
@@ -161,8 +161,8 @@ describe("Enforce transfer restrictions", () => {
         testEnvironment.reserveAdmin
       );
     testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      firstGroupPubkey,
-      holderPubkey,
+      firstGroupIdx,
+      currentHolderIdx,
       holderGroupPubkey,
       investorWallet2.publicKey,
       investorWallet2AssociatedAccount,
@@ -223,8 +223,8 @@ describe("Enforce transfer restrictions", () => {
       await testEnvironment.transferRestrictionsHelper.setAllowTransferRule(
         new anchor.BN(0),
         transferRulePubkey,
-        transferGroupPubkey,
-        transferGroupPubkey,
+        firstGroupIdx,
+        firstGroupIdx,
         testEnvironment.accessControlHelper.walletRolePDA(
           testEnvironment.transferAdmin.publicKey
         )[0],
@@ -264,8 +264,8 @@ describe("Enforce transfer restrictions", () => {
       await testEnvironment.transferRestrictionsHelper.setAllowTransferRule(
         new anchor.BN(lockedUntil + 2000),
         transferRulePubkey,
-        transferGroupPubkey,
-        transferGroupPubkey,
+        firstGroupIdx,
+        firstGroupIdx,
         testEnvironment.accessControlHelper.walletRolePDA(
           testEnvironment.transferAdmin.publicKey
         )[0],

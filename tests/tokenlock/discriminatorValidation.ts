@@ -422,8 +422,8 @@ describe("TokenLockup tokenlock discriminator tests", () => {
     );
 
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      holderId,
       holderGroupPubkey,
       walletA.publicKey,
       walletATokenAcc,
@@ -431,8 +431,8 @@ describe("TokenLockup tokenlock discriminator tests", () => {
       testEnvironment.transferAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      holderId,
       holderGroupPubkey,
       walletB.publicKey,
       walletBTokenAcc,
@@ -585,8 +585,8 @@ describe("TokenLockup tokenlock discriminator tests", () => {
     );
 
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      holderId,
       holderGroupPubkey,
       walletA.publicKey,
       walletATokenAcc,
@@ -594,8 +594,8 @@ describe("TokenLockup tokenlock discriminator tests", () => {
       testEnvironment.transferAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      holderId,
       holderGroupPubkey,
       walletB.publicKey,
       walletBTokenAcc,

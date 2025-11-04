@@ -144,7 +144,7 @@ describe("Initialize security associated account", () => {
       );
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .initializeSecurityAssociatedAccount()
+        .initializeSecurityAssociatedAccount(firstGroupIdx, holderIdx)
         .accountsStrict({
           securityAssociatedAccount: securityAssociatedAccountPubkey,
           group: groupPubkey,
@@ -190,7 +190,7 @@ describe("Initialize security associated account", () => {
       );
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .initializeSecurityAssociatedAccount()
+        .initializeSecurityAssociatedAccount(firstGroupIdx, holderIdx)
         .accountsStrict({
           securityAssociatedAccount: securityAssociatedAccountPubkey,
           group: groupPubkey,
@@ -244,7 +244,7 @@ describe("Initialize security associated account", () => {
       await testEnvironment.transferRestrictionsHelper.groupData(groupPubkey);
 
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .initializeSecurityAssociatedAccount()
+      .initializeSecurityAssociatedAccount(firstGroupIdx, holderIdx)
       .accountsStrict({
         securityAssociatedAccount: securityAssociatedAccountPubkey,
         group: groupPubkey,
@@ -326,7 +326,7 @@ describe("Initialize security associated account", () => {
       await testEnvironment.transferRestrictionsHelper.groupData(groupPubkey);
 
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .initializeSecurityAssociatedAccount()
+      .initializeSecurityAssociatedAccount(firstGroupIdx, holderIdx)
       .accountsStrict({
         securityAssociatedAccount: securityAssociatedAccountPubkey,
         group: groupPubkey,
@@ -416,7 +416,7 @@ describe("Initialize security associated account", () => {
       await testEnvironment.connection.getBalance(authority.publicKey);
 
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .initializeSecurityAssociatedAccount()
+      .initializeSecurityAssociatedAccount(firstGroupIdx, holderIdx)
       .accountsStrict({
         securityAssociatedAccount: securityAssociatedAccountPubkey,
         group: groupPubkey,
@@ -460,7 +460,7 @@ describe("Initialize security associated account", () => {
     before(async () => {
       await testEnvironment.transferRestrictionsHelper.setHolderGroupMax(
         new anchor.BN(3),
-        firstGroupPubkey,
+        firstGroupIdx,
         testEnvironment.accessControlHelper.walletRolePDA(
           testEnvironment.transferAdmin.publicKey
         )[0],
@@ -513,7 +513,7 @@ describe("Initialize security associated account", () => {
 
       try {
         await testEnvironment.transferRestrictionsHelper.program.methods
-          .initializeSecurityAssociatedAccount()
+          .initializeSecurityAssociatedAccount(firstGroupIdx, holderIdx)
           .accountsStrict({
             securityAssociatedAccount: securityAssociatedAccountPubkey,
             group: groupPubkey,

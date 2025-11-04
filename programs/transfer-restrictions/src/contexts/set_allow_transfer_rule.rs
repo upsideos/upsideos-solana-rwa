@@ -6,7 +6,7 @@ use access_control::{self, AccessControl, WalletRole};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(locked_until: u64)]
+#[instruction(transfer_group_id_from: u64, transfer_group_id_to: u64, locked_until: u64)]
 pub struct SetAllowTransferRule<'info> {
     #[account(mut,
         seeds = [
@@ -17,6 +17,8 @@ pub struct SetAllowTransferRule<'info> {
         ],
         bump,
         constraint = transfer_rule.transfer_restriction_data == transfer_restriction_data.key(),
+        constraint = transfer_rule.transfer_group_id_from == transfer_group_id_from,
+        constraint = transfer_rule.transfer_group_id_to == transfer_group_id_to,
     )]
     pub transfer_rule: Account<'info, TransferRule>,
 
@@ -28,13 +30,13 @@ pub struct SetAllowTransferRule<'info> {
 
     #[account(
         constraint = transfer_restriction_group_from.transfer_restriction_data == transfer_restriction_data.key(),
-        constraint = transfer_restriction_group_from.id == transfer_rule.transfer_group_id_from,
+        constraint = transfer_restriction_group_from.id == transfer_group_id_from,
     )]
     pub transfer_restriction_group_from: Account<'info, TransferRestrictionGroup>,
 
     #[account(
         constraint = transfer_restriction_group_to.transfer_restriction_data == transfer_restriction_data.key(),
-        constraint = transfer_restriction_group_to.id == transfer_rule.transfer_group_id_to,
+        constraint = transfer_restriction_group_to.id == transfer_group_id_to,
     )]
     pub transfer_restriction_group_to: Account<'info, TransferRestrictionGroup>,
 

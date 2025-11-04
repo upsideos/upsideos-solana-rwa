@@ -573,8 +573,8 @@ describe("token lockup", () => {
 
   it("initializes security associated account group3 holder2", async () => {
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      group3Pubkey,
-      holder3Pubkey,
+      new anchor.BN(3),
+      new anchor.BN(3),
       holderGroup3Pubkey,
       investor.publicKey,
       investorTokenAccountPubkey,
@@ -600,8 +600,8 @@ describe("token lockup", () => {
 
   it("initializes investor recipient security associated account group1 holder0", async () => {
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      group1Pubkey,
-      holder1Pubkey,
+      new anchor.BN(1),
+      new anchor.BN(1),
       holderGroup1Pubkey,
       investorRecipient.publicKey,
       investorRecipientTokenAccountPubkey,

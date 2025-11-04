@@ -440,8 +440,8 @@ describe("Set Address Permission", () => {
         );
 
       await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-        group0Pubkey,
-        existingHolderPubkey,
+        group0Idx,
+        holderId,
         existingHolderGroupPubkey,
         existingUserWallet.publicKey,
         existingUserTokenAccount,

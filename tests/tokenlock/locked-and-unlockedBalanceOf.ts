@@ -606,8 +606,8 @@ describe("TokenLockup timelock balances", () => {
       testEnvironment.walletsAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      new anchor.BN(0),
+      holderId,
       holderGroupPubkey,
       recipient.publicKey,
       recipientTokenAcc,

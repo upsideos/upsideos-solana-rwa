@@ -8,7 +8,7 @@ use crate::{
 };
 
 #[derive(Accounts)]
-#[instruction(holder_max: u64)]
+#[instruction(group_id: u64, holder_group_max: u64)]
 pub struct SetHolderGroupMax<'info> {
     #[account(
       seeds = [
@@ -45,6 +45,7 @@ pub struct SetHolderGroupMax<'info> {
         ],
         bump,
         constraint = group.transfer_restriction_data == transfer_restriction_data.key(),
+        constraint = group.id == group_id,
     )]
     pub group: Account<'info, TransferRestrictionGroup>,
 

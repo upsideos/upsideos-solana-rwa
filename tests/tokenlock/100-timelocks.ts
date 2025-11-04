@@ -290,8 +290,8 @@ describe("TokenLockup stress test", () => {
       testEnvironment.walletsAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      new anchor.BN(0),
+      new anchor.BN(holderId),
       holderGroupPubkey,
       walletC.publicKey,
       walletCTokenAccount,

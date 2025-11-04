@@ -365,8 +365,8 @@ describe("Revoke holder group", () => {
         testEnvironment.transferAdmin
       );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      new anchor.BN(2),
       holderGroupPubkey,
       investor.publicKey,
       investorTokenAccount,

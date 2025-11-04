@@ -53,7 +53,7 @@ describe("Set holder group max", () => {
     const maxHolders = new anchor.BN(10);
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .setHolderGroupMax(maxHolders)
+        .setHolderGroupMax(firstGroupIdx, maxHolders)
         .accountsStrict({
           transferRestrictionData:
             testEnvironment.transferRestrictionsHelper
@@ -81,7 +81,7 @@ describe("Set holder group max", () => {
     const maxHolders = new anchor.BN(10);
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .setHolderGroupMax(maxHolders)
+        .setHolderGroupMax(firstGroupIdx, maxHolders)
         .accountsStrict({
           transferRestrictionData:
             testEnvironment.transferRestrictionsHelper
@@ -109,7 +109,7 @@ describe("Set holder group max", () => {
     const maxHolders = new anchor.BN(10);
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .setHolderGroupMax(maxHolders)
+        .setHolderGroupMax(firstGroupIdx, maxHolders)
         .accountsStrict({
           transferRestrictionData:
             testEnvironment.transferRestrictionsHelper
@@ -138,7 +138,7 @@ describe("Set holder group max", () => {
           testEnvironment.accessControlHelper.walletRolePDA(signer.publicKey);
         const maxHolders = new anchor.BN(10);
         await testEnvironment.transferRestrictionsHelper.program.methods
-          .setHolderGroupMax(maxHolders)
+          .setHolderGroupMax(firstGroupIdx, maxHolders)
           .accountsStrict({
             transferRestrictionData:
               testEnvironment.transferRestrictionsHelper
@@ -172,7 +172,7 @@ describe("Set holder group max", () => {
             );
 
           await testEnvironment.transferRestrictionsHelper.program.methods
-            .setHolderGroupMax(maxHolders)
+            .setHolderGroupMax(firstGroupIdx, maxHolders)
             .accountsStrict({
               transferRestrictionData:
                 testEnvironment.transferRestrictionsHelper
@@ -235,8 +235,8 @@ describe("Set holder group max", () => {
             testEnvironment.transferAdmin
           );
           await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-            groupPubkey,
-            holderPubkey,
+            firstGroupIdx,
+            currentHolderId,
             holderGroupPubkey,
             investor.publicKey,
             investorAssociatedTokenAccountPubkey,
@@ -260,7 +260,7 @@ describe("Set holder group max", () => {
         const maxHolders = currentHoldersCount.subn(1);
         try {
           await testEnvironment.transferRestrictionsHelper.program.methods
-            .setHolderGroupMax(maxHolders)
+            .setHolderGroupMax(firstGroupIdx, maxHolders)
             .accountsStrict({
               transferRestrictionData:
                 testEnvironment.transferRestrictionsHelper
@@ -299,7 +299,7 @@ describe("Set holder group max", () => {
         testEnvironment.transferRestrictionsHelper.groupPDA(zeroIdx);
       try {
         await testEnvironment.transferRestrictionsHelper.program.methods
-          .setHolderGroupMax(maxHolders)
+          .setHolderGroupMax(zeroIdx, maxHolders)
           .accountsStrict({
             transferRestrictionData:
               testEnvironment.transferRestrictionsHelper

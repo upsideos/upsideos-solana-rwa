@@ -9,6 +9,7 @@ use crate::{
 };
 
 #[derive(Accounts)]
+#[instruction(new_group_id: u64)]
 pub struct UpdateWalletGroup<'info> {
     #[account(mut,
       seeds = [
@@ -32,7 +33,6 @@ pub struct UpdateWalletGroup<'info> {
     pub transfer_restriction_data: Account<'info, TransferRestrictionData>,
     #[account(mut,
       constraint = transfer_restriction_group_current.transfer_restriction_data == transfer_restriction_data.key(),
-      constraint = transfer_restriction_group_current.id == security_associated_account.group,
       seeds = [
         TRANSFER_RESTRICTION_GROUP_PREFIX.as_bytes(),
         &transfer_restriction_data.key().to_bytes(),
@@ -43,6 +43,7 @@ pub struct UpdateWalletGroup<'info> {
     pub transfer_restriction_group_current: Account<'info, TransferRestrictionGroup>,
     #[account(mut,
       constraint = transfer_restriction_group_new.transfer_restriction_data == transfer_restriction_data.key(),
+      constraint = transfer_restriction_group_new.id == new_group_id,
       seeds = [
         TRANSFER_RESTRICTION_GROUP_PREFIX.as_bytes(),
         &transfer_restriction_data.key().to_bytes(),

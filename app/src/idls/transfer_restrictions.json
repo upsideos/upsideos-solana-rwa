@@ -816,7 +816,16 @@
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "group_id",
+          "type": "u64"
+        },
+        {
+          "name": "holder_id",
+          "type": "u64"
+        }
+      ]
     },
     {
       "name": "initialize_transfer_restriction_group",
@@ -1177,6 +1186,14 @@
         }
       ],
       "args": [
+        {
+          "name": "transfer_group_id_from",
+          "type": "u64"
+        },
+        {
+          "name": "transfer_group_id_to",
+          "type": "u64"
+        },
         {
           "name": "lock_until",
           "type": "u64"
@@ -2041,6 +2058,14 @@
       ],
       "args": [
         {
+          "name": "transfer_group_id_from",
+          "type": "u64"
+        },
+        {
+          "name": "transfer_group_id_to",
+          "type": "u64"
+        },
+        {
           "name": "locked_until",
           "type": "u64"
         }
@@ -2119,6 +2144,10 @@
         }
       ],
       "args": [
+        {
+          "name": "group_id",
+          "type": "u64"
+        },
         {
           "name": "holder_group_max",
           "type": "u64"
@@ -2528,7 +2557,12 @@
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "new_group_id",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [

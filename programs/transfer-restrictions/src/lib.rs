@@ -54,19 +54,26 @@ pub mod transfer_restrictions {
 
     pub fn initialize_transfer_rule(
         ctx: Context<InitializeTransferRule>,
+        transfer_group_id_from: u64,
+        transfer_group_id_to: u64,
         lock_until: u64,
     ) -> Result<()> {
-        instructions::transfer_restrictions::initialize_transfer_rule(ctx, lock_until)
+        instructions::transfer_restrictions::initialize_transfer_rule(ctx, transfer_group_id_from, transfer_group_id_to, lock_until)
     }
 
     pub fn initialize_security_associated_account(
         ctx: Context<InitializeSecurityAssociatedAccount>,
+        group_id: u64,
+        holder_id: u64,
     ) -> Result<()> {
-        instructions::transfer_restrictions::initialize_security_associated_account(ctx)
+        instructions::transfer_restrictions::initialize_security_associated_account(ctx, group_id, holder_id)
     }
 
-    pub fn update_wallet_group(ctx: Context<UpdateWalletGroup>) -> Result<()> {
-        instructions::transfer_restrictions::update_wallet_group(ctx)
+    pub fn update_wallet_group(
+        ctx: Context<UpdateWalletGroup>,
+        new_group_id: u64,
+    ) -> Result<()> {
+        instructions::transfer_restrictions::update_wallet_group(ctx, new_group_id)
     }
 
     pub fn pause(ctx: Context<Pause>, paused: bool) -> Result<()> {
@@ -83,16 +90,19 @@ pub mod transfer_restrictions {
 
     pub fn set_holder_group_max(
         ctx: Context<SetHolderGroupMax>,
+        group_id: u64,
         holder_group_max: u64,
     ) -> Result<()> {
-        instructions::transfer_restrictions::set_holder_group_max(ctx, holder_group_max)
+        instructions::transfer_restrictions::set_holder_group_max(ctx, group_id, holder_group_max)
     }
 
     pub fn set_allow_transfer_rule(
         ctx: Context<SetAllowTransferRule>,
+        transfer_group_id_from: u64,
+        transfer_group_id_to: u64,
         locked_until: u64,
     ) -> Result<()> {
-        instructions::transfer_restrictions::set_allow_transfer_rule(ctx, locked_until)
+        instructions::transfer_restrictions::set_allow_transfer_rule(ctx, transfer_group_id_from, transfer_group_id_to, locked_until)
     }
 
     pub fn revoke_security_associated_account(

@@ -6,13 +6,14 @@ use crate::InitializeSecurityAssociatedAccount;
 
 pub fn initialize_security_associated_account(
     ctx: Context<InitializeSecurityAssociatedAccount>,
+    group_id: u64,
+    _holder_id: u64,
 ) -> Result<()> {
     check_authorization(
         &ctx.accounts.authority_wallet_role,
         Roles::TransferAdmin as u8 | Roles::WalletsAdmin as u8,
     )?;
 
-    let group_id = ctx.accounts.group.id;
     initialize_security_associated_account_fields(
         &mut ctx.accounts.security_associated_account,
         &mut ctx.accounts.group,

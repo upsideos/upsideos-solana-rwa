@@ -65,7 +65,7 @@ describe("Set allow transfer rule", () => {
     const lockedUntil = new anchor.BN(0);
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .setAllowTransferRule(lockedUntil)
+        .setAllowTransferRule(firstGroupIdx, firstGroupIdx, lockedUntil)
         .accountsStrict({
           transferRule: transferRulePubkey,
           transferRestrictionData:
@@ -94,7 +94,7 @@ describe("Set allow transfer rule", () => {
     const lockedUntil = new anchor.BN(0);
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .setAllowTransferRule(lockedUntil)
+        .setAllowTransferRule(firstGroupIdx, firstGroupIdx, lockedUntil)
         .accountsStrict({
           transferRule: transferRulePubkey,
           transferRestrictionData:
@@ -123,7 +123,7 @@ describe("Set allow transfer rule", () => {
     const lockedUntil = new anchor.BN(0);
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .setAllowTransferRule(lockedUntil)
+        .setAllowTransferRule(firstGroupIdx, firstGroupIdx, lockedUntil)
         .accountsStrict({
           transferRule: transferRulePubkey,
           transferRestrictionData:
@@ -151,7 +151,7 @@ describe("Set allow transfer rule", () => {
       testEnvironment.accessControlHelper.walletRolePDA(signer.publicKey);
     const lockedUntil = new anchor.BN(0);
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .setAllowTransferRule(lockedUntil)
+      .setAllowTransferRule(firstGroupIdx, firstGroupIdx, lockedUntil)
       .accountsStrict({
         transferRule: transferRulePubkey,
         transferRestrictionData:
@@ -180,7 +180,7 @@ describe("Set allow transfer rule", () => {
     const lockedUntil = new anchor.BN(0);
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .setAllowTransferRule(lockedUntil)
+        .setAllowTransferRule(firstGroupIdx, firstGroupIdx, lockedUntil)
         .accountsStrict({
           transferRule: transferRulePubkey,
           transferRestrictionData:
