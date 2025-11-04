@@ -73,13 +73,13 @@ sequenceDiagram
   Investor ->> TransferAdmin: send AML/KYC and accreditation info
   TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRestrictionHolder(investorAddress)
   TransferAdmin ->> TransferRestrictionsProgram: initializeHolderGroup(investorAddress, transferGroup)
-  TransferAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(groupId, holderId)
+  TransferAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(investorAddress, transferGroup)
 
   Buyer ->> TransferAdmin: send AML/KYC and accreditation info
   TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRestrictionHolder(buyerAddress)
   TransferAdmin ->> TransferRestrictionsProgram: initializeHolderGroup(buyerAddress, transferGroup)
-  TransferAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(groupId, holderId)
-  TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRule(transferGroupIdFrom, transferGroupIdTo, afterTimestamp)
+  TransferAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(buyerAddress, transferGroup)
+  TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRule(fromGroup, toGroup, afterTimestamp)
 
   Investor ->>+ Token22: transfer(buyerAddress, amount)
   Token22 ->>- TransferRestrictionsProgram: execute(from, to, value)
@@ -93,16 +93,16 @@ The Transfer Admin for the TransferRestrictionsProgram can provision wallet addr
     - We recommend implementations use off-chain mechanisms (such as a 3rd party AML/KYC provider) that ensure a given address is approved and is a non-malicious smart contract wallet. However, generally multi-signature type wallets must be allowed in order to provide adequate security for investors.
     - This smart contract implementation does not provide a solution for collecting AML/KYC information.
 
-2. The Transfer Admin or Wallet Admin calls `initialalizeHolder(buyerAddress)`, `initializeHolderGroup(buyerAddress, transferGroup)` and `initializeSecurityAssociatedAccount(groupId, holderId)` to provision their account. Initially this will be done for the Primary Issuance of tokens to Investors where tokens are distributed directly from the Issuer to Holder wallets, where:
+2. The Transfer Admin or Wallet Admin calls `initialalizeHolder(buyerAddress)`, `initializeHolderGroup(buyerAddress, transferGroup)` and `initializeSecurityAssociatedAccount(buyerAddress, transferGroup)` to provision their account. Initially this will be done for the Primary Issuance of tokens to Investors where tokens are distributed directly from the Issuer to Holder wallets, where:
 
-   - `groupId`: The transfer group ID to assign to the wallet
-   - `holderId`: The holder ID to associate with the wallet
+   - `buyerAddress`: Buyer/Investor wallet address for which to set permissions
+   - `transferGroup`: desired transfer group ID for wallet address
 
 3. A potential Investor sends their AML/KYC information to the Transfer Admin or Wallet Admin or a **trusted** AML/KYC provider.
 
-4. The Transfer Admin or Wallet Admin calls `initialalizeHolder(investorAddress)`, `initializeHolderGroup(investorAddress, transferGroup)` and `initializeSecurityAssociatedAccount(groupId, holderId)` to provision the Investor account.
+4. The Transfer Admin or Wallet Admin calls `initialalizeHolder(investorAddress)`, `initializeHolderGroup(investorAddress, transferGroup)` and `initializeSecurityAssociatedAccount(investorAddress, transferGroup)` to provision the Investor account.
 
-5. At this time (or potentially earlier), the Transfer Admin or Wallet Admin authorizes the transfer of tokens between account groups with `initializeTransferRule(transferGroupIdFrom, transferGroupIdTo, afterTimestamp)`. Note that allowing a transfer from group A to group B by default does not allow the reverse transfer from group B to group A. This would need to be configured separately.
+5. At this time (or potentially earlier), the Transfer Admin or Wallet Admin authorizes the transfer of tokens between account groups with `initializeTransferRule(fromGroup, toGroup, afterTimestamp)`. Note that allowing a transfer from group A to group B by default does not allow the reverse transfer from group B to group A. This would need to be configured separately.
 
    - Ex.: Reg CF unaccredited Investors may be allowed to sell to Accredited US Investors but not vice versa.
 
@@ -311,10 +311,10 @@ The variable `maxTotalSupply` is set when the contract is created and limits the
 | From                                 | To                                                        | Restrict                                                                                          | Enforced By                                                                                                  | Admin Role                                                                                |
 | :----------------------------------- | :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------- |
 | Reg D/S/CF                           | Anyone                                                    | Until TimeLock ends                                                                               | `mintReleaseSchedule(investorAddress, balanceReserved, commencementTime, scheduleId, cancelableByAddresses)` | Reserve Admin                                                                                 |
-| Reg S Group                          | US Accredited                                             | Forbidden During Flowback Restriction Period                                                      | `initializeTransferRule(transferGroupIdFrom, transferGroupIdTo, afterTime)`                                                     | Transfer Admin                                                                            |
-| Reg S Group                          | Reg S Group                                               | Forbidden Until Shorter Reg S TimeLock Ended                                                      | `initializeTransferRule(transferGroupIdFrom, transferGroupIdTo, afterTime)`                                                     | Transfer Admin                                                                            |
+| Reg S Group                          | US Accredited                                             | Forbidden During Flowback Restriction Period                                                      | `initializeTransferRule(fromGroupS, toGroupD, afterTime)`                                                     | Transfer Admin                                                                            |
+| Reg S Group                          | Reg S Group                                               | Forbidden Until Shorter Reg S TimeLock Ended                                                      | `initializeTransferRule(fromGroupS, toGroupS, afterTime)`                                                     | Transfer Admin                                                                            |
 | Issuer                               | Reg CF with > maximum number of total holders allowed     | Forbid transfers increasing number of total Holders (across all groups) above a certain threshold | `setHolderMax(maxAmount)`                                                                                    | Transfer Admin                                                                            |
-| Issuer                               | Reg CF with > maximum number of Holders per group allowed | Forbid transfers increasing number of total Holders (within each group) above a certain threshold | `setHolderGroupMax(groupId, holderGroupMax)`                                                              | Transfer Admin                                                                            |
+| Issuer                               | Reg CF with > maximum number of Holders per group allowed | Forbid transfers increasing number of total Holders (within each group) above a certain threshold | `setHolderGroupMax(transferGroupID, maxAmount)`                                                              | Transfer Admin                                                                            |
 | Stolen Tokens                        | Anyone                                                    | Fix With Freeze, Burn, Reissue                                                                    | `freezeWallet();`<br /> `burnSecurities(address, amount);`<br />`mintSecurities(newOwnerAddress);`                | Wallets Admin or Transfer Admin can `freezeWallet()` and Reserve Admin can do `mintSecurities()` `burnSecurities()` |
 | Any Address During Regulatory Freeze | Anyone                                                    | Forbid all transfers while paused                                                                 | `pause(isPausedFlag)`                                                                                        | Transfer Admin                                                                            |
 | Any Address During Regulatory Freeze | Anyone                                                    | Unpause from a paused state                                                             | `pause(isPausedFlag)`                                                                                        | Transfer Admin                                                                            |
@@ -404,19 +404,19 @@ sequenceDiagram
 
   TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRestrictionGroup(fromGroupId)
   TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRestrictionGroup(toGroupId)
-  TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRule(transferGroupIdFrom, transferGroupIdTo, lockedUntil)
+  TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRule(fromGroup, toGroup)
 
   ReserveAdmin ->> AccessControlProgram: mintSecurities(reserveAdminAddress, amount)
 
   loop EITHER / OR for reserveAdminAddress and walletsAdminAddress
-      TransferAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(groupId, holderId), intializeHolder(address,id), initializeHolderGroup(address, groupId)
-      WalletsAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(groupId, holderId), intializeHolder(address,id), initializeHolderGroup(address, groupId)
+      TransferAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(address, walletTransferGroup), intializeHolder(address,id), initializeHolderGroup(address, groupId)
+      WalletsAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(address, walletTransferGroup), intializeHolder(address,id), initializeHolderGroup(address, groupId)
   end
 
   ReserveAdmin ->>+ TransferRestrictionsProgram: createTransferCheckedWithTransferHookInstruction(walletsAdminAddress, amount)
   loop EITHER / OR
-      TransferAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(groupId, holderId), intializeHolder(address,id), initializeHolderGroup(address, groupId)
-      WalletsAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(groupId, holderId), intializeHolder(address,id), initializeHolderGroup(address, groupId)
+      TransferAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(investorAddress, walletTransferGroup), intializeHolder(address,id), initializeHolderGroup(address, groupId)
+      WalletsAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(investorAddress, walletTransferGroup), intializeHolder(address,id), initializeHolderGroup(address, groupId)
   end
 
   WalletsAdmin ->> TransferRestrictionsProgram: createTransferCheckedWithTransferHookInstruction(investorAddress, amount)
@@ -427,7 +427,7 @@ sequenceDiagram
 2. Deployer initializes access control data, mint, transfer restrictions data. At the time of deployment, the deployer configures a separate Reserve Admin address, a Transfer Admin address, and a Wallets Admin address. This allows the reserve RWAs to be stored in cold storage since the treasury Reserve Admin address private keys are not needed for everyday use by the Transfer Admin.
 2. The Transfer Admin initializes transfer groups with `initializeTransferRestrictionGroup(groupId)`
 3. The Transfer Admin authorizes the transfer of tokens between account groups with `initializeTransferRestrictionGroup(fromGroup, toGroup, afterTimestamp)` .
-4. The Reserve Admin then provisions a Wallets Admin address for distributing tokens to investors or other stakeholders. The Wallets Admin uses `initializeTransferRestrictionHolder(investorAddress, holderId)`, `initializeHolderGroup(investorAddress, group)``initializeSecurityAssociatedAccount(groupId, holderId)` to set address restrictions.
+4. The Reserve Admin then provisions a Wallets Admin address for distributing tokens to investors or other stakeholders. The Wallets Admin uses `initializeTransferRestrictionHolder(investorAddress, holderId)`, `initializeHolderGroup(investorAddress, group)``initializeSecurityAssociatedAccount(investorAddress, transferGroup)` to set address restrictions.
 5. The Reserve Admin then transfers tokens to the Wallets Admin address.
 6. The Wallets Admin then transfers tokens to Investors or other stakeholders who are entitled to tokens.
 
@@ -453,8 +453,8 @@ Here is how these restricted Admin accounts can be configured:
 
 1. Transfer Admin, Reserve Admin and Wallets Admin accounts are managed by separate users with separate keys. For example, separate Nano Ledger X hardware wallets.
 2. Reserve and Wallets Admin addresses can have their own separate transfer groups.
-   - `updateWalletGroup(currentGroupId, reserveAdminTransferGroup)`
-   - `updateWalletGroup(currentGroupId, walletsAdminTransferGroup)`
+   - `updateWalletGroup(reserveAdminAddress, reserveAdminTransferGroup)`
+   - `updateWalletGroup(walletsAdminAddress, walletsAdminTransferGroup)`
 3. Reserve Address Group can only transfer to Wallets Admin Groups after a certain Timestamp.
    - `initializeTransferRule(reserveAdminTransferGroup, walletsAdminTransferGroup, afterTimestamp)`
 4. Wallets Admin Address can transfer to investor groups like Reg D and Reg S after a certain Timestamp.
@@ -483,7 +483,7 @@ sequenceDiagram
     TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRestrictionGroup(walletsAdminAddress, walletsAdminGroup...)
     TransferAdmin ->> TransferRestrictionsProgram: setTransferGroup(walletsAdminAddress, walletsAdminGroup...)
     TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRestrictionGroup(investorAddress, investorAdminGroup...)
-    TransferAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(groupId, holderId)
+    TransferAdmin ->> TransferRestrictionsProgram: initializeSecurityAssociatedAccount(investorAddress, holder, investorAdminGroup...)
     TransferAdmin ->> TransferRestrictionsProgram: initializeTransferRestrictionRule(walletsAdminGroup, investorAdminGroup...)
   end
   WalletsAdmin ->> Token22: transfer(investorAddress, amount)
@@ -494,7 +494,7 @@ sequenceDiagram
 1. The Transfer Admin gathers AML/KYC and accreditation information from investors and stakeholders who will receive tokens directly from the Issuer (the Primary Issuance).
 1. (optional) set the Holder max if desired
 1. Transfer Admin configures approved Transfer Group for Wallets Admin.
-1. Transfer Admin then configures approved Transfer Groups for Investor and stakeholders with `initializeSecurityAssociatedAccount(groupId, holderId)`. Based on the AML/KYC and accreditation process the investor can provision the account address with:
+1. Transfer Admin then configures approved Transfer Groups for Investor and stakeholders with `initializeSecurityAssociatedAccount(address, holder, transferGroup)`. Based on the AML/KYC and accreditation process the investor can provision the account address with:
 
    a) a transfer group designating a regulatory class like "Reg D", "Reg CF" or "Reg S"
 
@@ -512,7 +512,7 @@ Note that there are no transfers initially authorized between groups. By default
 
 Lockup periods are enforced via:
 
-- `initializeTransferRule(transferGroupIdFrom, transferGroupIdTo, unixTimestamp)` or `setAllowTransferRule(transferGroupIdFrom, transferGroupIdTo, unixTimestamp)` allows transfers from one Transfer Group to another after the unixTimestamp. If the unixTimestamp is 0, then no transfer is allowed.
+- `initializeTransferRule(fromGroup, toGroup, unixTimestamp)` or `setAllowTransferRule(fromGroup, toGroup, unixTimestamp)` allows transfers from one Transfer Group to another after the unixTimestamp. If the unixTimestamp is 0, then no transfer is allowed.
 
 ## Maximum Number of Holders Allowed
 
@@ -592,7 +592,7 @@ Only Reserve Admin, Transfer Admin, or Wallets Admin can call this instruction.
 
 ## `initialializeTransferRule`
 
-`initializeTransferRule(transferGroupIdFrom, transferGroupIdTo, lockedUntil)` is used to create new transfer rule for 2 specified groups where `transferGroupIdFrom` is for senders and `transferGroupIdTo` is for receivers. The instruction validates that the provided group IDs match the accounts passed to avoid extra RPC calls.
+`initializeTransferRule` is used to create new transfer rule for 2 specified groups where `..groupFrom` for senders and `..groupTo` for reveivers
 
 ## Timelock Cancellations and Transfers
 
@@ -619,8 +619,8 @@ In the case of a timelock transfer, the initial target recipient must also be in
 
 To allow trading in a group:
 
-- Call `updateWalletGroup(currentGroupId, newGroupId)` for trader Wallets in the group
-- `initializeTransferRule(transferGroupIdFrom, transferGroupIdTo, groupTimeLock)` for Wallets associated with groupIDs (for example, Reg S)
+- Call `updateWalletGroup(address, transferGroup)` for trader Wallets in the group
+- `initializeTransferRule(fromGroupX, toGroupX, groupTimeLock)` for Wallets associated with groupIDs (for example, Reg S)
 - A token transfer for an allowed group will succeed if:
   - the recipient of a token transfer does not result in a total holder count in a given group that exceeds the defined `holderGroupMax` (if configured, ie `holderGroupMax` set to > 0)
   - the recipient of a token transfer does not result in a total global holder count that exceeds the defined `holderMax`
@@ -629,8 +629,8 @@ To allow trading in a group:
 
 To allow trading between Foreign Reg S account addresses but forbid flow back to US Reg D account addresses until the end of the Reg D lockup period
 
-- Call `updateWalletGroup(currentGroupId, groupIDForRegS)` to configure settings for Reg S investors
-- Call `updateWalletGroup(currentGroupId, groupIDForRegD)` to configure settings for Reg D investors
+- Call `updateWalletGroup(address, groupIDForRegS)` to configure settings for Reg S investors
+- Call `updateWalletGroup(address, groupIDForRegD)` to configure settings for Reg D investors
 - `initializeTransferRule(groupIDForRegS, groupIDForRegS, addressTimelock)` allow Reg S trading
 - A token transfer for between allowed groups will succeed if:
   - the `addressTimelock` time has passed; and
@@ -995,13 +995,13 @@ Title: Post-Deployment Configuration
   ContractAdmin->>AccessControlProgram: 1. grantRole(TransferAdmin_Address, 8)
   AccessControlProgram->>TransferAdmin: Role is granted
   TransferAdmin->>TransferRestrictionProgram: 2. initializeTransferGroup(1)
-  TransferAdmin->>TransferRestrictionProgram: 3. initializeTransferRule(1, 1, lockedUntil)
+  TransferAdmin->>TransferRestrictionProgram: 3. initializeTransferRule(1, 1, 1)
   TransferAdmin->>TransferRestrictionProgram: 4. initializeTransferRestrictionHolder(Token_Address, 1)
   TransferAdmin->>TransferRestrictionProgram: 5. initializeHolderGroup(Token_Address_HolderId, 1)
-  TransferAdmin->>TransferRestrictionProgram: 6. initializeSecurityAssociatedAccount(groupId, holderId)
+  TransferAdmin->>TransferRestrictionProgram: 6. initializeSecurityAssociatedAccount(Token_Address, 1)
   TransferAdmin->>TransferRestrictionProgram: 7. initializeTransferRestrictionHolder(ReserveAdmin_Address, 1)
   TransferAdmin->>TransferRestrictionProgram: 8. initializeHolderGroup(ReserveAdmin_Address_HolderId, 1)
-  TransferAdmin->>TransferRestrictionProgram: 9. initializeSecurityAssociatedAccount(groupId, holderId)
+  TransferAdmin->>TransferRestrictionProgram: 9. initializeSecurityAssociatedAccount(ReserveAdmin_Address, 1)
 ```
 
 ## Troubleshooting
