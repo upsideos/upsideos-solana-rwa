@@ -149,8 +149,8 @@ describe("Approve and transfer by third party service", () => {
     );
     // Initialize security associated accounts
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      investorHolderPubkey,
+      new anchor.BN(groupId),
+      new anchor.BN(holderInvestorId),
       investorHolderGroupPubkey,
       investor.publicKey,
       investorTokenAccountPubkey,
@@ -159,8 +159,8 @@ describe("Approve and transfer by third party service", () => {
     );
 
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      recipientHolderPubkey,
+      new anchor.BN(groupId),
+      new anchor.BN(holderRecipientId),
       recipientHolderGroupPubkey,
       recipient.publicKey,
       recipientTokenAccountPubkey,
@@ -192,8 +192,8 @@ describe("Approve and transfer by third party service", () => {
     );
 
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      reserveAdminHolderPubkey,
+      new anchor.BN(groupId),
+      new anchor.BN(holderReserveAdminId),
       reserveAdminHolderGroupPubkey,
       testEnvironment.reserveAdmin.publicKey,
       reserveAdminTokenAccountPubkey,

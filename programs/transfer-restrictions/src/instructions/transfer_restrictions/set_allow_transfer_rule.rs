@@ -5,6 +5,8 @@ use crate::{errors::TransferRestrictionsError, SetAllowTransferRule};
 
 pub fn set_allow_transfer_rule(
     ctx: Context<SetAllowTransferRule>,
+    _group_id_from: u64,
+    _group_id_to: u64,
     locked_until: u64,
 ) -> Result<()> {
     if !ctx.accounts.authority_wallet_role.has_role(Roles::TransferAdmin) {

@@ -269,8 +269,8 @@ describe("Transfer Negative cases", async () => {
       testEnvironment.walletsAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      group0,
+      holderId,
       holderGroupPubkey,
       walletA.publicKey,
       walletATokenAcc,
@@ -278,8 +278,8 @@ describe("Transfer Negative cases", async () => {
       testEnvironment.walletsAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      group0,
+      holderId,
       holderGroupPubkey,
       walletB.publicKey,
       walletBTokenAcc,

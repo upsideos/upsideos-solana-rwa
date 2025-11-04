@@ -62,7 +62,7 @@ describe("Initialize transfer restriction HolderGroup", () => {
       testEnvironment.transferRestrictionsHelper.groupPDA(firstGroupIdx);
     await testEnvironment.transferRestrictionsHelper.setHolderGroupMax(
       maxHoldersInGroup1,
-      firstGroupPubkey,
+      firstGroupIdx,
       testEnvironment.accessControlHelper.walletRolePDA(
         testEnvironment.transferAdmin.publicKey
       )[0],

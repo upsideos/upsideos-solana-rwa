@@ -51,7 +51,7 @@ describe("Initialize transfer restriction rule", () => {
       );
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .initializeTransferRule(lockedUntil)
+        .initializeTransferRule(firstGroupIdx, firstGroupIdx, lockedUntil)
         .accountsStrict({
           transferRule: transferRulePubkey,
           transferRestrictionData:
@@ -90,7 +90,7 @@ describe("Initialize transfer restriction rule", () => {
       );
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .initializeTransferRule(lockedUntil)
+        .initializeTransferRule(firstGroupIdx, firstGroupIdx, lockedUntil)
         .accountsStrict({
           transferRule: transferRulePubkey,
           transferRestrictionData:
@@ -129,7 +129,7 @@ describe("Initialize transfer restriction rule", () => {
       );
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .initializeTransferRule(lockedUntil)
+        .initializeTransferRule(firstGroupIdx, firstGroupIdx, lockedUntil)
         .accountsStrict({
           transferRule: transferRulePubkey,
           transferRestrictionData:
@@ -167,7 +167,7 @@ describe("Initialize transfer restriction rule", () => {
         firstGroupIdx
       );
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .initializeTransferRule(lockedUntil)
+      .initializeTransferRule(firstGroupIdx, firstGroupIdx, lockedUntil)
       .accountsStrict({
         transferRule: transferRulePubkey,
         transferRestrictionData:
@@ -237,7 +237,7 @@ describe("Initialize transfer restriction rule", () => {
       await testEnvironment.connection.getBalance(authority.publicKey);
 
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .initializeTransferRule(lockedUntil)
+      .initializeTransferRule(secondGroupIdx, secondGroupIdx, lockedUntil)
       .accountsStrict({
         transferRule: transferRulePubkey,
         transferRestrictionData:

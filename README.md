@@ -138,6 +138,8 @@ Relevant methods:
 /**
   * @dev Sets an allowed transfer from a group to another group beginning at a specific time.
   * There is only one definitive rule per from and to group.
+  * @param transferGroupIdFrom The transfer group ID the transfer is coming from.
+  * @param transferGroupIdTo The transfer group ID the transfer is going to.
   * @param lockedUntil The unix timestamp that the transfer is locked until. 0 is a special number. 0 means the transfer is not allowed.
   * This is because in the smart contract mapping all pairs are implicitly defined with a default lockedUntil value of 0.
   * But no transfers should be authorized until explicitly allowed. Thus 0 must mean no transfer is allowed.
@@ -152,7 +154,7 @@ Relevant methods:
   * @param payer Wallet which pays account rent. Can be different from authority
   * @param systemProgram Solana System Program which is required for new on-chain account data initialization
   */
-initializeTransferRule(lockedUntil)
+initializeTransferRule(transferGroupIdFrom, transferGroupIdTo, lockedUntil)
   .accountsStrict({
     transferRule,
     transferRestrictionData,
@@ -220,6 +222,8 @@ initializeTransferRule(lockedUntil)
 ```typescript
 /**
   * @dev A convenience method for initializing the security associated account.
+  * @param groupId The transfer group ID to assign to the wallet
+  * @param holderId The holder ID to associate with the wallet
   * @accounts
   * @param securityAssociatedAccount The security associated account PDA as ["saa", associatedTokenAccount].
   * @param group The desired group account PDA linked with groupId to set for the address.
@@ -234,7 +238,7 @@ initializeTransferRule(lockedUntil)
   * @param payer Wallet which pays account rent. Can be different from authority
   * @param systemProgram Solana System Program which is required for new on-chain account data initialization
   */
-initializeSecurityAssociatedAccount()
+initializeSecurityAssociatedAccount(groupId, holderId)
   .accountsStrict({
     securityAssociatedAccount,
     group,
@@ -512,7 +516,7 @@ Lockup periods are enforced via:
 
 ## Maximum Number of Holders Allowed
 
-By default Transfer Groups cannot receive token transfers. To receive tokens the issuer gathers AML/KYC information and then calls `initializeSecurityAssociatedAccount()`.
+By default Transfer Groups cannot receive token transfers. To receive tokens the issuer gathers AML/KYC information and then calls `initializeSecurityAssociatedAccount(groupId, holderId)`.
 
 A single Holder may have unlimited Wallet addresses. This cannot be altered. The Issuer can only configure the maximum number of **Holders** allowed (via Transfer Admin) by calling `setHolderMax`. By default, this limit is set to `2**64-1`.
 
@@ -634,9 +638,9 @@ To allow trading between Foreign Reg S account addresses but forbid flow back to
 
 ### Example: Exchanges Can Register Omnibus Accounts
 
-Centralized exchanges can register custody addresses using the same method as other users. They contact the Issuer to provision accounts and the Transfer Admin or Wallets Admin calls `initializeTransferRestrictionHolder()`, `initializeHolderGroup()`, `initializeSecurityAssociatedAccount()` for the exchange account.
+Centralized exchanges can register custody addresses using the same method as other users. They contact the Issuer to provision accounts and the Transfer Admin or Wallets Admin calls `initializeTransferRestrictionHolder()`, `initializeHolderGroup()`, `initializeSecurityAssociatedAccount(groupId, holderId)` for the exchange account.
 
-When customers of the exchange want to withdraw tokens from the exchange account they must withdraw into an account that the Transfer Admin has provisioned for them with `initializeSecurityAssociatedAccount()`.
+When customers of the exchange want to withdraw tokens from the exchange account they must withdraw into an account that the Transfer Admin has provisioned for them with `initializeSecurityAssociatedAccount(groupId, holderId)`.
 
 Talk to a lawyer about when exchange accounts may or may not exceed the maximum number of holders allowed for a token.
 
@@ -1004,8 +1008,8 @@ Title: Post-Deployment Configuration
 
 To enable transfers between wallets, ensure that:
 
-- both sender and recipient are placed into desired transfer groups (ie invoking `initializeSecurityAssociatedAccount` or `updateWalletGroup`)
-- these transfer groups have approved transfer restrictions (ie invoking `initializeTransferRule`)
+- both sender and recipient are placed into desired transfer groups (ie invoking `initializeSecurityAssociatedAccount(groupId, holderId)` or `updateWalletGroup(currentGroupId, newGroupId)`)
+- these transfer groups have approved transfer restrictions (ie invoking `initializeTransferRule(transferGroupIdFrom, transferGroupIdTo, lockedUntil)`)
 - sender has available tokens to be transferred
 
 Note that `balance` property of AssociatedTokenAccount typically used by wallet providers (ie Phantom) will display wallet balance that includes the amount of simple tokens. Any locked, staked tokens are held by related Tokenlockup program escrow account.

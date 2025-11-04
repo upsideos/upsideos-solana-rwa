@@ -230,7 +230,7 @@ export class TransferRestrictionsHelper {
     const payerKeypair = payer || authority;
 
     return this.program.methods
-      .initializeTransferRule(lockedUntil)
+      .initializeTransferRule(transferGroupFromId, transferGroupToId, lockedUntil)
       .accountsStrict({
         transferRule: transferRulePubkey,
         transferRestrictionData: this.transferRestrictionDataPubkey,
@@ -271,8 +271,8 @@ export class TransferRestrictionsHelper {
   }
 
   async initializeSecurityAssociatedAccount(
-    groupPubkey: PublicKey,
-    holderPubkey: PublicKey,
+    groupId: BN,
+    holderId: BN,
     holderGroupPubkey: PublicKey,
     userWalletPubkey: PublicKey,
     userWalletAssociatedAccountPubkey: PublicKey,
@@ -283,10 +283,12 @@ export class TransferRestrictionsHelper {
     const [securityAssociatedAccountPubkey] = this.securityAssociatedAccountPDA(
       userWalletAssociatedAccountPubkey
     );
+    const [groupPubkey] = this.groupPDA(groupId);
+    const [holderPubkey] = this.holderPDA(holderId);
     const payerKeypair = payer || authority;
 
     return this.program.methods
-      .initializeSecurityAssociatedAccount()
+      .initializeSecurityAssociatedAccount(groupId, holderId)
       .accountsStrict({
         securityAssociatedAccount: securityAssociatedAccountPubkey,
         group: groupPubkey,
@@ -334,7 +336,7 @@ export class TransferRestrictionsHelper {
   async updateWalletGroup(
     userWalletSecAssociatedAccountPubkey: PublicKey,
     groupCurrentPubkey: PublicKey,
-    groupNewPubkey: PublicKey,
+    newGroupId: BN,
     holderGroupCurrentPubkey: PublicKey,
     holderGroupNewPubkey: PublicKey,
     authorityWalletRole: PublicKey,
@@ -342,8 +344,9 @@ export class TransferRestrictionsHelper {
     userTokenAccountPubkey: PublicKey,
     payer: Keypair
   ): Promise<string> {
+    const [groupNewPubkey] = this.groupPDA(newGroupId);
     return this.program.methods
-      .updateWalletGroup()
+      .updateWalletGroup(newGroupId)
       .accountsStrict({
         securityAssociatedAccount: userWalletSecAssociatedAccountPubkey,
         securityToken: this.mintPubkey,
@@ -382,12 +385,13 @@ export class TransferRestrictionsHelper {
 
   async setHolderGroupMax(
     maxHolders: BN,
-    groupPubkey: PublicKey,
+    groupId: BN,
     authorityWalletRolePubkey: PublicKey,
     payer: Keypair
   ): Promise<string> {
+    const [groupPubkey] = this.groupPDA(groupId);
     return this.program.methods
-      .setHolderGroupMax(maxHolders)
+      .setHolderGroupMax(groupId, maxHolders)
       .accountsStrict({
         transferRestrictionData: this.transferRestrictionDataPubkey,
         accessControlAccount: this.accessControlPubkey,
@@ -403,13 +407,15 @@ export class TransferRestrictionsHelper {
   async setAllowTransferRule(
     lockedUntil: BN,
     transferRulePubkey: PublicKey,
-    transferRestrictionGroupFromPubkey: PublicKey,
-    transferRestrictionGroupToPubkey: PublicKey,
+    transferGroupFromId: BN,
+    transferGroupToId: BN,
     authorityWalletRolePubkey: PublicKey,
     payer: Keypair
   ): Promise<string> {
+    const [transferRestrictionGroupFromPubkey] = this.groupPDA(transferGroupFromId);
+    const [transferRestrictionGroupToPubkey] = this.groupPDA(transferGroupToId);
     return this.program.methods
-      .setAllowTransferRule(lockedUntil)
+      .setAllowTransferRule(transferGroupFromId, transferGroupToId, lockedUntil)
       .accountsStrict({
         transferRestrictionData: this.transferRestrictionDataPubkey,
         transferRule: transferRulePubkey,
@@ -586,8 +592,8 @@ export class TransferRestrictionsHelper {
 
       // Initialize security associated account
       await this.initializeSecurityAssociatedAccount(
-        groupPubkey,
-        holderPubkey,
+        groupIdx,
+        holderId,
         holderGroupPubkey,
         userWalletPubkey,
         userWalletAssociatedAccountPubkey,

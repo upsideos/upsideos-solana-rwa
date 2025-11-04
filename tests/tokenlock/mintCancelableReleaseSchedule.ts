@@ -187,8 +187,8 @@ describe("TokenLockup check cancelables", () => {
       testEnvironment.transferAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      holderId,
       holderGroupPubkey,
       walletA.publicKey,
       walletATokenAcc,
@@ -196,8 +196,8 @@ describe("TokenLockup check cancelables", () => {
       testEnvironment.transferAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      holderId,
       holderGroupPubkey,
       walletB.publicKey,
       walletBTokenAcc,
@@ -210,8 +210,8 @@ describe("TokenLockup check cancelables", () => {
         testEnvironment.contractAdmin
       );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      holderId,
       holderGroupPubkey,
       tokenlockWallet.publicKey,
       tokenlockWalletTokenAcc,
@@ -495,8 +495,8 @@ describe("TokenLockup check cancelables", () => {
           groupId
         );
       await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-        groupPubkey,
-        holderPubkey,
+        groupId,
+        holderId,
         holderGroupPubkey,
         canceler.publicKey,
         cancelerTokenAcc,

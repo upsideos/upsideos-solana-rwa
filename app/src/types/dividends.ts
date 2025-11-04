@@ -8,7 +8,7 @@ export type Dividends = {
   address: "FUjkkUVKa9Pofs5mBdiYQe2cBVwzrhX8SunAZhGXRkog";
   metadata: {
     name: "dividends";
-    version: "0.1.0";
+    version: "0.2.0";
     spec: "0.1.0";
     description: "Dividends are based on Merkle tree distribution"
   };

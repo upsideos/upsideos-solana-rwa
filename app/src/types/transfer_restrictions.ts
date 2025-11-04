@@ -8,7 +8,7 @@ export type TransferRestrictions = {
   address: "6yEnqdEjX3zBBDkzhwTRGJwv1jRaN4QE4gywmgdcfPBZ";
   metadata: {
     name: "transferRestrictions";
-    version: "0.1.0";
+    version: "0.2.0";
     spec: "0.1.0";
     description: "Transfer restrictions for Solana tokens"
   };
@@ -822,7 +822,16 @@ export type TransferRestrictions = {
           address: "11111111111111111111111111111111"
         }
       ];
-      args: []
+      args: [
+        {
+          name: "groupId";
+          type: "u64"
+        },
+        {
+          name: "holderId";
+          type: "u64"
+        }
+      ]
     },
     {
       name: "initializeTransferRestrictionGroup";
@@ -1183,6 +1192,14 @@ export type TransferRestrictions = {
         }
       ];
       args: [
+        {
+          name: "transferGroupIdFrom";
+          type: "u64"
+        },
+        {
+          name: "transferGroupIdTo";
+          type: "u64"
+        },
         {
           name: "lockUntil";
           type: "u64"
@@ -2047,6 +2064,14 @@ export type TransferRestrictions = {
       ];
       args: [
         {
+          name: "transferGroupIdFrom";
+          type: "u64"
+        },
+        {
+          name: "transferGroupIdTo";
+          type: "u64"
+        },
+        {
           name: "lockedUntil";
           type: "u64"
         }
@@ -2125,6 +2150,10 @@ export type TransferRestrictions = {
         }
       ];
       args: [
+        {
+          name: "groupId";
+          type: "u64"
+        },
         {
           name: "holderGroupMax";
           type: "u64"
@@ -2534,7 +2563,12 @@ export type TransferRestrictions = {
           address: "11111111111111111111111111111111"
         }
       ];
-      args: []
+      args: [
+        {
+          name: "newGroupId";
+          type: "u64"
+        }
+      ]
     }
   ];
   accounts: [

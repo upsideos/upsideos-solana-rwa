@@ -460,8 +460,8 @@ describe("solana-security-token", () => {
     );
     const initSecAssocAccountSenderTx =
       await transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-        transferRestrictionGroup1Pubkey,
-        holderSenderPubkey,
+        transferGroup1,
+        senderHolderId,
         holderGroupPubkey,
         userWalletPubkey,
         userWalletAssociatedAccountPubkey,
@@ -653,8 +653,8 @@ describe("solana-security-token", () => {
 
     const initSecAssocAccountRecipientTx =
       await transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-        transferRestrictionGroup1Pubkey,
-        holderRecipientPubkey,
+        transferGroup1,
+        recipientHolderId,
         holderGroupPubkey,
         userWalletRecipientPubkey,
         userWalletRecipientAssociatedTokenAccountPubkey,
@@ -1108,7 +1108,7 @@ describe("solana-security-token", () => {
       await transferRestrictionsHelper.updateWalletGroup(
         userWalletSecurityAssociatedAccountPubkey,
         transferRestrictionGroup1Pubkey,
-        groupNewPubkey,
+        transferGroup2Id,
         userWalletCurrentHolderGroupPubkey,
         userWalletNewHolderGroupPubkey,
         transferAdminWalletRole,
@@ -1266,7 +1266,7 @@ describe("solana-security-token", () => {
 
     const setMaxHoldersTx = await transferRestrictionsHelper.setHolderGroupMax(
       newMaxHolders,
-      groupPubkey,
+      transferGroup1,
       accessControlHelper.walletRolePDA(transferAdmin.publicKey)[0],
       transferAdmin
     );
@@ -1288,8 +1288,8 @@ describe("solana-security-token", () => {
       await transferRestrictionsHelper.setAllowTransferRule(
         lockedUntil,
         transferRulePubkey,
-        transferRestrictionGroup2Pubkey,
-        transferRestrictionGroup1Pubkey,
+        transferGroup2Id,
+        transferGroup1,
         accessControlHelper.walletRolePDA(transferAdmin.publicKey)[0],
         transferAdmin
       );

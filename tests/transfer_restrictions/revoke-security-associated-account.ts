@@ -73,8 +73,8 @@ describe("Revoke security associated account", () => {
       )
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      holderIdx,
       holderGroupPubkey,
       investors[0].publicKey,
       investorsTokenAccounts[0],
@@ -111,8 +111,8 @@ describe("Revoke security associated account", () => {
       )
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      holderIdx,
       holderGroupPubkey,
       investors[1].publicKey,
       investorsTokenAccounts[1],
@@ -137,8 +137,8 @@ describe("Revoke security associated account", () => {
       )
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      holderIdx,
       holderGroupPubkey,
       investors[2].publicKey,
       investorsTokenAccounts[2],

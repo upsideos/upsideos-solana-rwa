@@ -17,7 +17,7 @@ pub struct SecurityAssociatedAccount {
 }
 
 #[derive(Accounts)]
-#[instruction()]
+#[instruction(group_id: u64, holder_id: u64)]
 pub struct InitializeSecurityAssociatedAccount<'info> {
     #[account(init, payer = payer, space = DISCRIMINATOR_LEN + SecurityAssociatedAccount::INIT_SPACE,
       seeds = [
@@ -29,10 +29,12 @@ pub struct InitializeSecurityAssociatedAccount<'info> {
     pub security_associated_account: Account<'info, SecurityAssociatedAccount>,
     #[account(mut,
       constraint = group.transfer_restriction_data == transfer_restriction_data.key(),
+      constraint = group.id == group_id,
     )]
     pub group: Account<'info, TransferRestrictionGroup>,
     #[account(mut,
       constraint = holder.transfer_restriction_data == transfer_restriction_data.key(),
+      constraint = holder.id == holder_id,
     )]
     pub holder: Account<'info, TransferRestrictionHolder>,
     #[account(mut,

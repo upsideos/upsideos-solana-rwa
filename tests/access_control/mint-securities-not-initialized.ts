@@ -113,8 +113,8 @@ describe("Access Control mint securities", () => {
       testEnvironment.walletsAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      mintRecipientHolderPubkey,
+      new anchor.BN(0),
+      new anchor.BN(mintRecipientHolderId),
       mintRecipientHolderGroupPubkey,
       mintRecipient.publicKey,
       mintRecipientTokenAccount,

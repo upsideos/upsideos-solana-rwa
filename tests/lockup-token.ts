@@ -522,7 +522,7 @@ describe("token lockup", () => {
         reserveAdminTokenAccountPubkey
       )[0],
       reserveAdminCurrentGroupPubkey,
-      reserveAdminGroupPubkey,
+      reserveAdminGroupId,
       reserveAdminCurrentHolderGroupPubkey,
       reserveAdminHolderGroupPubkey,
       transferAdminWalletRole,
@@ -662,8 +662,8 @@ describe("token lockup", () => {
     );
 
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      testEnvironment.transferRestrictionsHelper.groupPDA(investorGroupId)[0],
-      testEnvironment.transferRestrictionsHelper.holderPDA(investorHolderId)[0],
+      investorGroupId,
+      investorHolderId,
       investorHolderGroupPubkey,
       investor.publicKey,
       investorTokenAccountPubkey,
@@ -817,8 +817,8 @@ describe("token lockup", () => {
     );
 
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      investorGroupPubkey,
-      investorHolderPubkey,
+      investorGroupId,
+      investorHolderId,
       investorHolderGroupPubkey,
       newInvestorWallet.publicKey,
       newinvestorTokenAccountPubkey,

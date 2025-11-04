@@ -146,8 +146,8 @@ describe("Access Control force transfer between", () => {
       testEnvironment.walletsAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      targetHolderPubkey,
+      new anchor.BN(groupId),
+      new anchor.BN(targetHolderId),
       targetHolderGroupPubkey,
       target.publicKey,
       targetTokenAccount,
@@ -155,8 +155,8 @@ describe("Access Control force transfer between", () => {
       testEnvironment.walletsAdmin
     );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      recipientHolderPubkey,
+      new anchor.BN(groupId),
+      new anchor.BN(recipientHolderId),
       recipientHolderGroupPubkey,
       recipient.publicKey,
       recipientTokenAccount,
@@ -445,8 +445,8 @@ describe("Access Control force transfer between", () => {
         testEnvironment.transferAdmin
       );
       await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-        groupPubkey,
-        holderPubkey,
+        new anchor.BN(groupId),
+        currentHolderIdx,
         holderGroupPubkey,
         escrowOwnerPubkey,
         escrowAccount,

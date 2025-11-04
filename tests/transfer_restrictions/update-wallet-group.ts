@@ -81,8 +81,8 @@ describe("Update wallet group", () => {
         testEnvironment.reserveAdmin
       );
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      firstGroupPubkey,
-      holderPubkey,
+      firstGroupIdx,
+      currentHolderIdx,
       holderGroupPubkey,
       investorWallet0.publicKey,
       investorWallet0AssociatedAccount,
@@ -118,8 +118,8 @@ describe("Update wallet group", () => {
         testEnvironment.reserveAdmin
       );
     testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      firstGroupPubkey,
-      holderPubkey,
+      firstGroupIdx,
+      currentHolderIdx,
       holderGroupPubkey,
       investorWallet1.publicKey,
       investorWallet1AssociatedAccount,
@@ -156,8 +156,8 @@ describe("Update wallet group", () => {
         testEnvironment.reserveAdmin
       );
     testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      firstGroupPubkey,
-      holderPubkey,
+      firstGroupIdx,
+      currentHolderIdx,
       holderGroupPubkey,
       investorWallet2.publicKey,
       investorWallet2AssociatedAccount,
@@ -201,7 +201,7 @@ describe("Update wallet group", () => {
 
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .updateWalletGroup()
+        .updateWalletGroup(new anchor.BN(2))
         .accountsStrict({
           securityAssociatedAccount: userWalletSecAssociatedAccountPubkey,
           securityToken: testEnvironment.mintKeypair.publicKey,
@@ -253,7 +253,7 @@ describe("Update wallet group", () => {
 
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .updateWalletGroup()
+        .updateWalletGroup(new anchor.BN(2))
         .accountsStrict({
           securityAssociatedAccount: userWalletSecAssociatedAccountPubkey,
           securityToken: testEnvironment.mintKeypair.publicKey,
@@ -300,7 +300,7 @@ describe("Update wallet group", () => {
 
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .updateWalletGroup()
+        .updateWalletGroup(firstGroupIdx)
         .accountsStrict({
           securityAssociatedAccount: userWalletSecAssociatedAccountPubkey,
           securityToken: testEnvironment.mintKeypair.publicKey,
@@ -370,7 +370,7 @@ describe("Update wallet group", () => {
         secondGroupPubkey
       );
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .updateWalletGroup()
+      .updateWalletGroup(new anchor.BN(2))
       .accountsStrict({
         securityAssociatedAccount: userWalletSecAssociatedAccountPubkey,
         securityToken: testEnvironment.mintKeypair.publicKey,
@@ -474,8 +474,8 @@ describe("Update wallet group", () => {
       );
     // Add investorWallet3 to the current group so that there are more than 1 wallets in the group
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      firstGroupPubkey,
-      holderPubkey,
+      firstGroupIdx,
+      new anchor.BN(2),
       holderGroupCurrentPubkey,
       investorWallet3.publicKey,
       investorWallet3AssociatedAccount,
@@ -499,7 +499,7 @@ describe("Update wallet group", () => {
         secondGroupPubkey
       );
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .updateWalletGroup()
+      .updateWalletGroup(new anchor.BN(2))
       .accountsStrict({
         securityAssociatedAccount: userWalletSecAssociatedAccountPubkey,
         securityToken: testEnvironment.mintKeypair.publicKey,
@@ -604,7 +604,7 @@ describe("Update wallet group", () => {
         secondGroupPubkey
       );
     await testEnvironment.transferRestrictionsHelper.program.methods
-      .updateWalletGroup()
+      .updateWalletGroup(new anchor.BN(2))
       .accountsStrict({
         securityAssociatedAccount: userWalletSecAssociatedAccountPubkey,
         securityToken: testEnvironment.mintKeypair.publicKey,
@@ -688,7 +688,7 @@ describe("Update wallet group", () => {
       );
     await testEnvironment.transferRestrictionsHelper.setHolderGroupMax(
       new anchor.BN(2),
-      secondGroupPubkey,
+      new anchor.BN(2),
       authorityWalletRolePubkey,
       testEnvironment.transferAdmin
     );
@@ -721,7 +721,7 @@ describe("Update wallet group", () => {
       );
     try {
       await testEnvironment.transferRestrictionsHelper.program.methods
-        .updateWalletGroup()
+        .updateWalletGroup(new anchor.BN(2))
         .accountsStrict({
           securityAssociatedAccount: userWalletSecAssociatedAccountPubkey,
           securityToken: testEnvironment.mintKeypair.publicKey,

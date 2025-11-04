@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "access-control"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -1391,7 +1391,7 @@ dependencies = [
 
 [[package]]
 name = "dividends"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "access-control",
  "anchor-lang",
@@ -7833,7 +7833,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokenlock"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "access-control",
  "anchor-lang",
@@ -8157,7 +8157,7 @@ dependencies = [
 
 [[package]]
 name = "transfer-restrictions"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "access-control",
  "anchor-lang",

@@ -296,8 +296,8 @@ describe("TokenLockup create release schedule", () => {
     );
 
     await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupPubkey,
-      holderPubkey,
+      groupId,
+      holderId,
       holderGroupPubkey,
       walletB.publicKey,
       walletBTokenAcc,
