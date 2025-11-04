@@ -45,7 +45,6 @@ pub struct UpdateWalletGroup<'info> {
     #[account(mut,
       constraint = transfer_restriction_group_new.transfer_restriction_data == transfer_restriction_data.key(),
       constraint = transfer_restriction_group_new.id == new_group_id,
-      constraint = transfer_restriction_group_new.id != transfer_restriction_group_current.id,
       seeds = [
         TRANSFER_RESTRICTION_GROUP_PREFIX.as_bytes(),
         &transfer_restriction_data.key().to_bytes(),

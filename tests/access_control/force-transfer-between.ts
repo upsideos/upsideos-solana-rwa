@@ -161,7 +161,6 @@ describe("Access Control force transfer between", () => {
       recipient.publicKey,
       recipientTokenAccount,
       walletsAdminWalletRole,
-      testEnvironment.walletsAdmin,
       testEnvironment.walletsAdmin
     );
   });
