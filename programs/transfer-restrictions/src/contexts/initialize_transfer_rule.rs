@@ -41,13 +41,11 @@ pub struct InitializeTransferRule<'info> {
   pub transfer_restriction_data: Account<'info, TransferRestrictionData>,
   #[account(
     constraint = transfer_restriction_group_from.transfer_restriction_data == transfer_restriction_data.key(),
-    constraint = transfer_restriction_group_from.id == transfer_rule.transfer_group_id_from,
     constraint = transfer_restriction_group_from.id == group_id_from,
   )]
   pub transfer_restriction_group_from: Account<'info, TransferRestrictionGroup>,
   #[account(
     constraint = transfer_restriction_group_to.transfer_restriction_data == transfer_restriction_data.key(),
-    constraint = transfer_restriction_group_to.id == transfer_rule.transfer_group_id_to,
     constraint = transfer_restriction_group_to.id == group_id_to,
   )]
   pub transfer_restriction_group_to: Account<'info, TransferRestrictionGroup>,
