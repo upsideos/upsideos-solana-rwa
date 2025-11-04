@@ -8,7 +8,7 @@ export type AccessControl = {
   address: "4X79YRjz9KNMhdjdxXg2ZNTS3YnMGYdwJkBHnezMJwr3";
   metadata: {
     name: "accessControl";
-    version: "0.1.0";
+    version: "0.2.0";
     spec: "0.1.0";
     description: "Access Control for Solana Programs"
   };

@@ -1,6 +1,6 @@
 [package]
 name = "access-control"
-version = "0.1.0"
+version = "0.2.0"
 description = "Access Control for Solana Programs"
 edition = "2021"
 

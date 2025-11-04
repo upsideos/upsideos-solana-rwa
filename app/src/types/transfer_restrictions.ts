@@ -8,7 +8,7 @@ export type TransferRestrictions = {
   address: "6yEnqdEjX3zBBDkzhwTRGJwv1jRaN4QE4gywmgdcfPBZ";
   metadata: {
     name: "transferRestrictions";
-    version: "0.1.0";
+    version: "0.2.0";
     spec: "0.1.0";
     description: "Transfer restrictions for Solana tokens"
   };
