@@ -1,4 +1,4 @@
-use access_control::{AccessControl, WalletRole, ACCESS_CONTROL_SEED, WALLET_ROLE_PREFIX};
+use access_control::{AccessControl, WalletRole, ACCESS_CONTROL_SEED};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program_option::COption;
 use anchor_spl::token_interface::{Mint, Token2022, TokenAccount};

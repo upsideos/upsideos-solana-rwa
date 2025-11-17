@@ -30,7 +30,7 @@ describe("Set Address Permission", () => {
   before(async () => {
     testEnvironment = new TestEnvironment(testEnvironmentParams);
     await testEnvironment.setupAccessControl();
-    await testEnvironment.setupTransferRestrictions();  
+    await testEnvironment.setupTransferRestrictions();
     await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionGroup(
       group1Idx,
       testEnvironment.accessControlHelper.walletRolePDA(
@@ -48,7 +48,7 @@ describe("Set Address Permission", () => {
     it("Transfer admin can set address permission (freeze) for new wallet", async () => {
       const userWallet = Keypair.generate();
       const authority = testEnvironment.transferAdmin;
-      const payer =  Keypair.generate();
+      const payer = Keypair.generate();
       await topUpWallet(
         testEnvironment.connection,
         payer.publicKey,
