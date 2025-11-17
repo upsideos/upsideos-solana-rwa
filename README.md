@@ -277,6 +277,7 @@ initializeSecurityAssociatedAccount(groupId, holderId)
   * @param authorityWalletRole The authority's wallet role account
   * @param accessControlAccount Access Control Account
   * @param payer Wallet which pays transaction fee. Can be different from authority
+  * @param authority Wallet which signs the transaction. Must have either Transfer Admin or Wallets Admin role.
   * @param systemProgram Solana System Program which is required for new on-chain account data initialization
   */
 .setAddressPermission(groupId, frozen)
@@ -294,6 +295,7 @@ initializeSecurityAssociatedAccount(groupId, holderId)
     authorityWalletRole,
     accessControlAccount,
     payer,
+    authority,
     systemProgram,
   })
 ```

@@ -110,7 +110,7 @@ pub fn set_address_permission(
         
         if frozen {
             let cpi_accounts = access_control::cpi::accounts::FreezeWallet {
-                authority: ctx.accounts.payer.to_account_info(),
+                authority: ctx.accounts.authority.to_account_info(),
                 authority_wallet_role: ctx.accounts.authority_wallet_role.to_account_info(),
                 access_control: ctx.accounts.access_control_account.to_account_info(),
                 security_mint: ctx.accounts.security_mint.to_account_info(),
@@ -122,7 +122,7 @@ pub fn set_address_permission(
             access_control::cpi::freeze_wallet(cpi_ctx)?;
         } else {
             let cpi_accounts = access_control::cpi::accounts::ThawWallet {
-                authority: ctx.accounts.payer.to_account_info(),
+                authority: ctx.accounts.authority.to_account_info(),
                 authority_wallet_role: ctx.accounts.authority_wallet_role.to_account_info(),
                 access_control: ctx.accounts.access_control_account.to_account_info(),
                 security_mint: ctx.accounts.security_mint.to_account_info(),
