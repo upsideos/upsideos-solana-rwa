@@ -124,7 +124,6 @@ export type Dividends = {
           docs: [
             "New owner signing the transaction (must match proposed_wallet_address)."
           ];
-          writable: true;
           signer: true
         },
         {
@@ -683,7 +682,6 @@ export type Dividends = {
           docs: [
             "Authority signing the transaction."
           ];
-          writable: true;
           signer: true
         },
         {
