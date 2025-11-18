@@ -273,14 +273,15 @@ testCases.forEach(({ tokenProgramId, programName }) => {
           .signers([signer, baseKey])
           .rpc({ commitment });
 
-        // Set reclaimer
+        // Set reclaimer using 2-step process
         const [reclaimerPubkey] = findReclaimerKey(
           testEnvironment.accessControlHelper.accessControlPubkey,
           dividendsProgram.programId
         );
 
+        // Step 1: Propose reclaimer
         await dividendsProgram.methods
-          .setReclaimer(reclaimerWallet.publicKey)
+          .proposeReclaimer(reclaimerWallet.publicKey)
           .accountsStrict({
             reclaimer: reclaimerPubkey,
             accessControl:
@@ -295,6 +296,20 @@ testCases.forEach(({ tokenProgramId, programName }) => {
             systemProgram: SystemProgram.programId,
           })
           .signers([signer])
+          .rpc({ commitment });
+
+        // Step 2: Accept ownership
+        await dividendsProgram.methods
+          .acceptReclaimerOwnership()
+          .accountsStrict({
+            reclaimer: reclaimerPubkey,
+            accessControl:
+              testEnvironment.accessControlHelper.accessControlPubkey,
+            securityMint: testEnvironment.mintKeypair.publicKey,
+            newOwner: reclaimerWallet.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([reclaimerWallet])
           .rpc({ commitment });
 
         await dividendsProgram.methods
@@ -397,14 +412,15 @@ testCases.forEach(({ tokenProgramId, programName }) => {
           .signers([signer, baseKey])
           .rpc({ commitment });
 
-        // Set reclaimer
+        // Set reclaimer using 2-step process
         const [reclaimerPubkey] = findReclaimerKey(
           testEnvironment.accessControlHelper.accessControlPubkey,
           dividendsProgram.programId
         );
 
+        // Step 1: Propose reclaimer
         await dividendsProgram.methods
-          .setReclaimer(reclaimerWallet.publicKey)
+          .proposeReclaimer(reclaimerWallet.publicKey)
           .accountsStrict({
             reclaimer: reclaimerPubkey,
             accessControl:
@@ -419,6 +435,20 @@ testCases.forEach(({ tokenProgramId, programName }) => {
             systemProgram: SystemProgram.programId,
           })
           .signers([signer])
+          .rpc({ commitment });
+
+        // Step 2: Accept ownership
+        await dividendsProgram.methods
+          .acceptReclaimerOwnership()
+          .accountsStrict({
+            reclaimer: reclaimerPubkey,
+            accessControl:
+              testEnvironment.accessControlHelper.accessControlPubkey,
+            securityMint: testEnvironment.mintKeypair.publicKey,
+            newOwner: reclaimerWallet.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([reclaimerWallet])
           .rpc({ commitment });
 
         await dividendsProgram.methods
@@ -554,14 +584,15 @@ testCases.forEach(({ tokenProgramId, programName }) => {
           .signers([signer, baseKey])
           .rpc({ commitment });
 
-        // Set reclaimer
+        // Set reclaimer using 2-step process
         const [reclaimerPubkey] = findReclaimerKey(
           testEnvironment.accessControlHelper.accessControlPubkey,
           dividendsProgram.programId
         );
 
+        // Step 1: Propose reclaimer
         await dividendsProgram.methods
-          .setReclaimer(reclaimerWallet.publicKey)
+          .proposeReclaimer(reclaimerWallet.publicKey)
           .accountsStrict({
             reclaimer: reclaimerPubkey,
             accessControl:
@@ -576,6 +607,20 @@ testCases.forEach(({ tokenProgramId, programName }) => {
             systemProgram: SystemProgram.programId,
           })
           .signers([signer])
+          .rpc({ commitment });
+
+        // Step 2: Accept ownership
+        await dividendsProgram.methods
+          .acceptReclaimerOwnership()
+          .accountsStrict({
+            reclaimer: reclaimerPubkey,
+            accessControl:
+              testEnvironment.accessControlHelper.accessControlPubkey,
+            securityMint: testEnvironment.mintKeypair.publicKey,
+            newOwner: reclaimerWallet.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([reclaimerWallet])
           .rpc({ commitment });
 
         await dividendsProgram.methods
@@ -708,14 +753,15 @@ testCases.forEach(({ tokenProgramId, programName }) => {
           .signers([signer, baseKey])
           .rpc({ commitment });
 
-        // Set reclaimer
+        // Set reclaimer using 2-step process
         const [reclaimerPubkey] = findReclaimerKey(
           testEnvironment.accessControlHelper.accessControlPubkey,
           dividendsProgram.programId
         );
 
+        // Step 1: Propose reclaimer
         await dividendsProgram.methods
-          .setReclaimer(reclaimerWallet.publicKey)
+          .proposeReclaimer(reclaimerWallet.publicKey)
           .accountsStrict({
             reclaimer: reclaimerPubkey,
             accessControl:
@@ -730,6 +776,20 @@ testCases.forEach(({ tokenProgramId, programName }) => {
             systemProgram: SystemProgram.programId,
           })
           .signers([signer])
+          .rpc({ commitment });
+
+        // Step 2: Accept ownership
+        await dividendsProgram.methods
+          .acceptReclaimerOwnership()
+          .accountsStrict({
+            reclaimer: reclaimerPubkey,
+            accessControl:
+              testEnvironment.accessControlHelper.accessControlPubkey,
+            securityMint: testEnvironment.mintKeypair.publicKey,
+            newOwner: reclaimerWallet.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([reclaimerWallet])
           .rpc({ commitment });
 
         await dividendsProgram.methods
@@ -862,14 +922,15 @@ testCases.forEach(({ tokenProgramId, programName }) => {
           .signers([signer, baseKey])
           .rpc({ commitment });
 
-        // Set reclaimer
+        // Set reclaimer using 2-step process
         const [reclaimerPubkey] = findReclaimerKey(
           testEnvironment.accessControlHelper.accessControlPubkey,
           dividendsProgram.programId
         );
 
+        // Step 1: Propose reclaimer
         await dividendsProgram.methods
-          .setReclaimer(reclaimerWallet.publicKey)
+          .proposeReclaimer(reclaimerWallet.publicKey)
           .accountsStrict({
             reclaimer: reclaimerPubkey,
             accessControl:
@@ -884,6 +945,20 @@ testCases.forEach(({ tokenProgramId, programName }) => {
             systemProgram: SystemProgram.programId,
           })
           .signers([signer])
+          .rpc({ commitment });
+
+        // Step 2: Accept ownership
+        await dividendsProgram.methods
+          .acceptReclaimerOwnership()
+          .accountsStrict({
+            reclaimer: reclaimerPubkey,
+            accessControl:
+              testEnvironment.accessControlHelper.accessControlPubkey,
+            securityMint: testEnvironment.mintKeypair.publicKey,
+            newOwner: reclaimerWallet.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([reclaimerWallet])
           .rpc({ commitment });
 
         await dividendsProgram.methods
@@ -994,14 +1069,15 @@ testCases.forEach(({ tokenProgramId, programName }) => {
           .signers([signer, baseKey])
           .rpc({ commitment });
 
-        // Set reclaimer
+        // Set reclaimer using 2-step process
         const [reclaimerPubkey] = findReclaimerKey(
           testEnvironment.accessControlHelper.accessControlPubkey,
           dividendsProgram.programId
         );
 
+        // Step 1: Propose reclaimer
         await dividendsProgram.methods
-          .setReclaimer(reclaimerWallet.publicKey)
+          .proposeReclaimer(reclaimerWallet.publicKey)
           .accountsStrict({
             reclaimer: reclaimerPubkey,
             accessControl:
@@ -1016,6 +1092,20 @@ testCases.forEach(({ tokenProgramId, programName }) => {
             systemProgram: SystemProgram.programId,
           })
           .signers([signer])
+          .rpc({ commitment });
+
+        // Step 2: Accept ownership
+        await dividendsProgram.methods
+          .acceptReclaimerOwnership()
+          .accountsStrict({
+            reclaimer: reclaimerPubkey,
+            accessControl:
+              testEnvironment.accessControlHelper.accessControlPubkey,
+            securityMint: testEnvironment.mintKeypair.publicKey,
+            newOwner: reclaimerWallet.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([reclaimerWallet])
           .rpc({ commitment });
 
         await dividendsProgram.methods

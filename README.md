@@ -353,7 +353,8 @@ Typically any legal entity third-party Transfer Agent will need access to both t
 | grantRole()                 | **yes**        | no            | no             | no            |
 | revokeRole()                | **yes**        | no            | no             | no            |
 | newDistributor()           | **yes**        | no            | **yes**        | no            |
-| setReclaimer()             | **yes**        | no            | no             | no            |
+| proposeReclaimer()        | **yes**        | no            | no             | no            |
+| acceptReclaimerOwnership() | no             | no            | no             | no            |
 | reclaimDividends()         | no             | no            | **yes**        | no            |
 | mint()                     | no             | **yes**       | no             | no            |
 | burn()                     | no             | **yes**       | no             | no            |
@@ -1141,14 +1142,18 @@ await program.methods
     .rpc({ commitment });
 ```
 
-### Set reclaimer
+### Propose reclaimer
 
-Contract Admin can set a reclaimer wallet address for dividends. This wallet will receive unclaimed dividends when the `reclaimDividends` instruction is invoked. The reclaimer can be set or updated at any time by the Contract Admin.
+Contract Admin can propose a new reclaimer wallet address for dividends using a 2-step ownership transfer process. This wallet will receive unclaimed dividends when the `reclaimDividends` instruction is invoked. The 2-step process prevents accidental loss of access by requiring the new owner to confirm they control the proposed address.
+
+**Step 1: Propose reclaimer**
+
+Contract Admin proposes a new reclaimer wallet address. This creates a pending ownership transfer that must be accepted by the proposed wallet.
 
 **Solana Web3 TS call:**
 ```typescript
 await program.methods
-  .setReclaimer(reclaimerWallet)
+  .proposeReclaimer(newReclaimerWallet)
   .accountsStrict({
     reclaimer: reclaimerPubkey,
     accessControl: accessControlPubkey,
@@ -1162,9 +1167,28 @@ await program.methods
   .rpc({ commitment });
 ```
 
+**Step 2: Accept reclaimer ownership**
+
+The proposed reclaimer wallet must accept the ownership transfer. This confirms that the new owner controls the proposed address and completes the transfer.
+
+**Solana Web3 TS call:**
+```typescript
+await program.methods
+  .acceptReclaimerOwnership()
+  .accountsStrict({
+    reclaimer: reclaimerPubkey,
+    accessControl: accessControlPubkey,
+    securityMint: securityMintPubkey,
+    newOwner: newReclaimerWallet.publicKey,
+    systemProgram: SystemProgram.programId,
+  })
+  .signers([newReclaimerWallet])
+  .rpc({ commitment });
+```
+
 ### Reclaim dividends
 
-Transfer Admin can reclaim unclaimed dividends on behalf of a target wallet and send them to the reclaimer address. This is useful for recovering unclaimed dividends after a distribution period has ended. The reclaimer must be set using `setReclaimer` before this instruction can be called.
+Transfer Admin can reclaim unclaimed dividends on behalf of a target wallet and send them to the reclaimer address. This is useful for recovering unclaimed dividends after a distribution period has ended. The reclaimer must be set using the 2-step process (`proposeReclaimer` followed by `acceptReclaimerOwnership`) before this instruction can be called.
 
 **Solana Web3 TS call:**
 ```typescript
@@ -1203,8 +1227,10 @@ sequenceDiagram
     participant DividendsContract
     participant Distributor
 
-    CA ->> DividendsContract: setReclaimer(reclaimerWallet)
-    Note right of DividendsContract: Reclaimer wallet is set for future reclaims
+    CA ->> DividendsContract: proposeReclaimer(reclaimerWallet)
+    Note right of DividendsContract: Reclaimer wallet is proposed
+    reclaimerWallet ->> DividendsContract: acceptReclaimerOwnership()
+    Note right of DividendsContract: Reclaimer wallet ownership is confirmed
 
     Investor ->> DividendsContract: claimDividend(index, amount, proof)
     DividendsContract ->> Investor: Transfer dividend payment token

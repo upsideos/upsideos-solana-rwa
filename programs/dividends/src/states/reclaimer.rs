@@ -6,5 +6,7 @@ use anchor_lang::prelude::*;
 pub struct Reclaimer {
     /// Wallet address that will receive reclaimed dividends.
     pub wallet_address: Pubkey,
+    /// Proposed new wallet address during ownership transfer
+    pub proposed_wallet_address: Option<Pubkey>,
 }
 

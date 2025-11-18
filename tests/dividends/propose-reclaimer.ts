@@ -21,7 +21,7 @@ const findReclaimerKey = (
   );
 };
 
-describe("set-reclaimer", () => {
+describe("propose-reclaimer", () => {
   const provider = AnchorProvider.env();
   const connection = provider.connection;
   anchor.setProvider(provider);
@@ -63,14 +63,14 @@ describe("set-reclaimer", () => {
   });
 
   context("success cases", () => {
-    it("sets reclaimer for the first time (init)", async () => {
+    it("proposes reclaimer for the first time (init)", async () => {
       const [reclaimerPubkey] = findReclaimerKey(
         testEnvironment.accessControlHelper.accessControlPubkey,
         dividendsProgram.programId
       );
 
       await dividendsProgram.methods
-        .setReclaimer(reclaimerWallet1.publicKey)
+        .proposeReclaimer(reclaimerWallet1.publicKey)
         .accountsStrict({
           reclaimer: reclaimerPubkey,
           accessControl:
@@ -87,86 +87,97 @@ describe("set-reclaimer", () => {
         .signers([contractAdmin])
         .rpc({ commitment });
 
-      // Verify reclaimer account was created and set correctly
+      // Verify reclaimer account was created and proposal was set correctly
+      const reclaimerData =
+        await dividendsProgram.account.reclaimer.fetch(reclaimerPubkey);
+      assert.deepEqual(
+        reclaimerData.proposedWalletAddress,
+        reclaimerWallet1.publicKey
+      );
+    });
+
+    it("proposes new reclaimer when one already exists", async () => {
+      const [reclaimerPubkey] = findReclaimerKey(
+        testEnvironment.accessControlHelper.accessControlPubkey,
+        dividendsProgram.programId
+      );
+
+      // First propose reclaimer to wallet1
+      await dividendsProgram.methods
+        .proposeReclaimer(reclaimerWallet1.publicKey)
+        .accountsStrict({
+          reclaimer: reclaimerPubkey,
+          accessControl:
+            testEnvironment.accessControlHelper.accessControlPubkey,
+          authorityWalletRole:
+            testEnvironment.accessControlHelper.walletRolePDA(
+              contractAdmin.publicKey
+            )[0],
+          securityMint: testEnvironment.mintKeypair.publicKey,
+          authority: contractAdmin.publicKey,
+          payer: contractAdmin.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([contractAdmin])
+        .rpc({ commitment });
+
+      // Accept ownership
+      await dividendsProgram.methods
+        .acceptReclaimerOwnership()
+        .accountsStrict({
+          reclaimer: reclaimerPubkey,
+          accessControl:
+            testEnvironment.accessControlHelper.accessControlPubkey,
+          securityMint: testEnvironment.mintKeypair.publicKey,
+          newOwner: reclaimerWallet1.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([reclaimerWallet1])
+        .rpc({ commitment });
+
+      // Now propose a new reclaimer (wallet2)
+      await dividendsProgram.methods
+        .proposeReclaimer(reclaimerWallet2.publicKey)
+        .accountsStrict({
+          reclaimer: reclaimerPubkey,
+          accessControl:
+            testEnvironment.accessControlHelper.accessControlPubkey,
+          authorityWalletRole:
+            testEnvironment.accessControlHelper.walletRolePDA(
+              contractAdmin.publicKey
+            )[0],
+          securityMint: testEnvironment.mintKeypair.publicKey,
+          authority: contractAdmin.publicKey,
+          payer: contractAdmin.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([contractAdmin])
+        .rpc({ commitment });
+
+      // Verify proposal was updated
       const reclaimerData =
         await dividendsProgram.account.reclaimer.fetch(reclaimerPubkey);
       assert.deepEqual(
         reclaimerData.walletAddress,
         reclaimerWallet1.publicKey
       );
-    });
-
-    it("updates reclaimer to a different wallet", async () => {
-      const [reclaimerPubkey] = findReclaimerKey(
-        testEnvironment.accessControlHelper.accessControlPubkey,
-        dividendsProgram.programId
-      );
-
-      // First set reclaimer to wallet1
-      await dividendsProgram.methods
-        .setReclaimer(reclaimerWallet1.publicKey)
-        .accountsStrict({
-          reclaimer: reclaimerPubkey,
-          accessControl:
-            testEnvironment.accessControlHelper.accessControlPubkey,
-          authorityWalletRole:
-            testEnvironment.accessControlHelper.walletRolePDA(
-              contractAdmin.publicKey
-            )[0],
-          securityMint: testEnvironment.mintKeypair.publicKey,
-          authority: contractAdmin.publicKey,
-          payer: contractAdmin.publicKey,
-          systemProgram: SystemProgram.programId,
-        })
-        .signers([contractAdmin])
-        .rpc({ commitment });
-
-      let reclaimerData =
-        await dividendsProgram.account.reclaimer.fetch(reclaimerPubkey);
       assert.deepEqual(
-        reclaimerData.walletAddress,
-        reclaimerWallet1.publicKey
-      );
-
-      // Update reclaimer to wallet2
-      await dividendsProgram.methods
-        .setReclaimer(reclaimerWallet2.publicKey)
-        .accountsStrict({
-          reclaimer: reclaimerPubkey,
-          accessControl:
-            testEnvironment.accessControlHelper.accessControlPubkey,
-          authorityWalletRole:
-            testEnvironment.accessControlHelper.walletRolePDA(
-              contractAdmin.publicKey
-            )[0],
-          securityMint: testEnvironment.mintKeypair.publicKey,
-          authority: contractAdmin.publicKey,
-          payer: contractAdmin.publicKey,
-          systemProgram: SystemProgram.programId,
-        })
-        .signers([contractAdmin])
-        .rpc({ commitment });
-
-      // Verify reclaimer was updated
-      reclaimerData =
-        await dividendsProgram.account.reclaimer.fetch(reclaimerPubkey);
-      assert.deepEqual(
-        reclaimerData.walletAddress,
+        reclaimerData.proposedWalletAddress,
         reclaimerWallet2.publicKey
       );
     });
   });
 
   context("failure cases", () => {
-    it("fails when trying to set the same wallet address (ValueUnchanged)", async () => {
+    it("fails when trying to propose the same wallet address (ValueUnchanged)", async () => {
       const [reclaimerPubkey] = findReclaimerKey(
         testEnvironment.accessControlHelper.accessControlPubkey,
         dividendsProgram.programId
       );
 
-      // First set reclaimer
+      // First propose and accept reclaimer
       await dividendsProgram.methods
-        .setReclaimer(reclaimerWallet1.publicKey)
+        .proposeReclaimer(reclaimerWallet1.publicKey)
         .accountsStrict({
           reclaimer: reclaimerPubkey,
           accessControl:
@@ -183,10 +194,23 @@ describe("set-reclaimer", () => {
         .signers([contractAdmin])
         .rpc({ commitment });
 
-      // Try to set the same wallet again - should fail
+      await dividendsProgram.methods
+        .acceptReclaimerOwnership()
+        .accountsStrict({
+          reclaimer: reclaimerPubkey,
+          accessControl:
+            testEnvironment.accessControlHelper.accessControlPubkey,
+          securityMint: testEnvironment.mintKeypair.publicKey,
+          newOwner: reclaimerWallet1.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([reclaimerWallet1])
+        .rpc({ commitment });
+
+      // Try to propose the same wallet again - should fail
       try {
         await dividendsProgram.methods
-          .setReclaimer(reclaimerWallet1.publicKey)
+          .proposeReclaimer(reclaimerWallet1.publicKey)
           .accountsStrict({
             reclaimer: reclaimerPubkey,
             accessControl:
@@ -232,7 +256,7 @@ describe("set-reclaimer", () => {
 
       try {
         await dividendsProgram.methods
-          .setReclaimer(reclaimerWallet1.publicKey)
+          .proposeReclaimer(reclaimerWallet1.publicKey)
           .accountsStrict({
             reclaimer: reclaimerPubkey,
             accessControl:
@@ -266,7 +290,7 @@ describe("set-reclaimer", () => {
 
       try {
         await dividendsProgram.methods
-          .setReclaimer(reclaimerWallet1.publicKey)
+          .proposeReclaimer(reclaimerWallet1.publicKey)
           .accountsStrict({
             reclaimer: reclaimerPubkey,
             accessControl:
@@ -311,7 +335,7 @@ describe("set-reclaimer", () => {
       // Try to use wrong access control (from other environment)
       try {
         await dividendsProgram.methods
-          .setReclaimer(reclaimerWallet1.publicKey)
+          .proposeReclaimer(reclaimerWallet1.publicKey)
           .accountsStrict({
             reclaimer: reclaimerPubkey,
             accessControl:
@@ -358,7 +382,7 @@ describe("set-reclaimer", () => {
       // Try to use wrong mint (from other environment) with current access control
       try {
         await dividendsProgram.methods
-          .setReclaimer(reclaimerWallet1.publicKey)
+          .proposeReclaimer(reclaimerWallet1.publicKey)
           .accountsStrict({
             reclaimer: reclaimerPubkey,
             accessControl:
@@ -382,10 +406,13 @@ describe("set-reclaimer", () => {
             error.message?.includes("Constraint") ||
             error.message?.includes("A seeds constraint was violated") ||
             error.logs?.some((log: string) =>
-              log.includes("Constraint") || log.includes("security_mint") || log.includes("security_mint.key() == access_control.mint")
+              log.includes("Constraint") ||
+              log.includes("security_mint") ||
+              log.includes("security_mint.key() == access_control.mint")
             )
         );
       }
     });
   });
 });
+
