@@ -36,7 +36,7 @@ pub struct AcceptReclaimerOwnership<'info> {
     pub security_mint: Box<InterfaceAccount<'info, anchor_spl::token_interface::Mint>>,
 
     /// New owner signing the transaction (must match proposed_wallet_address).
-    #[account(mut)]
+    #[account()]
     pub new_owner: Signer<'info>,
 
     /// The [System] program.
@@ -53,14 +53,15 @@ pub fn accept_reclaimer_ownership(ctx: Context<AcceptReclaimerOwnership>) -> Res
         DividendsErrorCode::NoPendingOwnershipTransfer
     );
 
+    let proposed_wallet_address = reclaimer.proposed_wallet_address.unwrap();
     // Check if the signer matches the proposed wallet
     require!(
-        ctx.accounts.new_owner.key() == reclaimer.proposed_wallet_address.unwrap(),
+        ctx.accounts.new_owner.key() == proposed_wallet_address,
         DividendsErrorCode::UnauthorizedOwnershipTransfer
     );
 
     // Transfer ownership
-    reclaimer.wallet_address = reclaimer.proposed_wallet_address.unwrap();
+    reclaimer.wallet_address = proposed_wallet_address;
     reclaimer.proposed_wallet_address = None;
 
     Ok(())

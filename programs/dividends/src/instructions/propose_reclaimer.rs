@@ -48,7 +48,7 @@ pub struct ProposeReclaimer<'info> {
     pub security_mint: Box<InterfaceAccount<'info, anchor_spl::token_interface::Mint>>,
 
     /// Authority signing the transaction.
-    #[account(mut)]
+    #[account()]
     pub authority: Signer<'info>,
 
     /// Payer for the reclaimer account initialization.
