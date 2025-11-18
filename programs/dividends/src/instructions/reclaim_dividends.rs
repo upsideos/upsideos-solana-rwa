@@ -4,6 +4,7 @@ use access_control::{program::AccessControl as AccessControlProgram, AccessContr
 
 use crate::states::Reclaimer;
 use crate::{
+    constants,
     errors::DividendsErrorCode,
     events::ReclaimedEvent,
     ClaimStatus,
@@ -31,7 +32,7 @@ pub struct ReclaimDividends<'info> {
     /// Reclaimer account storing the wallet address.
     #[account(
         seeds = [
-            b"reclaimer".as_ref(),
+            constants::RECLAIMER_SEED,
             access_control.key().as_ref()
         ],
         bump,
@@ -42,7 +43,7 @@ pub struct ReclaimDividends<'info> {
     #[account(
         init,
         seeds = [
-            b"ClaimStatus".as_ref(),
+            constants::CLAIM_STATUS_SEED,
             index.to_le_bytes().as_ref(),
             distributor.key().to_bytes().as_ref()
         ],

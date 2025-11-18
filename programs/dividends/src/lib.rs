@@ -3,6 +3,7 @@ use anchor_lang::prelude::*;
 
 pub mod states;
 use states::*;
+pub mod constants;
 pub mod errors;
 pub mod events;
 pub mod instructions;

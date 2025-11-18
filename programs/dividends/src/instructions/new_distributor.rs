@@ -5,7 +5,7 @@ use anchor_lang::{prelude::*, solana_program::program_option::COption};
 use anchor_spl::{token_2022::ID as TOKEN_2022_PROGRAM_ID, token_interface::Mint};
 
 use crate::{
-    errors::DividendsErrorCode, utils::validate_transfer_fee_mint_extension, MerkleDistributor,
+    constants, errors::DividendsErrorCode, utils::validate_transfer_fee_mint_extension, MerkleDistributor,
     MAX_IPFS_HASH_LEN,
 };
 
@@ -26,7 +26,7 @@ pub struct NewDistributor<'info> {
     #[account(
         init,
         seeds = [
-            b"MerkleDistributor".as_ref(),
+            constants::MERKLE_DISTRIBUTOR_SEED,
             base.key().to_bytes().as_ref()
         ],
         bump,
