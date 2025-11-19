@@ -122,7 +122,7 @@ pub struct SetAddressPermission<'info> {
     pub user_associated_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
     #[account(
-      constraint = authority_wallet_role.owner == payer.key(),
+      constraint = authority_wallet_role.owner == authority.key(),
       constraint = authority_wallet_role.access_control == transfer_restriction_data.access_control_account.key(),
     )]
     pub authority_wallet_role: Account<'info, WalletRole>,
@@ -152,6 +152,8 @@ pub struct SetAddressPermission<'info> {
 
     #[account(mut)]
     pub payer: Signer<'info>,
+
+    pub authority: Signer<'info>,
 
     pub system_program: Program<'info, System>,
 }

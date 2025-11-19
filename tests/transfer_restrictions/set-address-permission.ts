@@ -7,6 +7,7 @@ import {
   TestEnvironment,
   TestEnvironmentParams,
 } from "../helpers/test_environment";
+import { solToLamports, topUpWallet } from "../utils";
 
 describe("Set Address Permission", () => {
   const testEnvironmentParams: TestEnvironmentParams = {
@@ -46,7 +47,13 @@ describe("Set Address Permission", () => {
   describe("New wallet scenario", () => {
     it("Transfer admin can set address permission (freeze) for new wallet", async () => {
       const userWallet = Keypair.generate();
-      const signer = testEnvironment.transferAdmin;
+      const authority = testEnvironment.transferAdmin;
+      const payer = Keypair.generate();
+      await topUpWallet(
+        testEnvironment.connection,
+        payer.publicKey,
+        solToLamports(1)
+      );
 
       const userTokenAccount =
         await testEnvironment.mintHelper.createAssociatedTokenAccount(
@@ -75,7 +82,7 @@ describe("Set Address Permission", () => {
         );
 
       const [authorityWalletRolePubkey] =
-        testEnvironment.accessControlHelper.walletRolePDA(signer.publicKey);
+        testEnvironment.accessControlHelper.walletRolePDA(authority.publicKey);
 
       const [transferRestrictionGroupNewPubkey] =
         testEnvironment.transferRestrictionsHelper.groupPDA(group0Idx);
@@ -93,7 +100,7 @@ describe("Set Address Permission", () => {
         holderPubkey,
         group0Pubkey,
         authorityWalletRolePubkey,
-        signer
+        authority
       );
 
       // Get BEFORE state for all accounts
@@ -143,12 +150,13 @@ describe("Set Address Permission", () => {
           securityMint: testEnvironment.mintKeypair.publicKey,
           accessControlProgram: testEnvironment.accessControlProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
-          payer: signer.publicKey,
+          payer: payer.publicKey,
+          authority: authority.publicKey,
           systemProgram: SystemProgram.programId,
           transferRestrictionGroupCurrent: null,
           holderGroupCurrent: null,
         })
-        .signers([signer])
+        .signers([payer, authority])
         .rpc({ commitment: testEnvironment.commitment });
 
       // Get AFTER state for all accounts
@@ -316,6 +324,7 @@ describe("Set Address Permission", () => {
           accessControlProgram: testEnvironment.accessControlProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
           transferRestrictionGroupCurrent: null,
           holderGroupCurrent: null,
@@ -520,6 +529,7 @@ describe("Set Address Permission", () => {
           accessControlProgram: testEnvironment.accessControlProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -648,6 +658,7 @@ describe("Set Address Permission", () => {
           accessControlProgram: testEnvironment.accessControlProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -791,6 +802,7 @@ describe("Set Address Permission", () => {
           accessControlProgram: testEnvironment.accessControlProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -941,6 +953,7 @@ describe("Set Address Permission", () => {
             accessControlProgram: testEnvironment.accessControlProgram.programId,
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             payer: signer.publicKey,
+            authority: signer.publicKey,
             systemProgram: SystemProgram.programId,
             transferRestrictionGroupCurrent: null,
             holderGroupCurrent: null,
@@ -1001,6 +1014,7 @@ describe("Set Address Permission", () => {
             accessControlProgram: testEnvironment.accessControlProgram.programId,
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             payer: signer.publicKey,
+            authority: signer.publicKey,
             systemProgram: SystemProgram.programId,
           })
           .signers([signer])
@@ -1082,6 +1096,7 @@ describe("Set Address Permission", () => {
             accessControlProgram: testEnvironment.accessControlProgram.programId,
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             payer: signer.publicKey,
+            authority: signer.publicKey,
             systemProgram: SystemProgram.programId,
           })
           .signers([signer])
@@ -1157,6 +1172,7 @@ describe("Set Address Permission", () => {
           accessControlProgram: testEnvironment.accessControlProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           payer: signer.publicKey,
+          authority: signer.publicKey,
           systemProgram: SystemProgram.programId,
         })
         .signers([signer])
@@ -1302,6 +1318,7 @@ describe("Set Address Permission", () => {
             accessControlProgram: testEnvironment.accessControlProgram.programId,
             tokenProgram: TOKEN_2022_PROGRAM_ID,
             payer: signer.publicKey,
+            authority: signer.publicKey,
             systemProgram: SystemProgram.programId,
           })
           .signers([signer])

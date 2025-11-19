@@ -1967,6 +1967,10 @@ export type TransferRestrictions = {
           signer: true
         },
         {
+          name: "authority";
+          signer: true
+        },
+        {
           name: "systemProgram";
           address: "11111111111111111111111111111111"
         }
