@@ -10,7 +10,8 @@ export type AccessControl = {
     name: "accessControl";
     version: "0.2.0";
     spec: "0.1.0";
-    description: "Access Control for Solana Programs"
+    description: "Access Control for Solana Programs";
+    repository: "https://github.com/upsideos/upsideos-solana-rwa"
   };
   instructions: [
     {

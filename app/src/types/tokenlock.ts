@@ -10,7 +10,8 @@ export type Tokenlock = {
     name: "tokenlock";
     version: "0.2.0";
     spec: "0.1.0";
-    description: "Vesting lockups for SPL tokens"
+    description: "Vesting lockups for SPL tokens";
+    repository: "https://github.com/upsideos/upsideos-solana-rwa"
   };
   instructions: [
     {
