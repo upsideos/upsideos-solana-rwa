@@ -53,12 +53,19 @@ pub mod dividends {
         instructions::pause(ctx, paused)
     }
 
-    /// Sets the reclaimer wallet address for dividends.
-    pub fn set_reclaimer<'info>(
-        ctx: Context<SetReclaimer>,
-        reclaimer_wallet: Pubkey,
+    /// Proposes a new reclaimer wallet address for dividends.
+    pub fn propose_reclaimer<'info>(
+        ctx: Context<ProposeReclaimer>,
+        new_reclaimer_wallet: Pubkey,
     ) -> Result<()> {
-        instructions::set_reclaimer(ctx, reclaimer_wallet)
+        instructions::propose_reclaimer(ctx, new_reclaimer_wallet)
+    }
+
+    /// Accepts the proposed reclaimer ownership transfer.
+    pub fn accept_reclaimer_ownership<'info>(
+        ctx: Context<AcceptReclaimerOwnership>,
+    ) -> Result<()> {
+        instructions::accept_reclaimer_ownership(ctx)
     }
 
     /// Reclaims all remaining unclaimed dividends and sends them to the reclaimer address.

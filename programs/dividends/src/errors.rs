@@ -32,4 +32,8 @@ pub enum DividendsErrorCode {
     TotalAmountClaimedOverflow,
     #[msg("Number of nodes claimed overflow")]
     NumNodesClaimedOverflow,
+    #[msg("No pending ownership transfer")]
+    NoPendingOwnershipTransfer,
+    #[msg("Unauthorized ownership transfer")]
+    UnauthorizedOwnershipTransfer,
 }

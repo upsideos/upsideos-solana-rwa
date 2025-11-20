@@ -5,10 +5,10 @@ use anchor_lang::prelude::*;
 
 use crate::{errors::DividendsErrorCode, Reclaimer};
 
-/// Accounts for [dividends::set_reclaimer].
+/// Accounts for [dividends::propose_reclaimer].
 #[derive(Accounts)]
-#[instruction(reclaimer_wallet: Pubkey)]
-pub struct SetReclaimer<'info> {
+#[instruction(new_reclaimer_wallet: Pubkey)]
+pub struct ProposeReclaimer<'info> {
     /// Reclaimer account storing the wallet address.
     #[account(
         init_if_needed,
@@ -33,7 +33,7 @@ pub struct SetReclaimer<'info> {
     )]
     pub access_control: Account<'info, AccessControl>,
 
-    /// Authority wallet role to set the reclaimer.
+    /// Authority wallet role to propose the reclaimer.
     #[account(
         constraint = authority_wallet_role.owner == authority.key(),
         constraint = authority_wallet_role.has_any_role(access_control::Roles::ContractAdmin as u8) @ DividendsErrorCode::Unauthorized,
@@ -48,7 +48,7 @@ pub struct SetReclaimer<'info> {
     pub security_mint: Box<InterfaceAccount<'info, anchor_spl::token_interface::Mint>>,
 
     /// Authority signing the transaction.
-    #[account(mut)]
+    #[account()]
     pub authority: Signer<'info>,
 
     /// Payer for the reclaimer account initialization.
@@ -59,17 +59,17 @@ pub struct SetReclaimer<'info> {
     pub system_program: Program<'info, System>,
 }
 
-/// Sets the reclaimer wallet address for dividends.
-pub fn set_reclaimer(ctx: Context<SetReclaimer>, reclaimer_wallet: Pubkey) -> Result<()> {
+/// Proposes a new reclaimer wallet address for dividends.
+pub fn propose_reclaimer(ctx: Context<ProposeReclaimer>, new_reclaimer_wallet: Pubkey) -> Result<()> {
     let reclaimer = &mut ctx.accounts.reclaimer;
     
     // Check if reclaimer is already set to the same value
     require!(
-        reclaimer.wallet_address != reclaimer_wallet,
+        reclaimer.wallet_address != new_reclaimer_wallet,
         DividendsErrorCode::ValueUnchanged
     );
 
-    reclaimer.wallet_address = reclaimer_wallet;
+    reclaimer.proposed_wallet_address = Some(new_reclaimer_wallet);
 
     Ok(())
 }
