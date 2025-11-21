@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
 
 use crate::{
+    constants,
     errors::DividendsErrorCode,
     events::ClaimedEvent,
     ClaimStatus,
@@ -31,7 +32,7 @@ pub struct Claim<'info> {
     #[account(
         init,
         seeds = [
-            b"ClaimStatus".as_ref(),
+            constants::CLAIM_STATUS_SEED,
             index.to_le_bytes().as_ref(),
             distributor.key().to_bytes().as_ref()
         ],

@@ -3,7 +3,7 @@ use access_control::{
 };
 use anchor_lang::prelude::*;
 
-use crate::{errors::DividendsErrorCode, Reclaimer};
+use crate::{constants, errors::DividendsErrorCode, Reclaimer};
 
 /// Accounts for [dividends::propose_reclaimer].
 #[derive(Accounts)]
@@ -15,7 +15,7 @@ pub struct ProposeReclaimer<'info> {
         payer = payer,
         space = 8 + Reclaimer::INIT_SPACE,
         seeds = [
-            b"reclaimer".as_ref(),
+            constants::RECLAIMER_SEED,
             access_control.key().as_ref()
         ],
         bump,

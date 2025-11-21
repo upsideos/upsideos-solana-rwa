@@ -3,6 +3,7 @@ use anchor_spl::token_2022::spl_token_2022::onchain::invoke_transfer_checked;
 use anchor_spl::token_interface::{Mint, TokenAccount};
 
 use crate::{
+    constants,
     errors::DividendsErrorCode,
     merkle_proof,
     ClaimStatus,
@@ -55,7 +56,7 @@ pub fn transfer_dividends_tokens<'info>(
     );
 
     let seeds = &[
-        b"MerkleDistributor".as_ref(),
+        constants::MERKLE_DISTRIBUTOR_SEED,
         &distributor.base.to_bytes(),
         &[distributor.bump],
     ];
