@@ -3,6 +3,9 @@ name = "transfer-restrictions"
 version = "0.2.0"
 description = "Transfer restrictions for Solana tokens"
 edition = "2021"
+license = "MIT"
+authors = ["CoMakery, Inc. dba Upside"]
+repository = "https://github.com/upsideos/upsideos-solana-rwa"
 
 [lib]
 crate-type = ["cdylib", "lib"]

@@ -3,6 +3,9 @@ name = "access-control"
 version = "0.2.0"
 description = "Access Control for Solana Programs"
 edition = "2021"
+license = "MIT"
+authors = ["CoMakery, Inc. dba Upside"]
+repository = "https://github.com/upsideos/upsideos-solana-rwa"
 
 [lib]
 crate-type = ["cdylib", "lib"]

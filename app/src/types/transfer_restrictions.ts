@@ -10,7 +10,8 @@ export type TransferRestrictions = {
     name: "transferRestrictions";
     version: "0.2.0";
     spec: "0.1.0";
-    description: "Transfer restrictions for Solana tokens"
+    description: "Transfer restrictions for Solana tokens";
+    repository: "https://github.com/upsideos/upsideos-solana-rwa"
   };
   instructions: [
     {

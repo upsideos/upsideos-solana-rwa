@@ -10,7 +10,8 @@ export type Dividends = {
     name: "dividends";
     version: "0.2.0";
     spec: "0.1.0";
-    description: "Dividends are based on Merkle tree distribution"
+    description: "Dividends are based on Merkle tree distribution";
+    repository: "https://github.com/upsideos/upsideos-solana-rwa"
   };
   instructions: [
     {

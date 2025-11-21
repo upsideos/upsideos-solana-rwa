@@ -14,7 +14,7 @@ Solana RWA consists of several modules:
 
 ### Disclaimer
 
-This open or closed source software is provided with no warranty. This is not legal advice. CoMakery (dba Upside) is not a legal firm and is not your lawyer. Securities are highly regulated across multiple jurisdictions. Issuing a RWA incorrectly can result in financial penalties or jail time if done incorrectly. Consult a lawyer and tax advisor. Conduct an independent security audit of the code.
+This open or closed source software is provided with no warranty. This is not legal advice. CoMakery, Inc. dba Upside is not a legal firm and is not your lawyer. Securities are highly regulated across multiple jurisdictions. Issuing a RWA incorrectly can result in financial penalties or jail time if done incorrectly. Consult a lawyer and tax advisor. Conduct an independent security audit of the code.
 
 ## On-Chain Holder/Wallet Management
 
