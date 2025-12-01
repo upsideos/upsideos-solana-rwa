@@ -1328,3 +1328,106 @@ ts-node deploy/dividends/upload-merkle-tree-to-ipfs.ts -f path_to_snapshot.csv
 ```bash
 ts-node deploy/new-dividends-distribution.ts --cluster localnet
 ```
+
+# Client Generation (Codama)
+
+This repository uses [Codama](https://github.com/codama-idl/codama) to generate type-safe clients from the Anchor IDL files. Generated clients are available for both JavaScript/TypeScript and Rust.
+
+## Generated Packages
+
+| Package | Language | Registry |
+|---------|----------|----------|
+| `@upsideos/solana-rwa` | JavaScript/TypeScript | npm |
+| `upsideos-solana-rwa-client` | Rust | crates.io |
+
+## Generate Clients
+
+After building the Anchor programs, generate the clients:
+
+```bash
+# Build programs first (generates IDL files)
+anchor build
+
+# Generate Codama clients for all programs
+pnpm generate:clients
+# or
+yarn generate:clients
+```
+
+This generates clients for all four programs:
+- `access_control`
+- `dividends`
+- `tokenlock`
+- `transfer_restrictions`
+
+Generated files are placed in:
+- JavaScript: `clients/js/src/generated/`
+- Rust: `clients/rust/src/generated/`
+
+## Build and Publish Clients
+
+### JavaScript Client
+
+```bash
+# Build
+pnpm clients:js:build
+
+# Test
+pnpm clients:js:test
+
+# Publish to npm (requires npm login)
+pnpm clients:js:publish
+```
+
+### Rust Client
+
+```bash
+# Build
+pnpm clients:rust:build
+
+# Test
+pnpm clients:rust:test
+
+# Publish to crates.io (requires cargo login)
+pnpm clients:rust:publish
+```
+
+## Usage Examples
+
+### JavaScript/TypeScript
+
+```typescript
+import { 
+  accessControl, 
+  dividends, 
+  tokenlock, 
+  transferRestrictions 
+} from '@upsideos/solana-rwa';
+
+// Use program instructions, accounts, types, etc.
+const instruction = accessControl.instructions.grantRole({
+  // ... parameters
+});
+```
+
+### Rust
+
+```rust
+use upsideos_solana_rwa_client::{
+    access_control,
+    dividends,
+    tokenlock,
+    transfer_restrictions,
+};
+
+// Use program instructions, accounts, types, etc.
+```
+
+## Client Structure
+
+Each program module exports:
+- `accounts/` - Account type definitions and decoders
+- `instructions/` - Instruction builders
+- `errors/` - Program error definitions
+- `types/` - Custom type definitions
+- `programs/` - Program address and metadata

@@ -1,4 +1,6 @@
 {
+  "private": true,
+  "workspaces": ["clients/js"],
   "scripts": {
     "build": "anchor build && node scripts/format-types.js",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
@@ -6,7 +8,14 @@
     "deploy:localnet": "ts-node deploy/run.ts --cluster localnet",
     "deploy:devnet": "ts-node deploy/run.ts --cluster devnet",
     "deploy:mainnet": "ts-node deploy/run.ts --cluster mainnet-beta",
-    "generate:codama": "ts-node scripts/create-codama-client.ts"
+    "generate": "pnpm generate:clients",
+    "generate:clients": "zx ./scripts/generate-clients.mjs",
+    "clients:js:build": "zx ./scripts/client/build-js.mjs",
+    "clients:js:test": "zx ./scripts/client/test-js.mjs",
+    "clients:js:publish": "zx ./scripts/client/publish-js.mjs",
+    "clients:rust:build": "zx ./scripts/client/build-rust.mjs",
+    "clients:rust:test": "zx ./scripts/client/test-rust.mjs",
+    "clients:rust:publish": "zx ./scripts/client/publish-rust.mjs"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",
@@ -14,15 +23,16 @@
     "dotenv": "^16.4.5"
   },
   "devDependencies": {
-    "@codama/nodes-from-anchor": "^1.3.4",
-    "@codama/renderers-js": "^1.5.1",
-    "@codama/visitors-core": "^1.4.2",
+    "@codama/nodes-from-anchor": "^1.0",
+    "@codama/renderers-js": "^1.4",
+    "@codama/renderers-rust": "^1.0",
     "@solana/spl-token": "^0.4.8",
     "@types/bn.js": "^5.1.0",
     "@types/chai": "^4.3.0",
     "@types/mocha": "^9.0.0",
     "@types/node": "^20.0.0",
     "chai": "^4.3.4",
+    "codama": "^1.3",
     "js-sha256": "^0.11.0",
     "js-sha3": "^0.8.0",
     "mocha": "^9.0.3",
@@ -31,6 +41,10 @@
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^4.3.5",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "zx": "^7.2.3"
+  },
+  "engines": {
+    "node": ">=v20.0.0"
   }
 }
