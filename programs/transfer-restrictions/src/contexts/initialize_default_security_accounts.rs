@@ -11,14 +11,14 @@ use crate::{
 };
 
 #[derive(Accounts)]
-#[instruction(id: u64)]
+#[instruction(holder_id: u64)]
 pub struct InitializeDefaultSecurityAccounts<'info> {
     // Initialize holder
     #[account(init_if_needed, payer = payer, space = DISCRIMINATOR_LEN + TransferRestrictionHolder::INIT_SPACE,
       seeds = [
         TRANSFER_RESTRICTION_HOLDER_PREFIX.as_bytes(),
         &transfer_restriction_data.key().to_bytes(),
-        &id.to_le_bytes(),
+        &holder_id.to_le_bytes(),
       ],
       bump,
     )]
