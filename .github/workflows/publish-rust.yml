@@ -94,6 +94,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Validate version input
+        if: ${{ inputs.level == 'version' }}
+        run: |
+          if [[ -z "${{ inputs.version }}" ]]; then
+            echo "::error::Version input is required when level is set to 'version'"
+            exit 1
+          fi
+
       - name: Determine version bump
         id: version
         run: |
