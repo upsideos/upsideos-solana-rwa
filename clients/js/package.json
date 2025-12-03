@@ -1,7 +1,7 @@
 {
   "name": "@upsideos/solana-rwa",
   "version": "0.2.0",
-  "description": "Codama-generated JavaScript client for Upside OS Solana RWA programs",
+  "description": "A generated JavaScript client for Upside OS Solana RWA programs",
   "sideEffects": false,
   "module": "./dist/src/index.mjs",
   "main": "./dist/src/index.js",
