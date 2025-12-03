@@ -1,0 +1,119 @@
+name: Publish JS Client to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      level:
+        description: Version level
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+          - prepatch
+          - preminor
+          - premajor
+      tag:
+        description: NPM Tag (and preid for pre-releases)
+        required: true
+        type: string
+        default: latest
+      dry_run:
+        description: 'Dry run (skip actual publish)'
+        required: false
+        default: false
+        type: boolean
+      create_release:
+        description: Create a GitHub release
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  id-token: write # Required for OIDC trusted publishing
+  contents: write # Required for creating tags and releases
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: clients/js
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build package
+        run: pnpm build
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Run linting
+        run: pnpm lint
+
+      # Ensure npm 11.5.1 or later for trusted publishing
+      - name: Update npm for trusted publishing
+        run: npm install -g npm@latest
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version
+        id: version
+        run: |
+          if [[ "${{ inputs.tag }}" != "latest" && "${{ inputs.level }}" == prerelease ]]; then
+            NEW_VERSION=$(npm version ${{ inputs.level }} --preid ${{ inputs.tag }} --no-git-tag-version)
+          elif [[ "${{ inputs.tag }}" != "latest" && "${{ inputs.level }}" == pre* ]]; then
+            NEW_VERSION=$(npm version ${{ inputs.level }} --preid ${{ inputs.tag }} --no-git-tag-version)
+          else
+            NEW_VERSION=$(npm version ${{ inputs.level }} --no-git-tag-version)
+          fi
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Commit and tag version
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          git add package.json
+          git commit -m "chore: release ${{ steps.version.outputs.new_version }}"
+          git tag ${{ steps.version.outputs.new_version }}
+          git push origin HEAD --tags
+
+      - name: Publish to npm (dry run)
+        if: ${{ inputs.dry_run == true }}
+        run: npm publish --access public --tag ${{ inputs.tag }} --dry-run
+
+      - name: Publish to npm
+        if: ${{ inputs.dry_run != true }}
+        run: npm publish --access public --tag ${{ inputs.tag }}
+
+      - name: Create GitHub Release
+        if: ${{ inputs.dry_run != true && inputs.create_release == true }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.new_version }}
+          name: ${{ steps.version.outputs.new_version }}
+          generate_release_notes: true
+          prerelease: ${{ inputs.tag != 'latest' }}
