@@ -1,0 +1,180 @@
+name: Publish Rust Client to crates.io
+
+on:
+  workflow_dispatch:
+    inputs:
+      level:
+        description: Version level
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - rc
+          - beta
+          - alpha
+          - release
+          - version
+      version:
+        description: Version (used with level "version")
+        required: false
+        type: string
+      dry_run:
+        description: Dry run (skip actual publish)
+        required: true
+        default: true
+        type: boolean
+      create_release:
+        description: Create a GitHub release
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write # Required for creating tags and releases
+
+env:
+  RUST_VERSION: "1.90.0"
+  SOLANA_VERSION: "2.2.20"
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: clients/rust
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential pkg-config libudev-dev llvm libclang-dev protobuf-compiler libssl-dev
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: rustfmt, clippy
+
+      - name: Cache Cargo dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            clients/rust/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('clients/rust/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install cargo-release
+        run: cargo install cargo-release --locked || true
+
+      - name: Run clippy
+        run: cargo clippy --all-features -- -D warnings
+
+      - name: Run rustfmt check
+        run: cargo fmt --check
+
+      - name: Run tests
+        run: cargo test --all-features
+
+      - name: Build package
+        run: cargo build --release --all-features
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine version bump
+        id: version
+        run: |
+          CURRENT_VERSION=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
+          echo "Current version: $CURRENT_VERSION"
+          
+          if [[ "${{ inputs.level }}" == "version" ]]; then
+            NEW_VERSION="${{ inputs.version }}"
+          elif [[ "${{ inputs.level }}" == "release" ]]; then
+            # Remove prerelease suffix for release
+            NEW_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-.*$//')
+          elif [[ "${{ inputs.level }}" == "rc" || "${{ inputs.level }}" == "beta" || "${{ inputs.level }}" == "alpha" ]]; then
+            # For prerelease versions
+            BASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-.*$//')
+            # Check if already a prerelease of same type
+            if [[ "$CURRENT_VERSION" == *"-${{ inputs.level }}"* ]]; then
+              # Increment prerelease number
+              PRE_NUM=$(echo "$CURRENT_VERSION" | grep -oP '(?<=-${{ inputs.level }}\.)\d+' || echo "0")
+              NEW_PRE_NUM=$((PRE_NUM + 1))
+              NEW_VERSION="${BASE_VERSION}-${{ inputs.level }}.${NEW_PRE_NUM}"
+            else
+              NEW_VERSION="${BASE_VERSION}-${{ inputs.level }}.1"
+            fi
+          else
+            # Standard semver bump (patch, minor, major)
+            IFS='.' read -ra VERSION_PARTS <<< "$(echo "$CURRENT_VERSION" | sed 's/-.*$//')"
+            MAJOR=${VERSION_PARTS[0]}
+            MINOR=${VERSION_PARTS[1]}
+            PATCH=${VERSION_PARTS[2]}
+            
+            case "${{ inputs.level }}" in
+              major)
+                MAJOR=$((MAJOR + 1))
+                MINOR=0
+                PATCH=0
+                ;;
+              minor)
+                MINOR=$((MINOR + 1))
+                PATCH=0
+                ;;
+              patch)
+                PATCH=$((PATCH + 1))
+                ;;
+            esac
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          fi
+          
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Update Cargo.toml version
+        run: |
+          sed -i 's/^version = ".*"/version = "${{ steps.version.outputs.new_version }}"/' Cargo.toml
+          echo "Updated Cargo.toml:"
+          head -10 Cargo.toml
+
+      - name: Verify package
+        run: cargo package --allow-dirty
+
+      - name: Commit and tag version
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          git add Cargo.toml
+          git commit -m "chore: release rust client v${{ steps.version.outputs.new_version }}"
+          git tag "rust-client-v${{ steps.version.outputs.new_version }}"
+          git push origin HEAD --tags
+
+      - name: Publish to crates.io (dry run)
+        if: ${{ inputs.dry_run == true }}
+        run: cargo publish --dry-run --allow-dirty
+
+      - name: Publish to crates.io
+        if: ${{ inputs.dry_run != true }}
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+      - name: Create GitHub Release
+        if: ${{ inputs.dry_run != true && inputs.create_release == true }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: rust-client-v${{ steps.version.outputs.new_version }}
+          name: Rust Client v${{ steps.version.outputs.new_version }}
+          generate_release_notes: true
+          prerelease: ${{ contains(steps.version.outputs.new_version, '-') }}
+
