@@ -12,10 +12,8 @@
     "generate:clients": "zx ./scripts/generate-clients.mjs",
     "clients:js:build": "zx ./scripts/client/build-js.mjs",
     "clients:js:test": "zx ./scripts/client/test-js.mjs",
-    "clients:js:publish": "zx ./scripts/client/publish-js.mjs",
     "clients:rust:build": "zx ./scripts/client/build-rust.mjs",
-    "clients:rust:test": "zx ./scripts/client/test-rust.mjs",
-    "clients:rust:publish": "zx ./scripts/client/publish-rust.mjs"
+    "clients:rust:test": "zx ./scripts/client/test-rust.mjs"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",

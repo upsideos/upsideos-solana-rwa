@@ -8,6 +8,7 @@
 import { getCreateAccountInstruction } from '@solana-program/system';
 import {
   Address,
+  assertIsTransactionWithBlockhashLifetime,
   BaseTransactionMessage,
   Commitment,
   Instruction,
@@ -107,6 +108,7 @@ export const signAndSendTransaction = async (
   const signedTransaction =
     await signTransactionMessageWithSigners(transactionMessage);
   const signature = getSignatureFromTransaction(signedTransaction);
+  assertIsTransactionWithBlockhashLifetime(signedTransaction);
   await sendAndConfirmTransactionFactory(client)(signedTransaction, {
     commitment,
   });

@@ -1,6 +1,6 @@
 {
   "name": "@upsideos/solana-rwa",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A generated JavaScript client for Upside OS Solana RWA programs",
   "sideEffects": false,
   "module": "./dist/src/index.mjs",
@@ -19,9 +19,8 @@
   ],
   "scripts": {
     "build": "rimraf dist && tsup && tsc -p ./tsconfig.declarations.json",
-    "build:test": "tsc -p ./tsconfig.test.json",
-    "test": "pnpm build:test && ava",
-    "test:unit": "pnpm build:test && ava",
+    "test": "pnpm build && ava",
+    "test:unit": "pnpm build && ava",
     "lint": "eslint --ext js,ts,mts,cts src",
     "lint:fix": "eslint --fix --ext js,ts,mts,cts src",
     "format": "prettier --check src",
@@ -48,13 +47,14 @@
   "author": "Upside OS",
   "license": "MIT",
   "peerDependencies": {
-    "@solana/kit": "^2.1.0"
+    "@solana/kit": "^5.0"
   },
   "devDependencies": {
     "@ava/typescript": "^5.0.0",
-    "@solana-program/system": "^0.7.0",
-    "@solana/kit": "^2.1.0",
-    "@solana/webcrypto-ed25519-polyfill": "^2.1.0",
+    "@solana-program/system": "^0.10.0",
+    "@solana/eslint-config-solana": "^3.0.5",
+    "@solana/kit": "^5.0.0",
+    "@solana/webcrypto-ed25519-polyfill": "^5.0.0",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "ava": "^6.2.0",
