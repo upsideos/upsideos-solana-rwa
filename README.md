@@ -1374,9 +1374,6 @@ pnpm clients:js:build
 
 # Test
 pnpm clients:js:test
-
-# Publish to npm (requires npm login)
-pnpm clients:js:publish
 ```
 
 ### Rust Client
@@ -1387,9 +1384,6 @@ pnpm clients:rust:build
 
 # Test
 pnpm clients:rust:test
-
-# Publish to crates.io (requires cargo login)
-pnpm clients:rust:publish
 ```
 
 ## Usage Examples
