@@ -71,10 +71,6 @@ jobs:
       - name: Run linting
         run: pnpm lint
 
-      # Ensure npm 11.5.1 or later for trusted publishing
-      - name: Update npm for trusted publishing
-        run: npm install -g npm@latest
-
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
@@ -83,12 +79,10 @@ jobs:
       - name: Bump version
         id: version
         run: |
-          if [[ "${{ inputs.tag }}" != "latest" && "${{ inputs.level }}" == prerelease ]]; then
-            NEW_VERSION=$(npm version ${{ inputs.level }} --preid ${{ inputs.tag }} --no-git-tag-version)
-          elif [[ "${{ inputs.tag }}" != "latest" && "${{ inputs.level }}" == pre* ]]; then
-            NEW_VERSION=$(npm version ${{ inputs.level }} --preid ${{ inputs.tag }} --no-git-tag-version)
+          if [[ "${{ inputs.tag }}" != "latest" && "${{ inputs.level }}" == pre* ]]; then
+            NEW_VERSION=$(pnpm version ${{ inputs.level }} --preid ${{ inputs.tag }} --no-git-tag-version)
           else
-            NEW_VERSION=$(npm version ${{ inputs.level }} --no-git-tag-version)
+            NEW_VERSION=$(pnpm version ${{ inputs.level }} --no-git-tag-version)
           fi
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "New version: $NEW_VERSION"
@@ -100,6 +94,10 @@ jobs:
           git commit -m "chore: release ${{ steps.version.outputs.new_version }}"
           git tag ${{ steps.version.outputs.new_version }}
           git push origin HEAD --tags
+
+      # Ensure npm 11.5.1 or later for trusted publishing
+      - name: Update npm for trusted publishing
+        run: npm install -g npm@latest
 
       - name: Publish to npm (dry run)
         if: ${{ inputs.dry_run == true }}
