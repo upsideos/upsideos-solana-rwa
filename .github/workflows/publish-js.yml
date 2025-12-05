@@ -92,7 +92,8 @@ jobs:
           fi
           
           # Update package.json using node
-          node -e "const pkg = require('./package.json'); pkg.version = '$NEW_VERSION'; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n')"
+          export NEW_VERSION
+          node -e "const pkg = require('./package.json'); pkg.version = process.env.NEW_VERSION; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n')"
           
           echo "new_version=v$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "New version: v$NEW_VERSION"
