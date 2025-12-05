@@ -239,7 +239,7 @@ export type TransferRestrictions = {
               },
               {
                 kind: "arg";
-                path: "id"
+                path: "holderId"
               }
             ]
           }

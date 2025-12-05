@@ -1,0 +1,76 @@
+{
+  "name": "@upsideos/solana-rwa",
+  "version": "0.2.1",
+  "description": "A generated JavaScript client for Upside OS Solana RWA programs",
+  "sideEffects": false,
+  "module": "./dist/src/index.mjs",
+  "main": "./dist/src/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/src/index.mjs",
+      "require": "./dist/src/index.js"
+    }
+  },
+  "files": [
+    "./dist/src",
+    "./dist/types"
+  ],
+  "scripts": {
+    "build": "rimraf dist && tsup && tsc -p ./tsconfig.declarations.json",
+    "test": "pnpm build && ava",
+    "test:unit": "pnpm build && ava",
+    "lint": "eslint --ext js,ts,mts,cts src",
+    "lint:fix": "eslint --fix --ext js,ts,mts,cts src",
+    "format": "prettier --check src",
+    "format:fix": "prettier --write src"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/upsideos/upsideos-solana-rwa"
+  },
+  "keywords": [
+    "solana",
+    "rwa",
+    "security-token",
+    "tokenlock",
+    "transfer-restrictions",
+    "dividends",
+    "access-control",
+    "codama",
+    "blockchain"
+  ],
+  "author": "Upside OS",
+  "license": "MIT",
+  "peerDependencies": {
+    "@solana/kit": "^5.0"
+  },
+  "devDependencies": {
+    "@ava/typescript": "^5.0.0",
+    "@solana-program/system": "^0.10.0",
+    "@solana/eslint-config-solana": "^3.0.5",
+    "@solana/kit": "^5.0.0",
+    "@solana/webcrypto-ed25519-polyfill": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "ava": "^6.2.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  },
+  "ava": {
+    "files": [
+      "dist/test/**/*.test.js"
+    ],
+    "timeout": "60s",
+    "concurrency": 5,
+    "failFast": false,
+    "verbose": true
+  }
+}

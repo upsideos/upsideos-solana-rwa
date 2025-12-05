@@ -233,7 +233,7 @@
               },
               {
                 "kind": "arg",
-                "path": "id"
+                "path": "holder_id"
               }
             ]
           }
