@@ -76,16 +76,27 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+
       - name: Bump version
         id: version
         run: |
+          # Install semver globally for version calculation
+          npm install -g semver
+          
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          
           if [[ "${{ inputs.tag }}" != "latest" && "${{ inputs.level }}" == pre* ]]; then
-            NEW_VERSION=$(pnpm version ${{ inputs.level }} --preid ${{ inputs.tag }} --no-git-tag-version)
+            NEW_VERSION=$(semver -i ${{ inputs.level }} --preid ${{ inputs.tag }} $CURRENT_VERSION)
           else
-            NEW_VERSION=$(pnpm version ${{ inputs.level }} --no-git-tag-version)
+            NEW_VERSION=$(semver -i ${{ inputs.level }} $CURRENT_VERSION)
           fi
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "New version: $NEW_VERSION"
+          
+          # Update package.json using node
+          export NEW_VERSION
+          node -e "const pkg = require('./package.json'); pkg.version = process.env.NEW_VERSION; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n')"
+          
+          echo "new_version=v$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: v$NEW_VERSION"
 
       - name: Commit and tag version
         if: ${{ inputs.dry_run != true }}
