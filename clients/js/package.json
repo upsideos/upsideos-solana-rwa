@@ -1,6 +1,6 @@
 {
   "name": "@upsideos/solana-rwa",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "description": "A generated JavaScript client for Upside OS Solana RWA programs",
   "sideEffects": false,
   "module": "./dist/src/index.mjs",
