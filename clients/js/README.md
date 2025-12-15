@@ -54,23 +54,71 @@ pnpm format:fix
 
 ## Usage Example
 
+### Recommended: Using Fetch Functions
+
 ```typescript
-import { createSolanaRpc, createSolanaRpcSubscriptions, address } from '@solana/kit';
-import { 
-  getInitializeAccessControlInstruction,
-  getAccessControlDecoder,
-  findAccessControlPda 
+import { createSolanaRpc } from '@solana/kit';
+import {
+  fetchAccessControl,
+  fetchMaybeWalletRole
 } from '@upsideos/solana-rwa';
 
 // Create RPC connection
-const rpc = createSolanaRpc('http://127.0.0.1:8899');
+const rpc = createSolanaRpc(v);
 
-// Find PDA for access control account
-const [accessControlPda] = await findAccessControlPda({ mint: mintAddress });
+// Compute PDA for access control account
+const accessControlPda = '59mfBZPtvb64bVzXQHi8kLQoA2BmcuCD8GGa6rTKwbiM'; // Example PDA
 
 // Fetch and decode access control account
-const accountInfo = await rpc.getAccountInfo(accessControlPda).send();
-const accessControl = getAccessControlDecoder().decode(accountInfo.value.data);
+const accessControl = await fetchAccessControl(rpc, accessControlPda);
+
+// Access account data
+console.log('Mint:', accessControl.data.mint);
+console.log('Authority:', accessControl.data.authority);
+console.log('Max Total Supply:', accessControl.data.maxTotalSupply);
+
+// Fetch wallet role (returns MaybeAccount - check exists property)
+const walletRolePda = '6ZNDXHtDQpG7Nz8po5otoXrPmCiMAMxsVLAr8Nc6XL95'; // Example PDA
+const walletRole = await fetchMaybeWalletRole(rpc, walletRolePda);
+
+if (walletRole.exists) {
+  console.log('Wallet Role:', walletRole.data.role);
+}
+```
+
+## Building Instructions
+
+The library provides generated functions for building Solana instructions. Here's an example of building a transfer restriction instruction:
+
+```typescript
+import { address } from '@solana/kit';
+import {
+  getSetAddressPermissionInstructionAsync
+} from '@upsideos/solana-rwa';
+
+// Build a set address permission instruction
+const instruction = await getSetAddressPermissionInstructionAsync(
+  {
+    securityAssociatedAccount: securityAssociatedAccountAddress,
+    transferRestrictionGroupNew: groupNewAddress,
+    transferRestrictionGroupCurrent: groupCurrentAddress,
+    transferRestrictionHolder: transferRestrictionHolderAddress,
+    holderGroupNew: holderGroupNewAddress,
+    holderGroupCurrent: holderGroupCurrentAddress,
+    securityToken: mint,
+    userWallet: walletAddress,
+    userAssociatedTokenAccount: walletAssociatedAccountAddress,
+    authorityWalletRole: authorityWalletRoleAddress,
+    securityMint: mint,
+    accessControlAccount: accessControlHelper.accessControlPubkey!,
+    accessControlProgram: ACCESS_CONTROL_PROGRAM_ID,
+    payer: payerSigner,
+    authority: authoritySigner,
+    groupId: BigInt(groupId),
+    frozen,
+  },
+  { programAddress: TRANSFER_RESTRICTIONS_PROGRAM_ID },
+);
 ```
 
 ## License
