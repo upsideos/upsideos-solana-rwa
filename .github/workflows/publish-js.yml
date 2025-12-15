@@ -77,7 +77,34 @@ jobs:
           if [[ "$EVENT_NAME" == "push" ]]; then
             if [[ "$REF_NAME" =~ ^js@([0-9]+\.[0-9]+\.[0-9A-Za-z\.-]+)$ ]]; then
               VERSION="${BASH_REMATCH[1]}"
-              NPM_TAG="latest"
+              # Determine npm tag based on version type
+              if [[ "$VERSION" =~ - ]]; then
+                # This is a prerelease version, determine tag from prerelease identifier
+                if [[ "$VERSION" =~ -(alpha|beta|rc|next) ]]; then
+                  PRERELEASE_TYPE="${BASH_REMATCH[1]}"
+                  case "$PRERELEASE_TYPE" in
+                    alpha)
+                      NPM_TAG="alpha"
+                      ;;
+                    beta)
+                      NPM_TAG="beta"
+                      ;;
+                    rc)
+                      NPM_TAG="rc"
+                      ;;
+                    next)
+                      NPM_TAG="next"
+                      ;;
+                    *)
+                      NPM_TAG="beta"  # Default fallback for other prerelease types
+                      ;;
+                  esac
+                else
+                  NPM_TAG="beta"  # Default for prerelease versions without specific identifier
+                fi
+              else
+                NPM_TAG="latest"
+              fi
               if [[ "$PKG_VERSION" != "$VERSION" ]]; then
                 echo "Tag version ($VERSION) does not match package.json version ($PKG_VERSION)" >&2
                 exit 1
