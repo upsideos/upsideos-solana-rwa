@@ -1,36 +1,23 @@
 name: Publish JS Client to npm
 
 on:
+  # Automatic publish when a tag like "js@1.2.3" is pushed.
+  push:
+    tags:
+      - js@*
+  # Manual trigger fallback.
   workflow_dispatch:
     inputs:
-      level:
-        description: Version level
-        required: true
-        default: patch
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
-          - prerelease
-          - prepatch
-          - preminor
-          - premajor
-      tag:
-        description: NPM Tag (and preid for pre-releases)
+      npm_tag:
+        description: NPM dist-tag to use (latest, beta, next, etc.)
         required: true
         type: string
         default: latest
       dry_run:
         description: 'Dry run (skip actual publish)'
-        required: false
-        default: false
-        type: boolean
-      create_release:
-        description: Create a GitHub release
         required: true
-        type: boolean
         default: true
+        type: boolean
 
 permissions:
   id-token: write # Required for OIDC trusted publishing
@@ -39,6 +26,8 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
     defaults:
       run:
         working-directory: clients/js
@@ -76,53 +65,73 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-
-      - name: Bump version
+      - name: Determine version and dist-tag
         id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          # Install semver globally for version calculation
-          npm install -g semver
-          
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          
-          if [[ "${{ inputs.tag }}" != "latest" && "${{ inputs.level }}" == pre* ]]; then
-            NEW_VERSION=$(semver -i ${{ inputs.level }} --preid ${{ inputs.tag }} $CURRENT_VERSION)
-          else
-            NEW_VERSION=$(semver -i ${{ inputs.level }} $CURRENT_VERSION)
-          fi
-          
-          # Update package.json using node
-          export NEW_VERSION
-          node -e "const pkg = require('./package.json'); pkg.version = process.env.NEW_VERSION; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n')"
-          
-          echo "new_version=v$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "New version: v$NEW_VERSION"
+          PKG_VERSION=$(node -p "require('./package.json').version")
 
-      - name: Commit and tag version
-        if: ${{ inputs.dry_run != true }}
-        run: |
-          git add package.json
-          git commit -m "chore: release ${{ steps.version.outputs.new_version }}"
-          git tag ${{ steps.version.outputs.new_version }}
-          git push origin HEAD --tags
+          # When triggered by a pushed tag like "js@1.2.3", extract the version.
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            if [[ "$REF_NAME" =~ ^js@([0-9]+\.[0-9]+\.[0-9A-Za-z\.-]+)$ ]]; then
+              VERSION="${BASH_REMATCH[1]}"
+              # Determine npm tag based on version type
+              if [[ "$VERSION" =~ - ]]; then
+                # This is a prerelease version, determine tag from prerelease identifier
+                if [[ "$VERSION" =~ -(alpha|beta|rc|next) ]]; then
+                  PRERELEASE_TYPE="${BASH_REMATCH[1]}"
+                  case "$PRERELEASE_TYPE" in
+                    alpha)
+                      NPM_TAG="alpha"
+                      ;;
+                    beta)
+                      NPM_TAG="beta"
+                      ;;
+                    rc)
+                      NPM_TAG="rc"
+                      ;;
+                    next)
+                      NPM_TAG="next"
+                      ;;
+                    *)
+                      NPM_TAG="beta"  # Default fallback for other prerelease types
+                      ;;
+                  esac
+                else
+                  NPM_TAG="beta"  # Default for prerelease versions without specific identifier
+                fi
+              else
+                NPM_TAG="latest"
+              fi
+              if [[ "$PKG_VERSION" != "$VERSION" ]]; then
+                echo "Tag version ($VERSION) does not match package.json version ($PKG_VERSION)" >&2
+                exit 1
+              fi
+            else
+              echo "Tag format must be js@<version> (e.g. js@1.2.3)" >&2
+              exit 1
+            fi
+          else
+            VERSION="$PKG_VERSION"
+            NPM_TAG="${{ inputs.npm_tag }}"
+          fi
+
+          echo "Using version $VERSION"
+          echo "Using npm tag $NPM_TAG"
+
+          echo "new_version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "npm_tag=$NPM_TAG" >> $GITHUB_OUTPUT
 
       # Ensure npm 11.5.1 or later for trusted publishing
       - name: Update npm for trusted publishing
         run: npm install -g npm@latest
 
       - name: Publish to npm (dry run)
-        if: ${{ inputs.dry_run == true }}
-        run: npm publish --access public --tag ${{ inputs.tag }} --dry-run
+        if: ${{ env.DRY_RUN == 'true' }}
+        run: npm publish --access public --tag ${{ steps.version.outputs.npm_tag }} --dry-run
 
       - name: Publish to npm
-        if: ${{ inputs.dry_run != true }}
-        run: npm publish --access public --tag ${{ inputs.tag }}
-
-      - name: Create GitHub Release
-        if: ${{ inputs.dry_run != true && inputs.create_release == true }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.version.outputs.new_version }}
-          name: ${{ steps.version.outputs.new_version }}
-          generate_release_notes: true
-          prerelease: ${{ inputs.tag != 'latest' }}
+        if: ${{ env.DRY_RUN != 'true' }}
+        run: npm publish --access public --tag ${{ steps.version.outputs.npm_tag }}
