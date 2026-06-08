@@ -3,9 +3,9 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenAccount};
 
 use crate::{
-    HolderGroup, SecurityAssociatedAccount, TransferRestrictionData, TransferRestrictionGroup,
-    TransferRestrictionHolder, SECURITY_ASSOCIATED_ACCOUNT_PREFIX,
-    TRANSFER_RESTRICTION_DATA_PREFIX,
+    errors::TransferRestrictionsError, HolderGroup, SecurityAssociatedAccount,
+    TransferRestrictionData, TransferRestrictionGroup, TransferRestrictionHolder,
+    SECURITY_ASSOCIATED_ACCOUNT_PREFIX, TRANSFER_RESTRICTION_DATA_PREFIX,
 };
 
 #[derive(Accounts)]
@@ -22,10 +22,15 @@ pub struct RevokeSecurityAssociatedAccount<'info> {
     pub security_associated_account: Account<'info, SecurityAssociatedAccount>,
     #[account(mut,
       constraint = group.transfer_restriction_data == transfer_restriction_data.key(),
+      // Bind the group to the security associated account being revoked so that the
+      // counters decremented below belong to the wallet that is actually being removed.
+      constraint = group.id == security_associated_account.group @ TransferRestrictionsError::InvalidPDA,
     )]
     pub group: Account<'info, TransferRestrictionGroup>,
     #[account(mut,
       constraint = holder.transfer_restriction_data == transfer_restriction_data.key(),
+      // Bind the holder to the security associated account being revoked.
+      constraint = security_associated_account.holder == Some(holder.key()) @ TransferRestrictionsError::InvalidPDA,
     )]
     pub holder: Account<'info, TransferRestrictionHolder>,
     #[account(mut,
