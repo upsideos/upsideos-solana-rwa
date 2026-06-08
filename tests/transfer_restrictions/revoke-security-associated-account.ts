@@ -409,6 +409,55 @@ describe("Revoke security associated account", () => {
     });
   });
 
+  it("fails to revoke when holder does not match the security associated account", async () => {
+    // Regression test: revoking a security associated account must only ever
+    // decrement the counters of the holder/group the wallet actually belongs to.
+    // investorsTokenAccounts[2] belongs to holder #1, so passing holder #0
+    // (a different, still-existing holder) must be rejected.
+    const signer = testEnvironment.transferAdmin;
+    const [authorityWalletRolePubkey] =
+      testEnvironment.accessControlHelper.walletRolePDA(signer.publicKey);
+
+    const wrongHolderIdx = new anchor.BN(0);
+    const [wrongHolderPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderPDA(wrongHolderIdx);
+    const [wrongHolderGroupPubkey] =
+      testEnvironment.transferRestrictionsHelper.holderGroupPDA(
+        wrongHolderPubkey,
+        groupId
+      );
+    const [securityAssociatedAccountPubkey] =
+      testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+        investorsTokenAccounts[2]
+      );
+
+    try {
+      await testEnvironment.transferRestrictionsHelper.program.methods
+        .revokeSecurityAssociatedAccount()
+        .accountsStrict({
+          securityAssociatedAccount: securityAssociatedAccountPubkey,
+          group: groupPubkey,
+          holder: wrongHolderPubkey,
+          holderGroup: wrongHolderGroupPubkey,
+          securityToken: testEnvironment.mintKeypair.publicKey,
+          transferRestrictionData:
+            testEnvironment.transferRestrictionsHelper
+              .transferRestrictionDataPubkey,
+          userWallet: investors[2].publicKey,
+          associatedTokenAccount: investorsTokenAccounts[2],
+          authorityWalletRole: authorityWalletRolePubkey,
+          payer: signer.publicKey,
+          authority: signer.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([signer])
+        .rpc({ commitment: testEnvironment.commitment });
+      assert.fail("Expect an error");
+    } catch ({ error }) {
+      assert.equal(error.errorCode.code, "InvalidPDA");
+    }
+  });
+
   it("payer can be different from authority and pays all fees", async () => {
     const payer = Keypair.generate();
     await topUpWallet(testEnvironment.connection, payer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
