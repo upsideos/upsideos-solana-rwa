@@ -23,7 +23,10 @@ pub mod access_control {
         instructions::access_control::initialize(ctx, args)
     }
 
-    pub fn grant_role(ctx: Context<GrantRole>, role: u8) -> Result<()> {
+    pub fn grant_role<'info>(
+        ctx: Context<'_, '_, '_, 'info, GrantRole<'info>>,
+        role: u8,
+    ) -> Result<()> {
         instructions::access_control::grant_role(ctx, role)
     }
 
@@ -31,11 +34,17 @@ pub mod access_control {
         instructions::access_control::revoke_role(ctx, role)
     }
 
-    pub fn mint_securities(ctx: Context<MintSecurities>, amount: u64) -> Result<()> {
+    pub fn mint_securities<'info>(
+        ctx: Context<'_, '_, '_, 'info, MintSecurities<'info>>,
+        amount: u64,
+    ) -> Result<()> {
         instructions::asset::mint_securities(ctx, amount)
     }
 
-    pub fn burn_securities(ctx: Context<BurnSecurities>, amount: u64) -> Result<()> {
+    pub fn burn_securities<'info>(
+        ctx: Context<'_, '_, '_, 'info, BurnSecurities<'info>>,
+        amount: u64,
+    ) -> Result<()> {
         instructions::asset::burn_securities(ctx, amount)
     }
 
@@ -46,11 +55,13 @@ pub mod access_control {
         instructions::asset::force_transfer_beetween(ctx, amount)
     }
 
-    pub fn freeze_wallet(ctx: Context<FreezeWallet>) -> Result<()> {
+    pub fn freeze_wallet<'info>(
+        ctx: Context<'_, '_, '_, 'info, FreezeWallet<'info>>,
+    ) -> Result<()> {
         instructions::asset::freeze_wallet(ctx)
     }
 
-    pub fn thaw_wallet(ctx: Context<ThawWallet>) -> Result<()> {
+    pub fn thaw_wallet<'info>(ctx: Context<'_, '_, '_, 'info, ThawWallet<'info>>) -> Result<()> {
         instructions::asset::thaw_wallet(ctx)
     }
 
@@ -58,7 +69,10 @@ pub mod access_control {
         instructions::access_control::set_lockup_escrow_account(ctx)
     }
 
-    pub fn set_max_total_supply(ctx: Context<SetMaxTotalSupply>, max_total_supply: u64) -> Result<()> {
+    pub fn set_max_total_supply(
+        ctx: Context<SetMaxTotalSupply>,
+        max_total_supply: u64,
+    ) -> Result<()> {
         instructions::access_control::set_max_total_supply(ctx, max_total_supply)
     }
 }

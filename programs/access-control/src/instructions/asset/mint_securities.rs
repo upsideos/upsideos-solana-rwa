@@ -10,7 +10,15 @@ use crate::{errors::AccessControlError, MintSecurities, ACCESS_CONTROL_SEED};
 // Security Associated Account prefix from transfer-restrictions program
 const SECURITY_ASSOCIATED_ACCOUNT_PREFIX: &str = "saa";
 
-pub fn mint_securities(ctx: Context<MintSecurities>, amount: u64) -> Result<()> {
+pub fn mint_securities<'info>(
+    ctx: Context<'_, '_, '_, 'info, MintSecurities<'info>>,
+    amount: u64,
+) -> Result<()> {
+    crate::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
     if !ctx
         .accounts
         .authority_wallet_role
@@ -61,7 +69,10 @@ fn validate_security_associated_account(ctx: &Context<MintSecurities>) -> Result
     }
 
     // For non-lockup-escrow destinations, security_associated_account is mandatory
-    let saa_account = ctx.accounts.security_associated_account.as_ref()
+    let saa_account = ctx
+        .accounts
+        .security_associated_account
+        .as_ref()
         .ok_or(AccessControlError::SecurityAssociatedAccountRequired)?;
 
     let mint_account_info = &ctx.accounts.security_mint.to_account_info();

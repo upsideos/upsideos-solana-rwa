@@ -10,7 +10,6 @@ use crate::{
     SECURITY_ASSOCIATED_ACCOUNT_PREFIX, TRANSFER_RESTRICTION_DATA_PREFIX,
 };
 
-
 #[derive(Accounts)]
 pub struct SetLockupEscrowAccount<'info> {
     #[account(mut,
@@ -60,8 +59,9 @@ pub struct SetLockupEscrowAccount<'info> {
     pub tokenlock_account: AccountInfo<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
-    #[account()]
-    pub authority: Signer<'info>,
+    /// CHECK: a transaction signer, or a Token-2022 multisig.
+    /// Members, when used, are appended in remaining accounts.
+    pub authority: UncheckedAccount<'info>,
 
     pub system_program: Program<'info, System>,
 }

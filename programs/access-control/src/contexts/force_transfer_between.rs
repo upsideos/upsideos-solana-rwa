@@ -31,8 +31,9 @@ pub struct ForceTransferBetween<'info> {
     )]
     pub destination_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
-    #[account()]
-    pub authority: Signer<'info>,
+    /// CHECK: a transaction signer, or a Token-2022 multisig.
+    /// Members, when used, are appended in remaining accounts.
+    pub authority: UncheckedAccount<'info>,
     #[account(
       seeds = [
         WALLET_ROLE_PREFIX,

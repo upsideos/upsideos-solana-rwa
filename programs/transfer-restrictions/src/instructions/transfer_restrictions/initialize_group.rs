@@ -3,7 +3,15 @@ use anchor_lang::prelude::*;
 
 use crate::{errors::TransferRestrictionsError, InitializeTransferRestrictionGroup};
 
-pub fn initialize_group(ctx: Context<InitializeTransferRestrictionGroup>, id: u64) -> Result<()> {
+pub fn initialize_group<'info>(
+    ctx: Context<'_, '_, '_, 'info, InitializeTransferRestrictionGroup<'info>>,
+    id: u64,
+) -> Result<()> {
+    access_control::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
     if !ctx
         .accounts
         .authority_wallet_role

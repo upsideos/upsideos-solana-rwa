@@ -4,7 +4,14 @@ use tokenlock_accounts::{states::TokenLockData, wrappers::TokenLockDataWrapper};
 
 use crate::{errors::TransferRestrictionsError, SetLockupEscrowAccount};
 
-pub fn set_lockup_escrow_account(ctx: Context<SetLockupEscrowAccount>) -> Result<()> {
+pub fn set_lockup_escrow_account<'info>(
+    ctx: Context<'_, '_, '_, 'info, SetLockupEscrowAccount<'info>>,
+) -> Result<()> {
+    access_control::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
     if !ctx
         .accounts
         .authority_wallet_role

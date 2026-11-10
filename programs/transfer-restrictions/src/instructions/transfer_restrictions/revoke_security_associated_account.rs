@@ -3,9 +3,14 @@ use anchor_lang::prelude::*;
 
 use crate::{errors::TransferRestrictionsError, RevokeSecurityAssociatedAccount};
 
-pub fn revoke_security_associated_account(
-    ctx: Context<RevokeSecurityAssociatedAccount>,
+pub fn revoke_security_associated_account<'info>(
+    ctx: Context<'_, '_, '_, 'info, RevokeSecurityAssociatedAccount<'info>>,
 ) -> Result<()> {
+    access_control::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
     let wallet_role = &ctx.accounts.authority_wallet_role;
     if !wallet_role.has_any_role(Roles::TransferAdmin as u8 | Roles::WalletsAdmin as u8) {
         return Err(TransferRestrictionsError::Unauthorized.into());

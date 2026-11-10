@@ -1,5 +1,7 @@
 use crate::{
-    HolderGroup, TransferRestrictionData, TransferRestrictionGroup, TransferRestrictionHolder, TRANSFER_RESTRICTION_DATA_PREFIX, TRANSFER_RESTRICTION_GROUP_PREFIX, TRANSFER_RESTRICTION_HOLDER_GROUP_PREFIX, TRANSFER_RESTRICTION_HOLDER_PREFIX
+    HolderGroup, TransferRestrictionData, TransferRestrictionGroup, TransferRestrictionHolder,
+    TRANSFER_RESTRICTION_DATA_PREFIX, TRANSFER_RESTRICTION_GROUP_PREFIX,
+    TRANSFER_RESTRICTION_HOLDER_GROUP_PREFIX, TRANSFER_RESTRICTION_HOLDER_PREFIX,
 };
 use access_control::{self, WalletRole};
 use anchor_lang::prelude::*;
@@ -53,7 +55,9 @@ pub struct RevokeHolderGroup<'info> {
     )]
     pub authority_wallet_role: Account<'info, WalletRole>,
 
-    pub authority: Signer<'info>,
+    /// CHECK: a transaction signer, or a Token-2022 multisig.
+    /// Members, when used, are appended in remaining accounts.
+    pub authority: UncheckedAccount<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,

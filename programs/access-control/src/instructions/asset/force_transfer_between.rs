@@ -7,6 +7,11 @@ pub fn force_transfer_beetween<'info>(
     ctx: Context<'_, '_, '_, 'info, ForceTransferBetween<'info>>,
     amount: u64,
 ) -> Result<()> {
+    crate::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
     if !ctx
         .accounts
         .authority_wallet_role

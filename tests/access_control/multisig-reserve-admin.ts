@@ -4,9 +4,7 @@ import {
   ComputeBudgetProgram,
   Keypair,
   PublicKey,
-  Transaction,
   TransactionInstruction,
-  sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import {
   TOKEN_2022_PROGRAM_ID,
@@ -44,12 +42,18 @@ describe("Token-2022 multisig as reserve admin", () => {
   let testEnvironment: TestEnvironment;
   let multisig: Token2022Multisig;
   let multisigWalletRole: PublicKey;
+  let multisigTwoOfThree: Token2022Multisig;
+  let twoOfThreeWalletRole: PublicKey;
   const recipient = Keypair.generate();
   const target = Keypair.generate();
+  const twoOfThreeRecipient = Keypair.generate();
   let recipientTokenAccount: PublicKey;
   let targetTokenAccount: PublicKey;
   let recipientSaa: PublicKey;
   let targetSaa: PublicKey;
+  let twoOfThreeRecipientTokenAccount: PublicKey;
+  let twoOfThreeRecipientSaa: PublicKey;
+  const twoOfThreeAmount = new anchor.BN(250_000);
 
   before(async () => {
     testEnvironment = new TestEnvironment(testEnvironmentParams);
@@ -118,6 +122,38 @@ describe("Token-2022 multisig as reserve admin", () => {
       walletsAdminRole,
       testEnvironment.walletsAdmin
     );
+
+    multisigTwoOfThree = await createToken2022Multisig(
+      testEnvironment.connection,
+      testEnvironment.contractAdmin,
+      3,
+      2,
+      testEnvironment.commitment
+    );
+    await testEnvironment.accessControlHelper.grantRole(
+      multisigTwoOfThree.publicKey,
+      Roles.ReserveAdmin,
+      testEnvironment.contractAdmin
+    );
+    [twoOfThreeWalletRole] =
+      testEnvironment.accessControlHelper.walletRolePDA(
+        multisigTwoOfThree.publicKey
+      );
+    twoOfThreeRecipientTokenAccount =
+      await testEnvironment.mintHelper.createAssociatedTokenAccount(
+        twoOfThreeRecipient.publicKey,
+        testEnvironment.contractAdmin
+      );
+    [twoOfThreeRecipientSaa] =
+      testEnvironment.transferRestrictionsHelper.securityAssociatedAccountPDA(
+        twoOfThreeRecipientTokenAccount
+      );
+    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccountIfNotExists(
+      twoOfThreeRecipient.publicKey,
+      twoOfThreeRecipientTokenAccount,
+      walletsAdminRole,
+      testEnvironment.walletsAdmin
+    );
   });
 
   async function mintInstruction() {
@@ -136,9 +172,9 @@ describe("Token-2022 multisig as reserve admin", () => {
       .instruction();
   }
 
-  async function burnInstruction() {
+  async function burnInstruction(burnAmount: anchor.BN = amount) {
     return testEnvironment.accessControlHelper.program.methods
-      .burnSecurities(amount)
+      .burnSecurities(burnAmount)
       .accountsStrict({
         authority: multisig.publicKey,
         authorityWalletRole: multisigWalletRole,
@@ -190,84 +226,84 @@ describe("Token-2022 multisig as reserve admin", () => {
     return instruction;
   }
 
-  async function expectMultisigMembersRejected(
+  async function expectMultisigRejected(
     instruction: TransactionInstruction,
-    members: Keypair[]
+    members: Keypair[],
+    multisigAuthority: PublicKey = multisig.publicKey
   ) {
     try {
       await sendAsSplMultisig(
         testEnvironment.connection,
         instruction,
-        multisig.publicKey,
+        multisigAuthority,
         members,
         testEnvironment.contractAdmin,
         testEnvironment.commitment
       );
-      assert.fail("standard Token-2022 multisig authorization was accepted");
+      assert.fail("Token-2022 multisig authorization was accepted");
     } catch (error) {
-      if (
-        error.message ===
-        "standard Token-2022 multisig authorization was accepted"
-      ) {
+      if (error.message === "Token-2022 multisig authorization was accepted") {
         throw error;
       }
       assert.isTrue(
         authoritySignerRejected(error),
-        `expected the authority signer check to reject the multisig, got: ${errorText(
+        `expected the multisig check to reject the authority, got: ${errorText(
           error
         )}`
       );
     }
   }
 
-  it("rejects mint_securities signed by both multisig members", async () => {
-    await expectMultisigMembersRejected(
-      await mintInstruction(),
-      multisig.members
-    );
-  });
-
   it("rejects mint_securities signed by one multisig member", async () => {
-    await expectMultisigMembersRejected(await mintInstruction(), [
+    await expectMultisigRejected(await mintInstruction(), [
       multisig.members[0],
     ]);
-  });
-
-  it("rejects burn_securities signed by both multisig members", async () => {
-    await expectMultisigMembersRejected(
-      await burnInstruction(),
-      multisig.members
-    );
   });
 
   it("rejects burn_securities signed by one multisig member", async () => {
-    await expectMultisigMembersRejected(await burnInstruction(), [
+    await expectMultisigRejected(await burnInstruction(), [
       multisig.members[0],
     ]);
   });
 
-  it("rejects force_transfer signed by both multisig members", async () => {
-    await expectMultisigMembersRejected(
-      await forceTransferInstruction(amount),
-      multisig.members
-    );
-  });
-
   it("rejects force_transfer signed by one multisig member", async () => {
-    await expectMultisigMembersRejected(
-      await forceTransferInstruction(amount),
-      [multisig.members[0]]
-    );
+    await expectMultisigRejected(await forceTransferInstruction(amount), [
+      multisig.members[0],
+    ]);
   });
 
-  it("mints, burns, and force-transfers with only the multisig account key", async () => {
+  it("rejects mint_securities signed only by the multisig account key", async () => {
+    try {
+      await testEnvironment.accessControlHelper.mintSecurities(
+        amount,
+        recipient.publicKey,
+        recipientTokenAccount,
+        multisig.keypair,
+        recipientSaa
+      );
+      assert.fail("multisig account key alone was accepted");
+    } catch (error) {
+      if (error.message === "multisig account key alone was accepted") {
+        throw error;
+      }
+      assert.isTrue(
+        authoritySignerRejected(error),
+        `expected the multisig account key to be rejected, got: ${errorText(
+          error
+        )}`
+      );
+    }
+  });
+
+  it("mints, burns, and force-transfers with both multisig members", async () => {
     const supplyBefore = (await testEnvironment.mintHelper.getMint()).supply;
-    await testEnvironment.accessControlHelper.mintSecurities(
-      amount,
-      recipient.publicKey,
-      recipientTokenAccount,
-      multisig.keypair,
-      recipientSaa
+    await sendAsSplMultisig(
+      testEnvironment.connection,
+      await mintInstruction(),
+      multisig.publicKey,
+      multisig.members,
+      testEnvironment.contractAdmin,
+      testEnvironment.commitment
     );
     const recipientAfterMint = await testEnvironment.mintHelper.getAccount(
       recipientTokenAccount
@@ -277,11 +313,13 @@ describe("Token-2022 multisig as reserve admin", () => {
     assert.equal(supplyAfterMint - supplyBefore, BigInt(amount.toString()));
 
     const burnAmount = new anchor.BN(100_000);
-    await testEnvironment.accessControlHelper.burnSecurities(
-      burnAmount,
-      recipient.publicKey,
-      recipientTokenAccount,
-      multisig.keypair
+    await sendAsSplMultisig(
+      testEnvironment.connection,
+      await burnInstruction(burnAmount),
+      multisig.publicKey,
+      multisig.members,
+      testEnvironment.contractAdmin,
+      testEnvironment.commitment
     );
     const recipientAfterBurn = await testEnvironment.mintHelper.getAccount(
       recipientTokenAccount
@@ -292,17 +330,18 @@ describe("Token-2022 multisig as reserve admin", () => {
     );
 
     const transferAmount = new anchor.BN(100_000);
-    const forceTransferIx = await forceTransferInstruction(transferAmount);
-    const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
-      units: 400000,
-    });
-    const tx = new Transaction().add(modifyComputeUnits, forceTransferIx);
-    tx.feePayer = testEnvironment.contractAdmin.publicKey;
-    await sendAndConfirmTransaction(
+    await sendAsSplMultisig(
       testEnvironment.connection,
-      tx,
-      [testEnvironment.contractAdmin, multisig.keypair],
-      { commitment: testEnvironment.commitment }
+      await forceTransferInstruction(transferAmount),
+      multisig.publicKey,
+      multisig.members,
+      testEnvironment.contractAdmin,
+      testEnvironment.commitment,
+      [
+        ComputeBudgetProgram.setComputeUnitLimit({
+          units: 400000,
+        }),
+      ]
     );
 
     const recipientAfterTransfer = await testEnvironment.mintHelper.getAccount(
@@ -316,5 +355,67 @@ describe("Token-2022 multisig as reserve admin", () => {
       BigInt(amount.sub(burnAmount).sub(transferAmount).toString())
     );
     assert.equal(targetAfterTransfer.amount, BigInt(transferAmount.toString()));
+  });
+
+  async function twoOfThreeMintInstruction() {
+    return testEnvironment.accessControlHelper.program.methods
+      .mintSecurities(twoOfThreeAmount)
+      .accountsStrict({
+        authority: multisigTwoOfThree.publicKey,
+        authorityWalletRole: twoOfThreeWalletRole,
+        accessControl: testEnvironment.accessControlHelper.accessControlPubkey,
+        securityMint: testEnvironment.mintKeypair.publicKey,
+        destinationAccount: twoOfThreeRecipientTokenAccount,
+        destinationAuthority: twoOfThreeRecipient.publicKey,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+        securityAssociatedAccount: twoOfThreeRecipientSaa,
+      })
+      .instruction();
+  }
+
+  it("rejects mint_securities signed by one of three multisig members", async () => {
+    await expectMultisigRejected(
+      await twoOfThreeMintInstruction(),
+      [multisigTwoOfThree.members[0]],
+      multisigTwoOfThree.publicKey
+    );
+  });
+
+  it("mints securities with two of three multisig members", async () => {
+    const signingMembers = [
+      multisigTwoOfThree.members[0],
+      multisigTwoOfThree.members[2],
+    ];
+    assert.equal(multisigTwoOfThree.m, 2);
+    assert.equal(multisigTwoOfThree.members.length, 3);
+    assert.equal(signingMembers.length, 2);
+    assert.isFalse(
+      signingMembers.some((member) =>
+        member.publicKey.equals(multisigTwoOfThree.members[1].publicKey)
+      )
+    );
+
+    const supplyBefore = (await testEnvironment.mintHelper.getMint()).supply;
+    await sendAsSplMultisig(
+      testEnvironment.connection,
+      await twoOfThreeMintInstruction(),
+      multisigTwoOfThree.publicKey,
+      signingMembers,
+      testEnvironment.contractAdmin,
+      testEnvironment.commitment
+    );
+
+    const recipientAfterMint = await testEnvironment.mintHelper.getAccount(
+      twoOfThreeRecipientTokenAccount
+    );
+    const supplyAfterMint = (await testEnvironment.mintHelper.getMint()).supply;
+    assert.equal(
+      recipientAfterMint.amount,
+      BigInt(twoOfThreeAmount.toString())
+    );
+    assert.equal(
+      supplyAfterMint - supplyBefore,
+      BigInt(twoOfThreeAmount.toString())
+    );
   });
 });

@@ -68,7 +68,8 @@ export async function sendAsSplMultisig(
   multisig: PublicKey,
   members: Keypair[],
   feePayer: Keypair,
-  commitment: Commitment = "confirmed"
+  commitment: Commitment = "confirmed",
+  prepend: TransactionInstruction[] = []
 ): Promise<string> {
   const authorityMeta = instruction.keys.find((meta) =>
     meta.pubkey.equals(multisig)
@@ -85,7 +86,7 @@ export async function sendAsSplMultisig(
     });
   }
 
-  const transaction = new Transaction().add(instruction);
+  const transaction = new Transaction().add(...prepend, instruction);
   transaction.feePayer = feePayer.publicKey;
   return sendAndConfirmTransaction(
     connection,
