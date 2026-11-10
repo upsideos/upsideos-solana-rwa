@@ -5,10 +5,15 @@ use crate::errors::TransferRestrictionsError;
 use crate::helpers::*;
 use crate::InitializeDefaultSecurityAccounts;
 
-pub fn initialize_default_security_accounts(
-    ctx: Context<InitializeDefaultSecurityAccounts>,
+pub fn initialize_default_security_accounts<'info>(
+    ctx: Context<'_, '_, '_, 'info, InitializeDefaultSecurityAccounts<'info>>,
     holder_id: u64,
 ) -> Result<()> {
+    access_control::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
     // Check authorization: Reserve, Transfer, or Wallets admin
     check_authorization(
         &ctx.accounts.authority_wallet_role,
@@ -19,7 +24,11 @@ pub fn initialize_default_security_accounts(
     // Initialize holder
     let transfer_restriction_holder = &mut ctx.accounts.transfer_restriction_holder;
     if !transfer_restriction_holder.active {
-        initialize_new_holder(transfer_restriction_holder, transfer_restriction_data, holder_id)?;
+        initialize_new_holder(
+            transfer_restriction_holder,
+            transfer_restriction_data,
+            holder_id,
+        )?;
     }
     // Initialize holder_group for group 0
     let holder_group = &mut ctx.accounts.holder_group;

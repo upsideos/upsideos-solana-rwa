@@ -89,7 +89,7 @@ describe("Token-2022 multisig as wallets admin", () => {
       );
   });
 
-  async function expectMultisigMembersRejected(
+  async function expectMultisigRejected(
     instruction: TransactionInstruction,
     members: Keypair[]
   ) {
@@ -102,17 +102,14 @@ describe("Token-2022 multisig as wallets admin", () => {
         testEnvironment.contractAdmin,
         testEnvironment.commitment
       );
-      assert.fail("standard Token-2022 multisig authorization was accepted");
+      assert.fail("Token-2022 multisig authorization was accepted");
     } catch (error) {
-      if (
-        error.message ===
-        "standard Token-2022 multisig authorization was accepted"
-      ) {
+      if (error.message === "Token-2022 multisig authorization was accepted") {
         throw error;
       }
       assert.isTrue(
         authoritySignerRejected(error),
-        `expected the authority signer check to reject the multisig, got: ${errorText(
+        `expected the multisig check to reject the authority, got: ${errorText(
           error
         )}`
       );
@@ -177,25 +174,42 @@ describe("Token-2022 multisig as wallets admin", () => {
       .instruction();
   }
 
-  it("rejects initialize holder signed by two of three multisig members", async () => {
-    await expectMultisigMembersRejected(await holderInstruction(), [
-      multisig.members[0],
-      multisig.members[1],
-    ]);
-  });
-
   it("rejects initialize holder signed by one multisig member", async () => {
-    await expectMultisigMembersRejected(await holderInstruction(), [
+    await expectMultisigRejected(await holderInstruction(), [
       multisig.members[0],
     ]);
   });
 
-  it("initializes a holder with only the multisig account key", async () => {
-    await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
-      holderId,
-      multisigWalletRole,
-      multisig.keypair,
-      testEnvironment.contractAdmin
+  it("rejects initialize holder signed only by the multisig account key", async () => {
+    try {
+      await testEnvironment.transferRestrictionsHelper.initializeTransferRestrictionHolder(
+        holderId,
+        multisigWalletRole,
+        multisig.keypair,
+        testEnvironment.contractAdmin
+      );
+      assert.fail("multisig account key alone was accepted");
+    } catch (error) {
+      if (error.message === "multisig account key alone was accepted") {
+        throw error;
+      }
+      assert.isTrue(
+        authoritySignerRejected(error),
+        `expected the multisig account key to be rejected, got: ${errorText(
+          error
+        )}`
+      );
+    }
+  });
+
+  it("initializes a holder with two of three multisig members", async () => {
+    await sendAsSplMultisig(
+      testEnvironment.connection,
+      await holderInstruction(),
+      multisig.publicKey,
+      [multisig.members[0], multisig.members[1]],
+      testEnvironment.contractAdmin,
+      testEnvironment.commitment
     );
     const holderData =
       await testEnvironment.transferRestrictionsHelper.holderData(holderPubkey);
@@ -207,27 +221,20 @@ describe("Token-2022 multisig as wallets admin", () => {
     );
   });
 
-  it("rejects initialize holder group signed by two of three multisig members", async () => {
-    await expectMultisigMembersRejected(await holderGroupInstruction(), [
-      multisig.members[0],
-      multisig.members[2],
-    ]);
-  });
-
   it("rejects initialize holder group signed by one multisig member", async () => {
-    await expectMultisigMembersRejected(await holderGroupInstruction(), [
+    await expectMultisigRejected(await holderGroupInstruction(), [
       multisig.members[1],
     ]);
   });
 
-  it("initializes a holder group with only the multisig account key", async () => {
-    await testEnvironment.transferRestrictionsHelper.initializeHolderGroup(
-      holderGroupPubkey,
-      holderPubkey,
-      groupPubkey,
-      multisigWalletRole,
-      multisig.keypair,
-      testEnvironment.contractAdmin
+  it("initializes a holder group with two of three multisig members", async () => {
+    await sendAsSplMultisig(
+      testEnvironment.connection,
+      await holderGroupInstruction(),
+      multisig.publicKey,
+      [multisig.members[0], multisig.members[2]],
+      testEnvironment.contractAdmin,
+      testEnvironment.commitment
     );
     const holderGroupData =
       await testEnvironment.transferRestrictionsHelper.holderGroupData(
@@ -238,30 +245,21 @@ describe("Token-2022 multisig as wallets admin", () => {
     assert.equal(holderGroupData.currentWalletsCount.toNumber(), 0);
   });
 
-  it("rejects initialize security associated account signed by two of three multisig members", async () => {
-    await expectMultisigMembersRejected(
-      await securityAssociatedAccountInstruction(),
-      [multisig.members[1], multisig.members[2]]
-    );
-  });
-
   it("rejects initialize security associated account signed by one multisig member", async () => {
-    await expectMultisigMembersRejected(
+    await expectMultisigRejected(
       await securityAssociatedAccountInstruction(),
       [multisig.members[2]]
     );
   });
 
-  it("initializes a security associated account with only the multisig account key", async () => {
-    await testEnvironment.transferRestrictionsHelper.initializeSecurityAssociatedAccount(
-      groupId,
-      holderId,
-      holderGroupPubkey,
-      investor.publicKey,
-      investorTokenAccount,
-      multisigWalletRole,
-      multisig.keypair,
-      testEnvironment.contractAdmin
+  it("initializes a security associated account with two of three multisig members", async () => {
+    await sendAsSplMultisig(
+      testEnvironment.connection,
+      await securityAssociatedAccountInstruction(),
+      multisig.publicKey,
+      [multisig.members[1], multisig.members[2]],
+      testEnvironment.contractAdmin,
+      testEnvironment.commitment
     );
     const saa =
       await testEnvironment.transferRestrictionsHelper.securityAssociatedAccountData(

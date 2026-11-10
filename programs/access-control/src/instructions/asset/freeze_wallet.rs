@@ -3,7 +3,12 @@ use anchor_spl::token_interface::{freeze_account, FreezeAccount};
 
 use crate::{errors::AccessControlError, FreezeWallet, ACCESS_CONTROL_SEED};
 
-pub fn freeze_wallet(ctx: Context<FreezeWallet>) -> Result<()> {
+pub fn freeze_wallet<'info>(ctx: Context<'_, '_, '_, 'info, FreezeWallet<'info>>) -> Result<()> {
+    crate::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
     if !ctx
         .accounts
         .authority_wallet_role

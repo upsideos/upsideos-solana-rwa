@@ -1,8 +1,8 @@
 #![allow(unexpected_cfgs)]
 // Transfer Restrictions program for RWA module from Upside OS
 use anchor_lang::prelude::*;
-use spl_transfer_hook_interface::instruction::ExecuteInstruction;
 use spl_discriminator::SplDiscriminate;
+use spl_transfer_hook_interface::instruction::ExecuteInstruction;
 
 pub mod contexts;
 pub mod errors;
@@ -32,48 +32,52 @@ pub mod transfer_restrictions {
         instructions::transfer_hook::initialize_extra_account_meta_list(ctx)
     }
 
-    pub fn initialize_transfer_restrictions_data(
-        ctx: Context<InitializeTransferRestrictionData>,
+    pub fn initialize_transfer_restrictions_data<'info>(
+        ctx: Context<'_, '_, '_, 'info, InitializeTransferRestrictionData<'info>>,
         max_holders: u64,
     ) -> Result<()> {
         instructions::transfer_restrictions::initialize_data(ctx, max_holders)
     }
 
-    pub fn initialize_transfer_restriction_group(
-        ctx: Context<InitializeTransferRestrictionGroup>,
+    pub fn initialize_transfer_restriction_group<'info>(
+        ctx: Context<'_, '_, '_, 'info, InitializeTransferRestrictionGroup<'info>>,
         id: u64,
     ) -> Result<()> {
         instructions::transfer_restrictions::initialize_group(ctx, id)
     }
 
-    pub fn initialize_transfer_restriction_holder(
-        ctx: Context<InitializeTransferRestrictionHolder>,
+    pub fn initialize_transfer_restriction_holder<'info>(
+        ctx: Context<'_, '_, '_, 'info, InitializeTransferRestrictionHolder<'info>>,
         id: u64,
     ) -> Result<()> {
         instructions::transfer_restrictions::initialize_holder(ctx, id)
     }
 
-    pub fn initialize_transfer_rule(
-        ctx: Context<InitializeTransferRule>,
+    pub fn initialize_transfer_rule<'info>(
+        ctx: Context<'_, '_, '_, 'info, InitializeTransferRule<'info>>,
         transfer_group_id_from: u64,
         transfer_group_id_to: u64,
         lock_until: u64,
     ) -> Result<()> {
-        instructions::transfer_restrictions::initialize_transfer_rule(ctx, transfer_group_id_from, transfer_group_id_to, lock_until)
+        instructions::transfer_restrictions::initialize_transfer_rule(
+            ctx,
+            transfer_group_id_from,
+            transfer_group_id_to,
+            lock_until,
+        )
     }
 
-    pub fn initialize_security_associated_account(
-        ctx: Context<InitializeSecurityAssociatedAccount>,
+    pub fn initialize_security_associated_account<'info>(
+        ctx: Context<'_, '_, '_, 'info, InitializeSecurityAssociatedAccount<'info>>,
         group_id: u64,
         holder_id: u64,
     ) -> Result<()> {
-        instructions::transfer_restrictions::initialize_security_associated_account(ctx, group_id, holder_id)
+        instructions::transfer_restrictions::initialize_security_associated_account(
+            ctx, group_id, holder_id,
+        )
     }
 
-    pub fn update_wallet_group(
-        ctx: Context<UpdateWalletGroup>,
-        new_group_id: u64,
-    ) -> Result<()> {
+    pub fn update_wallet_group(ctx: Context<UpdateWalletGroup>, new_group_id: u64) -> Result<()> {
         instructions::transfer_restrictions::update_wallet_group(ctx, new_group_id)
     }
 
@@ -81,7 +85,9 @@ pub mod transfer_restrictions {
         instructions::transfer_restrictions::pause(ctx, paused)
     }
 
-    pub fn initialize_holder_group(ctx: Context<InitializeHolderGroup>) -> Result<()> {
+    pub fn initialize_holder_group<'info>(
+        ctx: Context<'_, '_, '_, 'info, InitializeHolderGroup<'info>>,
+    ) -> Result<()> {
         instructions::transfer_restrictions::initialize_holder_group(ctx)
     }
 
@@ -103,24 +109,35 @@ pub mod transfer_restrictions {
         transfer_group_id_to: u64,
         locked_until: u64,
     ) -> Result<()> {
-        instructions::transfer_restrictions::set_allow_transfer_rule(ctx, transfer_group_id_from, transfer_group_id_to, locked_until)
+        instructions::transfer_restrictions::set_allow_transfer_rule(
+            ctx,
+            transfer_group_id_from,
+            transfer_group_id_to,
+            locked_until,
+        )
     }
 
-    pub fn revoke_security_associated_account(
-        ctx: Context<RevokeSecurityAssociatedAccount>,
+    pub fn revoke_security_associated_account<'info>(
+        ctx: Context<'_, '_, '_, 'info, RevokeSecurityAssociatedAccount<'info>>,
     ) -> Result<()> {
         instructions::transfer_restrictions::revoke_security_associated_account(ctx)
     }
 
-    pub fn revoke_holder(ctx: Context<RevokeHolder>) -> Result<()> {
+    pub fn revoke_holder<'info>(
+        ctx: Context<'_, '_, '_, 'info, RevokeHolder<'info>>,
+    ) -> Result<()> {
         instructions::transfer_restrictions::revoke_holder(ctx)
     }
 
-    pub fn revoke_holder_group(ctx: Context<RevokeHolderGroup>) -> Result<()> {
+    pub fn revoke_holder_group<'info>(
+        ctx: Context<'_, '_, '_, 'info, RevokeHolderGroup<'info>>,
+    ) -> Result<()> {
         instructions::transfer_restrictions::revoke_holder_group(ctx)
     }
 
-    pub fn set_lockup_escrow_account(ctx: Context<SetLockupEscrowAccount>) -> Result<()> {
+    pub fn set_lockup_escrow_account<'info>(
+        ctx: Context<'_, '_, '_, 'info, SetLockupEscrowAccount<'info>>,
+    ) -> Result<()> {
         instructions::transfer_restrictions::set_lockup_escrow_account(ctx)
     }
 
@@ -128,15 +145,15 @@ pub mod transfer_restrictions {
         instructions::transfer_restrictions::enforce_transfer_restrictions(ctx)
     }
 
-    pub fn initialize_default_security_accounts(
-        ctx: Context<InitializeDefaultSecurityAccounts>,
+    pub fn initialize_default_security_accounts<'info>(
+        ctx: Context<'_, '_, '_, 'info, InitializeDefaultSecurityAccounts<'info>>,
         holder_id: u64,
     ) -> Result<()> {
         instructions::transfer_restrictions::initialize_default_security_accounts(ctx, holder_id)
     }
 
-    pub fn set_address_permission(
-        ctx: Context<SetAddressPermission>,
+    pub fn set_address_permission<'info>(
+        ctx: Context<'_, '_, '_, 'info, SetAddressPermission<'info>>,
         group_id: u64,
         frozen: bool,
     ) -> Result<()> {

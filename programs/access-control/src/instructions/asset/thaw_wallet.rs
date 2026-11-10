@@ -3,7 +3,12 @@ use anchor_spl::token_interface::{thaw_account, ThawAccount};
 
 use crate::{errors::AccessControlError, ThawWallet, ACCESS_CONTROL_SEED};
 
-pub fn thaw_wallet(ctx: Context<ThawWallet>) -> Result<()> {
+pub fn thaw_wallet<'info>(ctx: Context<'_, '_, '_, 'info, ThawWallet<'info>>) -> Result<()> {
+    crate::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
     if !ctx
         .accounts
         .authority_wallet_role

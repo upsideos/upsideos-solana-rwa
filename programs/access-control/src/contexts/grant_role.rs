@@ -43,8 +43,9 @@ pub struct GrantRole<'info> {
 
     /// CHECK: Wallet address to be controlled by the access control
     pub user_wallet: AccountInfo<'info>,
-    #[account()]
-    pub authority: Signer<'info>,
+    /// CHECK: a transaction signer, or a Token-2022 multisig.
+    /// Members, when used, are appended in remaining accounts.
+    pub authority: UncheckedAccount<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,

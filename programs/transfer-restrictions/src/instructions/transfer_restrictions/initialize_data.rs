@@ -3,11 +3,20 @@ use anchor_lang::prelude::*;
 
 use crate::{errors::TransferRestrictionsError, InitializeTransferRestrictionData};
 
-pub fn initialize_data(
-    ctx: Context<InitializeTransferRestrictionData>,
+pub fn initialize_data<'info>(
+    ctx: Context<'_, '_, '_, 'info, InitializeTransferRestrictionData<'info>>,
     max_holders: u64,
 ) -> Result<()> {
-    if !ctx.accounts.authority_wallet_role.has_role(Roles::ContractAdmin) {
+    access_control::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
+    if !ctx
+        .accounts
+        .authority_wallet_role
+        .has_role(Roles::ContractAdmin)
+    {
         return Err(TransferRestrictionsError::Unauthorized.into());
     }
 

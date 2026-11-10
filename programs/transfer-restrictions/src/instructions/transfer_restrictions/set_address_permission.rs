@@ -9,11 +9,16 @@ use crate::helpers::{
 };
 use crate::SetAddressPermission;
 
-pub fn set_address_permission(
-    ctx: Context<SetAddressPermission>,
+pub fn set_address_permission<'info>(
+    ctx: Context<'_, '_, '_, 'info, SetAddressPermission<'info>>,
     group_id: u64,
     frozen: bool,
 ) -> Result<()> {
+    access_control::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
     // Check authorization
     let wallet_role = &ctx.accounts.authority_wallet_role;
     if !wallet_role.has_any_role(Roles::TransferAdmin as u8 | Roles::WalletsAdmin as u8) {

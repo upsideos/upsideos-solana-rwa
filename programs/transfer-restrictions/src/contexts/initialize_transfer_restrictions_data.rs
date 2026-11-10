@@ -1,4 +1,7 @@
-use crate::{contexts::common::DISCRIMINATOR_LEN, TransferRestrictionGroup, TRANSFER_RESTRICTION_GROUP_PREFIX};
+use crate::{
+    contexts::common::DISCRIMINATOR_LEN, TransferRestrictionGroup,
+    TRANSFER_RESTRICTION_GROUP_PREFIX,
+};
 use access_control::{self, AccessControl, WalletRole};
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, Token2022};
@@ -52,8 +55,9 @@ pub struct InitializeTransferRestrictionData<'info> {
     pub authority_wallet_role: Account<'info, WalletRole>,
     #[account(mut)]
     pub payer: Signer<'info>,
-    #[account()]
-    pub authority: Signer<'info>,
+    /// CHECK: a transaction signer, or a Token-2022 multisig.
+    /// Members, when used, are appended in remaining accounts.
+    pub authority: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token2022>,
 }

@@ -6,11 +6,11 @@ use crate::{
     AccessControl, ACCESS_CONTROL_SEED,
 };
 
-
 #[derive(Accounts)]
 pub struct FreezeWallet<'info> {
-    #[account()]
-    pub authority: Signer<'info>,
+    /// CHECK: a transaction signer, or a Token-2022 multisig.
+    /// Members, when used, are appended in remaining accounts.
+    pub authority: UncheckedAccount<'info>,
     #[account(
       seeds = [
         WALLET_ROLE_PREFIX,

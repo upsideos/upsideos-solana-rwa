@@ -4,7 +4,15 @@ use anchor_lang::prelude::*;
 use crate::helpers::*;
 use crate::InitializeTransferRestrictionHolder;
 
-pub fn initialize_holder(ctx: Context<InitializeTransferRestrictionHolder>, id: u64) -> Result<()> {
+pub fn initialize_holder<'info>(
+    ctx: Context<'_, '_, '_, 'info, InitializeTransferRestrictionHolder<'info>>,
+    id: u64,
+) -> Result<()> {
+    access_control::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
     check_authorization(
         &ctx.accounts.authority_wallet_role,
         Roles::TransferAdmin as u8 | Roles::WalletsAdmin as u8,

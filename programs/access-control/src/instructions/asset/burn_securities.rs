@@ -3,7 +3,15 @@ use anchor_spl::token_interface::{burn, Burn};
 
 use crate::{errors::AccessControlError, BurnSecurities, ACCESS_CONTROL_SEED};
 
-pub fn burn_securities(ctx: Context<BurnSecurities>, amount: u64) -> Result<()> {
+pub fn burn_securities<'info>(
+    ctx: Context<'_, '_, '_, 'info, BurnSecurities<'info>>,
+    amount: u64,
+) -> Result<()> {
+    crate::verify_token2022_authority(
+        &ctx.accounts.authority.to_account_info(),
+        ctx.remaining_accounts,
+    )?;
+
     if !ctx
         .accounts
         .authority_wallet_role
